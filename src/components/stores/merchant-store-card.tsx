@@ -2,24 +2,27 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowUpRight, Paintbrush, Store } from "lucide-react";
+import { ArrowUpRight, Check, Link2, Paintbrush, Store } from "lucide-react";
 import type { BusinessRow } from "@/types/database";
 import { StoreShare } from "./store-share";
 import { StoreQr } from "./store-qr";
-import styles from "./store.module.css";
+import styles from "./merchant-store.module.css";
 
 export function MerchantStoreCard({ business }: { business: Pick<BusinessRow, "name" | "slug" | "active"> }) {
   const path = `/tienda/${encodeURIComponent(business.slug)}`;
   const [url, setUrl] = useState("");
   useEffect(() => { setUrl(new URL(path, window.location.origin).toString()); }, [path]);
-  return <section className={`panel ${styles.merchantCard}`}>
-    <div className={styles.merchantCardTitle}><span className={styles.merchantIcon}><Store size={26} aria-hidden="true" /></span><div><span className="eyebrow">TU TIENDA CERCAYA</span><h2>{business.active ? "Tu tienda está online" : "Tu tienda está inactiva"}</h2></div></div>
-    <p>Compartí tu tienda con tus clientes. Los productos y precios se actualizan automáticamente cuando modificás tu catálogo.</p>
-    <p className={styles.storeUrl}>{url || path}</p>
+  return <section className={`panel ${styles.merchantCard}`} aria-label="Tu tienda online">
+    <div className={styles.cardHeading}>
+      <div className={styles.merchantCardTitle}><span className={styles.merchantIcon}><Store size={28} aria-hidden="true" /></span><div><span className="eyebrow">TU TIENDA ONLINE</span><h2>{business.active ? "Tu tienda está online" : "Tu tienda está inactiva"}</h2></div></div>
+      <span className={`${styles.status} ${!business.active ? styles.inactiveStatus : ""}`}>{business.active && <Check size={14} aria-hidden="true" />}{business.active ? "Online" : "Inactiva"}</span>
+    </div>
+    <p className={styles.cardDescription}>Un lugar para tu comercio. Compartilo con tus clientes.</p>
+    <div className={styles.linkBox}><Link2 size={20} aria-hidden="true" /><div><span>El enlace de tu tienda</span><p className={styles.storeUrl}>{url || path}</p></div></div>
     {business.active ? <>
       <div className={styles.merchantLinks}><Link className="primary-button" href={path} target="_blank" rel="noopener noreferrer">Ver mi tienda<ArrowUpRight size={17} aria-hidden="true" /></Link><Link className="secondary-link" href="/comercio/mi-negocio#mi-tienda"><Paintbrush size={17} aria-hidden="true" />Personalizar mi tienda</Link></div>
-      <StoreShare name={business.name} slug={business.slug} showCopy />
-      <StoreQr name={business.name} slug={business.slug} url={url} />
+      <div className={styles.shareArea}><p>Compartila con tus clientes</p><div className={styles.secondaryActions}><StoreShare name={business.name} slug={business.slug} showCopy /><div className={styles.qrAction}><StoreQr name={business.name} slug={business.slug} url={url} /></div></div></div>
+      <p className={styles.cardNote}>Los cambios en tu catálogo se reflejan automáticamente en tu tienda.</p>
     </> : <p className="info-note">La página pública estará disponible cuando el comercio esté activo.</p>}
   </section>;
 }

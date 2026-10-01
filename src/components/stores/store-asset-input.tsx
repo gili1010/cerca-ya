@@ -5,7 +5,7 @@ import { ImagePlus, Store } from "lucide-react";
 import { prepareStoreImage, type StoreImageFit } from "@/lib/store-images";
 import { storeAssetPath, type StoreAssetChange, type StoreAssetKind } from "@/lib/business-assets";
 import { FormError } from "../requests/request-common";
-import styles from "./store.module.css";
+import styles from "./merchant-store.module.css";
 
 export function StoreAssetInput({ kind, businessId, initialUrl, change, onChange, busy, processing, onProcessing }: {
   kind: StoreAssetKind; businessId: string; initialUrl: string | null; change: StoreAssetChange;
@@ -38,22 +38,22 @@ export function StoreAssetInput({ kind, businessId, initialUrl, change, onChange
   }
 
   return <section className={styles.assetInput} aria-label={label}>
-    <div className={styles.assetInputHeading}><h3>{label}</h3><span>Opcional</span></div>
+    <div className={styles.assetInputHeading}><div><h3>{kind === "logo" ? "Logo de tu comercio" : "Portada de tu tienda"}</h3><p>{kind === "logo" ? "Una imagen que tus clientes reconozcan." : "La primera impresión de tu comercio."}</p></div><span>Opcional</span></div>
     <div className={kind === "logo" ? styles.logoPreview : styles.coverPreview}>
       {displayed ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={displayed} alt={`Vista previa: ${label.toLowerCase()}`} /> : kind === "logo" ? <Store size={38} aria-hidden="true" /> : <ImagePlus size={36} aria-hidden="true" />}
     </div>
     <label className={styles.fileLabel}>{initialUrl || change.kind === "upload" ? `Cambiar ${label.toLowerCase()}` : `Subir ${label.toLowerCase()}`}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy || processing} onChange={event => { const file = event.target.files?.[0]; event.target.value = ""; void select(file, "contain"); }} /></label>
-    <small>{kind === "logo" ? "Recomendado: una imagen cuadrada. También podés usar una foto horizontal o vertical: se muestra completa, centrada y con margen blanco." : "Recomendado: una imagen horizontal. No necesitás medidas exactas: por defecto mostramos toda la imagen, sin cortar texto ni personas."}</small>
-    {kind === "cover" && change.kind === "upload" && sourceFile && <label className={styles.fitLabel}>Ajuste de portada
+    <small className={styles.recommendation}>{kind === "logo" ? "Recomendado: imagen cuadrada. Se muestra completa, sin recortes." : "Recomendado: imagen horizontal. Por defecto se muestra completa."}</small>
+    {kind === "cover" && change.kind === "upload" && sourceFile && <label className={styles.fitLabel}>¿Cómo querés mostrarla?
       <select value={fit} disabled={busy || processing} onChange={event => { const nextFit = event.target.value as StoreImageFit; void select(sourceFile, nextFit); }}>
         <option value="contain">Mostrar completa</option>
         <option value="cover">Rellenar y recortar</option>
       </select>
-      <small>{fit === "cover" ? "El recorte se centra en la imagen. Revisá la vista previa antes de guardar." : "Si la proporción es distinta, agregamos espacio blanco alrededor para conservar la imagen completa."}</small>
+      <small>{fit === "cover" ? "Recortamos desde el centro. Revisá cómo queda antes de guardar." : "Conservamos toda la imagen y agregamos margen si hace falta."}</small>
     </label>}
-    {kind === "cover" && initialUrl && change.kind === "keep" && <small>Para cambiar el ajuste de una portada guardada, volvé a seleccionar la imagen original.</small>}
-    <small>JPEG, PNG o WebP · hasta 10 MB. La imagen se optimiza antes de subir. La vista previa muestra el resultado que se guardará.</small>
-    {blob && <small>Lista para subir: {Math.round(blob.size / 1024)} KB.</small>}
+    {kind === "cover" && initialUrl && change.kind === "keep" && <small>Para ajustar esta portada, volvé a elegir la imagen original.</small>}
+    <small>JPG, PNG o WebP · hasta 10 MB.</small>
+    {blob && <small className={styles.readyNote}>Imagen lista para guardar.</small>}
     {processing && <p role="status">Procesando imagen…</p>}
     {change.kind === "remove" && <p className="info-note">Se eliminará al guardar la tienda.</p>}
     <div className={styles.assetActions}>

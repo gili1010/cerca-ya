@@ -12,6 +12,7 @@ import { FormError } from "../requests/request-common";
 import { useMyBusiness } from "./business-provider";
 import { MerchantStoreCard } from "../stores/merchant-store-card";
 import { StoreBrandingEditor } from "../stores/store-branding-editor";
+import storeStyles from "../stores/merchant-store.module.css";
 
 export function MyBusiness() {
   const { business, loading, error, refresh } = useMyBusiness();
@@ -20,7 +21,7 @@ export function MyBusiness() {
   if (loading) return <p className="workflow-loading" role="status">Cargando tu comercio…</p>;
   if (error) return <section className="panel"><FormError message={error} /><button className="outline-button" onClick={() => void refresh().catch(() => {})}>Reintentar</button></section>;
   if (!business) return <p role="status">Abriendo el formulario de creación…</p>;
-  return <><BusinessDetails key={`${business.id}-${business.updated_at}`} business={business} /><div className="workflow-narrow"><MerchantStoreCard business={business} /><StoreBrandingEditor key={business.id} business={business} /></div></>;
+  return <><BusinessDetails key={`${business.id}-${business.updated_at}`} business={business} /><div className={storeStyles.workspace}><MerchantStoreCard business={business} /><StoreBrandingEditor key={business.id} business={business} /></div></>;
 }
 
 function BusinessDetails({ business }: { business: BusinessRow }) {
