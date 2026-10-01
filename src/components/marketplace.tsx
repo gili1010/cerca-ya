@@ -7,6 +7,7 @@ import type { QuickFilter, SortOrder } from "@/lib/products";
 import { getPublicCategories } from "@/lib/public-catalog";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { usePublicCatalog } from "@/lib/use-public-catalog";
+import { usePublicStoreSearch } from "@/lib/use-public-store-search";
 import { Header } from "./home/header";
 import { Hero } from "./home/hero";
 import { Categories } from "./home/categories";
@@ -40,6 +41,7 @@ export default function Marketplace() {
     if (!coordinates) { setFilters(effectiveFilters); setSort(effectiveSort); }
   }
   const catalog = usePublicCatalog({ query, category, filters: effectiveFilters, sort: effectiveSort, page: pageLocation === coordinates ? page : 0, favoriteIds: favoritesOnly ? favorites : undefined, buyerLocation: coordinates });
+  const storeSearch = usePublicStoreSearch(query, !favoritesOnly, Boolean(coordinates));
 
   useEffect(() => {
     let live = true;
@@ -70,7 +72,7 @@ export default function Marketplace() {
     <main className="shell">
       <Hero query={query} inputRef={inputRef} onQuery={value => { setQuery(value); setPage(0); if (activeTab !== "search") { setFilters([]); setActiveTab("search"); } }} onSearch={search} onRequest={() => router.push(`/pedido/nuevo?q=${encodeURIComponent(query)}`)} urgent={urgent} onUrgent={() => { setFilters(["today", "confirmed"]); setActiveTab("search"); setSort("recommended"); setPage(0); goToCatalog(); }} />
       <Categories categories={categories} selected={category} loading={categoryLoading} error={categoryError} onRetry={() => { setCategoryLoading(true); setCategoryError(""); setCategoryAttempt(value => value + 1); }} onChange={value => { setCategory(value); setQuery(""); setFilters([]); setActiveTab("search"); setPage(0); goToCatalog(); }} />
-      <Catalog {...catalog} hasLocation={Boolean(coordinates)} onLocation={() => setModal("zone")} onRetry={catalog.retry} page={page} onPage={value => { setPage(value); goToCatalog(); }} filters={effectiveFilters} category={categories.find(item => item.slug === category)?.name ?? category} query={query} favorites={favorites} favoritesOnly={favoritesOnly} sort={effectiveSort} onToggleFilter={toggleFilter} onSort={value => { setSort(value); setPage(0); }} onReset={reset} onSave={id => { toggleFavorite(id); if (favoritesOnly) setPage(0); }} onFavorites={showSaved} />
+      <Catalog {...catalog} storeSearch={storeSearch} hasLocation={Boolean(coordinates)} onLocation={() => setModal("zone")} onRetry={catalog.retry} page={page} onPage={value => { setPage(value); goToCatalog(); }} filters={effectiveFilters} category={categories.find(item => item.slug === category)?.name ?? category} query={query} favorites={favorites} favoritesOnly={favoritesOnly} sort={effectiveSort} onToggleFilter={toggleFilter} onSort={value => { setSort(value); setPage(0); }} onReset={reset} onSave={id => { toggleFavorite(id); if (favoritesOnly) setPage(0); }} onFavorites={showSaved} />
       <Footer onHow={() => setModal("how")} />
     </main>
     <MobileNav active={activeTab} savedCount={favorites.length} onSelect={selectTab} />

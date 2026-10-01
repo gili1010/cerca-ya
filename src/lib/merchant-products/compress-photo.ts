@@ -1,9 +1,13 @@
 export interface PreparedPhoto { blob: Blob; extension: "webp" | "jpg" }
 const originalLimit = 10 * 1024 * 1024;
-const targetSize = 350 * 1024;
 const uploadLimit = 2 * 1024 * 1024;
 
 export async function compressProductPhoto(file: File): Promise<PreparedPhoto> {
+  return compressPhoto(file);
+}
+
+export async function compressPhoto(file: File, options: { edges?: number[]; targetSize?: number } = {}): Promise<PreparedPhoto> {
+  const targetSize = options.targetSize ?? 350 * 1024;
   if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) throw new Error("Formato no compatible.");
   if (file.size > originalLimit) throw new Error("La imagen es demasiado grande.");
   const sourceUrl = URL.createObjectURL(file);
@@ -20,8 +24,8 @@ export async function compressProductPhoto(file: File): Promise<PreparedPhoto> {
     });
     let result: Blob | null = null;
     let format = "image/webp";
-    // Never upscale, use at most 1200 px; reduce dimensions before excessive quality loss.
-    for (const edge of [1200, 1000, 840]) {
+    // Never upscale; reduce dimensions before excessive quality loss.
+    for (const edge of options.edges ?? [1200, 1000, 840]) {
       const ratio = Math.min(1, edge / Math.max(image.naturalWidth, image.naturalHeight));
       canvas.width = Math.max(1, Math.round(image.naturalWidth * ratio));
       canvas.height = Math.max(1, Math.round(image.naturalHeight * ratio));

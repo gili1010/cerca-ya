@@ -7,7 +7,8 @@ import { isCoordinates, type Coordinates } from "@/lib/location";
 export const publicPageSize = 12;
 export const placeholderImage = "/product-placeholder.svg";
 export const isProductUuid = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
-const selection = "*, business:businesses!inner(id,name,city,address,latitude,longitude,whatsapp,pickup_enabled,delivery_enabled,delivery_price,active), category:categories!inner(*), product_images(url,position)";
+// Public presentation fields only: no owner ID, SKU or internal timestamps.
+const selection = "id,business_id,category_id,name,description,brand,model,price,stock_quantity,stock_status,stock_confirmed_at,pickup_enabled,delivery_enabled,active, business:businesses!inner(id,slug,name,city,address,latitude,longitude,whatsapp,pickup_enabled,delivery_enabled,delivery_price,active), category:categories!inner(id,name,slug), product_images(url,position)";
 
 function publicQuery(client: SupabaseClient<Database>, head = false) {
   // Explicit active checks apply even to owners, whose RLS also permits inactive rows.
@@ -117,4 +118,21 @@ export async function getPublicProduct(client: SupabaseClient<Database>, id: str
   const { data, error } = await publicQuery(client).eq("id", id).maybeSingle();
   if (error) throw error;
   return data ? toProduct(data) : null;
+}
+
+export async function getPublicStoreProducts(client: SupabaseClient<Database>, businessId: string): Promise<Product[]> {
+  // Same catalog rows and mapping; scope to one active business. Fetch all batches
+  // before client-side search, so Supabase's row limit cannot hide store products.
+  const products: Product[] = [];
+  let start = 0;
+  while (true) {
+    const { data, error, count } = await publicQuery(client).eq("business_id", businessId)
+      .order("name").order("id").range(start, start + 499);
+    if (error) throw error;
+    const rows = data ?? [];
+    products.push(...rows.map(row => toProduct(row)));
+    start += rows.length;
+    if (!rows.length || (count !== null && start >= count)) break;
+  }
+  return products;
 }

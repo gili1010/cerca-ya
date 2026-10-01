@@ -20,6 +20,8 @@ interface ProductCardProps { product: Product; saved: boolean; onSave: (id: stri
 export function ProductCard({ product, saved, onSave }: ProductCardProps) {
   const real = product.source === "supabase";
   const href = `/producto/${product.id}`;
+  const storeSlug = product.database?.business.slug;
+  const storeHref = real ? storeSlug ? `/tienda/${encodeURIComponent(storeSlug)}` : `${href}#comercio` : `/comercios/${product.storeId}`;
   return <article className="product-card">
     <div className="product-image">
       <Link className="product-image-link" href={href} aria-label={`Ver ${product.name}`}>{real ? <ProductImage src={product.image} alt={product.name} className="public-card-image" /> : <Image src={photo(product.image)} alt={product.name} fill sizes="(max-width: 600px) 50vw, (max-width: 1000px) 33vw, 25vw" />}</Link>
@@ -33,7 +35,7 @@ export function ProductCard({ product, saved, onSave }: ProductCardProps) {
       <div className="product-distance"><MapPin size={13} />{product.distanceKm === null ? product.database?.business.city ? <strong>{product.database.business.city}</strong> : <Link href={`${href}#comercio`}>Ver ubicación</Link> : <><strong>A {real ? formatDistance(product.distanceKm) : distance(product.distanceKm)}</strong><span>de vos</span></>}</div>
       <StockConfirmation product={product} />
       {real ? <div className="fulfillment public-fulfillment">{product.pickupToday && <span><Store size={15} />Retiro disponible</span>}{product.deliveryToday && <span><Truck size={15} />Envío disponible</span>}{!product.pickupToday && !product.deliveryToday && <span>Consultá al comercio</span>}</div> : <div className="fulfillment">{product.deliveryToday ? <><Truck size={15} /><strong>Entrega hoy</strong></> : product.pickupToday ? <><Store size={15} /><strong>{product.pickupMinutes !== null && product.pickupMinutes <= 15 ? "Retiro inmediato" : "Retirá hoy"}</strong></> : <><Clock3 size={15} /><strong>Desde mañana</strong></>}{product.deliveryToday && product.pickupToday && <span>o retiro</span>}</div>}
-      <div className="product-store"><Store size={14} /><Link href={real ? `${href}#comercio` : `/comercios/${product.storeId}`}>{product.store}</Link></div>
+      <div className="product-store"><Store size={14} /><Link href={storeHref} aria-label={real ? `Ver tienda de ${product.store}` : undefined}>{product.store}{real && storeSlug ? " ›" : ""}</Link></div>
     </div>
   </article>;
 }

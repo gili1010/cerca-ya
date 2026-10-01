@@ -23,9 +23,9 @@ export interface Product {
   pickupMinutes: number | null;
   source?: "supabase";
   database?: {
-    product: ProductRow;
-    category: CategoryRow;
-    business: Pick<BusinessRow, "id" | "name" | "city" | "address" | "latitude" | "longitude" | "whatsapp" | "pickup_enabled" | "delivery_enabled" | "delivery_price" | "active">;
+    product: Omit<ProductRow, "sku" | "created_at" | "updated_at">;
+    category: Pick<CategoryRow, "id" | "name" | "slug">;
+    business: Pick<BusinessRow, "id" | "slug" | "name" | "city" | "address" | "latitude" | "longitude" | "whatsapp" | "pickup_enabled" | "delivery_enabled" | "delivery_price" | "active">;
   };
 }
 

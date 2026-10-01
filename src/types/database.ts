@@ -17,6 +17,7 @@ type Timestamps = { created_at: string; updated_at: string };
 export type ProfileRow = Timestamps & { id: string; full_name: string; phone: string | null; avatar_url: string | null };
 export type BusinessRow = Timestamps & {
   id: string; owner_id: string | null; name: string; slug: string; description: string;
+  logo_url: string | null; cover_url: string | null;
   whatsapp: string | null; address: string | null; city: string | null; latitude: number | null; longitude: number | null;
   pickup_enabled: boolean; delivery_enabled: boolean; delivery_radius_km: number; delivery_price: number; minimum_order: number;
   verified: boolean; active: boolean;
@@ -108,6 +109,10 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      save_my_store_branding: {
+        Args: { p_description: string; p_logo_url: string | null; p_cover_url: string | null; p_expected_description: string; p_expected_logo_url: string | null; p_expected_cover_url: string | null };
+        Returns: undefined;
+      };
       create_my_reservation: {
         Args: { p_reservation_id: string; p_product_id: string; p_quantity: number; p_delivery_type: DatabaseDeliveryType };
         Returns: string;

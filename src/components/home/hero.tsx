@@ -21,9 +21,9 @@ export function Hero({ query, inputRef, onQuery, onSearch, onRequest, onUrgent, 
       <p className="hero-description">Productos en tu barrio, con stock confirmado.<br />Menos esperar. Más resolver.</p>
       <form className="hero-search" onSubmit={event => { event.preventDefault(); onSearch(); }}>
         <Search size={23} />
-        <input ref={inputRef} value={query} onChange={event => onQuery(event.target.value)} placeholder="Buscar productos cerca tuyo..." aria-label="Buscar productos cerca tuyo" />
+        <input ref={inputRef} value={query} onChange={event => onQuery(event.target.value)} placeholder="Buscar productos o tiendas cerca tuyo..." aria-label="Buscar productos o tiendas cerca tuyo" />
         {query && <button type="button" className="clear-query" onClick={() => onQuery("")} aria-label="Borrar búsqueda"><X size={17} /></button>}
-        <button className="search-arrow" type="submit" aria-label="Buscar productos"><ArrowRight size={22} /></button>
+        <button className="search-arrow" type="submit" aria-label="Buscar productos o tiendas"><ArrowRight size={22} /></button>
       </form>
       <div className="search-shortcuts" aria-label="Formas de buscar">
         <button className="shortcut-active" onClick={onSearch}><Search size={15} />Buscar</button>
