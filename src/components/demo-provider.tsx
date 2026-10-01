@@ -25,8 +25,8 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [saved, setSaved] = useState<{ owner: string; ids: string[] }>({ owner: "", ids: [] });
   const favorites = user && saved.owner === user.id ? saved.ids : [];
-  const { coordinates } = useUserLocation();
-  const zone = coordinates ? "Tu ubicación actual" : "Usar mi ubicación";
+  const { coordinates, locality } = useUserLocation();
+  const zone = coordinates ? locality || "Ubicación actual" : "Usar mi ubicación";
   const [modal, setDialogModal] = useState<HomeModal>(null);
   const setModal: Dispatch<SetStateAction<HomeModal>> = next => {
     const value = typeof next === "function" ? next(modal) : next;
