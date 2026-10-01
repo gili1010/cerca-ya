@@ -37,6 +37,7 @@ export function businessErrorMessage(error: unknown, edit: boolean): string {
     BUSINESS_CATEGORY_INVALID: "Alguna categoría ya no está disponible. Recargá el formulario.", BUSINESS_METHOD_REQUIRED: "Habilitá retiro o envío.",
     BUSINESS_RADIUS_INVALID: "Seleccioná un radio de entrega válido.", BUSINESS_PRICE_INVALID: "Revisá los importes ingresados.",
     BUSINESS_LOCATION_INVALID: "No pudimos guardar la ubicación. Volvé a obtenerla e intentá nuevamente.",
+    BUSINESS_SLUG_IMMUTABLE: "El enlace de tu tienda es permanente y no puede modificarse.",
   };
   if (typeof record.message === "string" && messages[record.message]) return messages[record.message];
   if (record.code === "23505") return "Ya tenés un comercio registrado o el nombre no pudo asignarse. Volvé a Mi comercio.";

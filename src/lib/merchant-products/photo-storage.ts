@@ -62,7 +62,7 @@ export async function saveProductPhoto(client: Client, businessId: string, produ
     const result = await client.rpc("set_my_product_photo", { p_product_id: productId, p_url: desiredUrl, p_expected_url: previousUrl });
     if (result.error) {
       if (result.error.code === "40001") failureMessage = "La foto cambió en otra sesión. Revisá la foto actual antes de volver a guardar.";
-      if (result.error.code === "PGRST202" || result.error.code === "42883") failureMessage = "Falta habilitar las fotos. Ejecutá product-storage.sql en Supabase.";
+      if (result.error.code === "PGRST202" || result.error.code === "42883") failureMessage = "No pudimos guardar la foto en este momento. Volvé a intentar más tarde.";
       throw result.error;
     }
     committed = true; currentUrl = desiredUrl;

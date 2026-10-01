@@ -40,7 +40,7 @@ export function productErrorMessage(cause: unknown): string {
   if (message.includes("product_not_owned")) return "No encontramos ese producto en tu comercio o ya no tenés acceso.";
   if (message.includes("product_business_required")) return "Necesitás crear tu comercio antes de publicar productos.";
   if (code === "42501" || message.includes("product_auth_required")) return "No pudimos autorizar la operación. Revisá tu sesión y que el producto sea de tu comercio.";
-  if (code === "PGRST202" || code === "42883") return "Falta habilitar la gestión de productos en Supabase. Ejecutá product-rls.sql.";
+  if (code === "PGRST202" || code === "42883") return "No pudimos guardar el producto en este momento. Volvé a intentar más tarde.";
   if (code === "22023" || code === "22P02" || code === "23514" || code === "23503") return "Revisá los campos, el precio, el stock y la categoría seleccionada.";
   return "No pudimos guardar el producto. Revisá tu conexión e intentá nuevamente.";
 }

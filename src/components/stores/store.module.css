@@ -8,16 +8,18 @@
   background: linear-gradient(120deg, var(--surface) 45%, var(--surface-soft));
 }
 .cover { position: relative; height: clamp(160px, 23vw, 290px); background: var(--deep); }
-.cover > img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cover > img { width: 100%; height: 100%; object-fit: contain; display: block; background: var(--surface); }
+.coverImage { height: auto; aspect-ratio: 4 / 1; background: var(--surface); }
+.coverImage > img { position: absolute; inset: 0; }
 .coverFallback { position: relative; display: flex; align-items: center; justify-content: space-between; gap: var(--space-5); height: 100%; padding: clamp(24px, 5vw, 64px); color: var(--lime); background: linear-gradient(120deg, var(--deep), var(--green)); overflow: hidden; }
 .coverFallback::after { content: ""; position: absolute; right: -8%; top: -120px; width: 440px; height: 440px; border: 70px solid #d7ed9c12; border-radius: 50%; pointer-events: none; }
 .coverFallback span { position: relative; z-index: 1; max-width: 22ch; font-size: clamp(1.125rem, 2.6vw, 2rem); font-weight: 550; letter-spacing: -.03em; }
 .coverFallback svg { opacity: .55; }
 .logo { position: relative; display: grid; place-items: center; width: 120px; height: 120px; margin-top: -96px; margin-bottom: var(--space-5); border: 6px solid var(--surface); border-radius: 28px; color: var(--green); background: var(--surface-soft); box-shadow: var(--shadow-card); overflow: hidden; }
-.logo > img { width: 100%; height: 100%; object-fit: contain; background: var(--surface); }
+.logo > img { width: 100%; height: 100%; padding: 4px; object-fit: contain; background: var(--surface); }
 .identity { min-width: 0; }
 .storeLabel { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--green); font-size: var(--text-xs); font-weight: 650; letter-spacing: .06em; }
-.header .name { margin: var(--space-4) 0 var(--space-5); font-size: clamp(2rem, 4vw, 3.25rem); line-height: 1.08; letter-spacing: -.04em; text-wrap: balance; }
+.header .name { margin: var(--space-4) 0 var(--space-5); font-size: clamp(2rem, 4vw, 3.25rem); line-height: 1.08; letter-spacing: -.04em; text-wrap: balance; overflow-wrap: anywhere; }
 .businessCategories { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
 .businessCategories li { padding: 6px 12px; border-radius: var(--radius-pill); border: 1px solid var(--success-line); background: var(--success-bg); color: var(--deep); font-size: var(--text-xs); font-weight: 550; }
 .location { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); margin-top: var(--space-4); color: var(--green); font-size: var(--text-sm); }
@@ -73,9 +75,13 @@
 .assetInputHeading h3 { margin: 0; font-size: var(--text-base); }
 .assetInputHeading > span, .assetInput > small { color: var(--muted); font-size: var(--text-xs); line-height: 1.6; }
 .logoPreview, .coverPreview { display: grid; place-items: center; height: 150px; border-radius: var(--radius-md); border: 1px solid var(--line); background: var(--surface-soft); color: var(--green); overflow: hidden; }
-.logoPreview { align-self: center; width: 150px; border-radius: 28px; }
-.logoPreview img { width: 100%; height: 100%; object-fit: contain; background: var(--surface); }
-.coverPreview img { width: 100%; height: 100%; object-fit: cover; }
+.logoPreview { align-self: center; width: 120px; height: 120px; border: 6px solid var(--surface); border-radius: 28px; box-shadow: var(--shadow-card); }
+.logoPreview img { width: 100%; height: 100%; padding: 4px; object-fit: contain; background: var(--surface); }
+.coverPreview { position: relative; height: auto; aspect-ratio: 4 / 1; background: var(--surface); }
+.coverPreview img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.fitLabel { display: grid; gap: var(--space-2); font-size: var(--text-sm); font-weight: 600; }
+.fitLabel select { width: 100%; min-width: 0; min-height: 48px; padding: var(--space-3); border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); font-size: var(--text-sm); }
+.fitLabel small { color: var(--muted); font-size: var(--text-xs); font-weight: 400; line-height: 1.6; }
 .fileLabel { display: grid; gap: var(--space-2); font-size: var(--text-sm); font-weight: 600; }
 .fileLabel input { width: 100%; min-width: 0; max-width: 100%; font-size: var(--text-xs); }
 .assetActions { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); }
@@ -87,9 +93,11 @@
   .storeHeader { border-radius: var(--radius-lg); }
   .header { grid-template-columns: 1fr; padding: var(--space-5); }
   .cover { height: 180px; }
+  .coverImage { height: auto; }
   .coverFallback { align-items: start; padding: var(--space-5); }
   .coverFallback svg { width: 52px; height: 52px; }
   .logo { width: 96px; height: 96px; margin-top: -76px; border-width: 5px; border-radius: 24px; margin-bottom: var(--space-4); }
+  .logoPreview { width: 96px; height: 96px; border-width: 5px; border-radius: 24px; }
   .header .name { font-size: clamp(2rem, 6vw, 2.75rem); margin-bottom: var(--space-4); }
   .purchase { padding: var(--space-4); }
   .methods { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }

@@ -85,7 +85,7 @@ function BusinessFormFields({ business, onLocationSaved }: { business: BusinessR
   return <div className="workflow-narrow"><Link className="secondary-link" href={business ? "/comercio/mi-negocio" : "/cuenta"}>Volver</Link><div className="workflow-heading"><h1>{business ? "Editar comercio" : "Crear mi comercio"}</h1><p>Contanos qué vendés y cómo pueden comprar cerca tuyo.</p></div>
     <form className="panel workflow-form" onSubmit={submit}>
       <label>Nombre del comercio<input value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} required maxLength={160} autoComplete="organization" disabled={busy} /></label>
-      {business && <p className="info-note">Identificador: {business.slug}. Se conserva aunque cambies el nombre.</p>}
+      {business && <p className="info-note">Tu enlace permanente: /tienda/{business.slug}. Se conserva aunque cambies el nombre, la localidad u otros datos del comercio.</p>}
       <label>Descripción<textarea value={form.description} onChange={event => setForm({ ...form, description: event.target.value })} maxLength={3000} disabled={busy} /></label>
       <label>WhatsApp · Argentina (+54)<input type="tel" value={form.whatsapp} onChange={event => setForm({ ...form, whatsapp: event.target.value })} required maxLength={40} autoComplete="tel" placeholder="3547636574" disabled={busy} /><small>Ingresá código de área y número, sin 0 ni 15. Agregamos +54 y el 9 para WhatsApp automáticamente. Si ya escribiste +54 9, no lo duplicamos.</small></label>
       <section className="workflow-form" aria-labelledby="business-location-title">

@@ -38,7 +38,7 @@ export function StoreBrandingEditor({ business }: { business: BusinessRow }) {
       setChanges({ logo: { kind: "keep" }, cover: { kind: "keep" } });
       setNotice(pending.length ? "Tu tienda se guardó. Quedan archivos anteriores pendientes de limpieza." : business.active ? "Tu tienda se guardó. Ya podés verla online." : "La presentación se guardó. Tu comercio sigue inactivo.");
       await refresh().catch(() => {});
-    } catch { setError("No pudimos guardar tu tienda. Revisá la conexión y que business-store-branding.sql esté aplicado."); }
+    } catch { setError("No pudimos guardar tu tienda. Revisá la conexión y volvé a intentar."); }
     finally { inFlight.current = false; setBusy(false); }
   }
 

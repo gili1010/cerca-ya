@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { ArrowUpRight, Paintbrush, Store } from "lucide-react";
 import type { BusinessRow } from "@/types/database";
 import { StoreShare } from "./store-share";
+import { StoreQr } from "./store-qr";
 import styles from "./store.module.css";
 
 export function MerchantStoreCard({ business }: { business: Pick<BusinessRow, "name" | "slug" | "active"> }) {
@@ -18,6 +19,7 @@ export function MerchantStoreCard({ business }: { business: Pick<BusinessRow, "n
     {business.active ? <>
       <div className={styles.merchantLinks}><Link className="primary-button" href={path} target="_blank" rel="noopener noreferrer">Ver mi tienda<ArrowUpRight size={17} aria-hidden="true" /></Link><Link className="secondary-link" href="/comercio/mi-negocio#mi-tienda"><Paintbrush size={17} aria-hidden="true" />Personalizar mi tienda</Link></div>
       <StoreShare name={business.name} slug={business.slug} showCopy />
+      <StoreQr name={business.name} slug={business.slug} url={url} />
     </> : <p className="info-note">La página pública estará disponible cuando el comercio esté activo.</p>}
   </section>;
 }

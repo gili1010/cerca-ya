@@ -31,7 +31,7 @@ function BusinessProducts({ business }: { business: BusinessRow }) {
   useEffect(() => {
     let live = true;
     const client = getSupabaseBrowserClient();
-    if (!client) { setError("No pudimos conectar con Supabase."); return; }
+    if (!client) { setError("No pudimos cargar tus productos. Volvé a intentar en unos momentos."); return; }
     getMerchantProducts(client, business.id, page).then(result => {
       if (live) { setData(result); setError(""); }
     }).catch(() => { if (live) setError("No pudimos cargar tus productos. Volvé a intentar."); });

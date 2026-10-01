@@ -24,7 +24,7 @@ function ProductFormLoader({ business, productId }: { business: BusinessRow; pro
   useEffect(() => {
     let live = true;
     const client = getSupabaseBrowserClient();
-    if (!client) { setError("No pudimos conectar con Supabase."); return; }
+    if (!client) { setError("No pudimos cargar los datos. Volvé a intentar en unos momentos."); return; }
     getMerchantProductForm(client, business.id, productId).then(result => {
       if (live) { setData(result); setError(""); }
     }).catch(() => { if (live) setError("No pudimos cargar el producto y sus categorías. Volvé a intentar."); });
@@ -117,7 +117,7 @@ function ProductFormFields({ business, product, initialImage, categories, prefer
         {preferred.length > 0 && <optgroup label="Categorías de tu comercio">{preferred.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}</optgroup>}
         {other.length > 0 && <optgroup label="Otras categorías">{other.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}</optgroup>}
       </select><small>Podés elegir cualquier categoría del catálogo.</small></label>
-      {!categories.length && <FormError message="No hay categorías disponibles en Supabase. Cargalas antes de publicar." />}
+      {!categories.length && <FormError message="No hay categorías disponibles en este momento. Volvé a intentar más tarde." />}
       <div className="form-columns"><label>Marca<input maxLength={160} value={form.brand ?? ""} onChange={event => setForm({ ...form, brand: event.target.value })} disabled={busy} /></label><label>Modelo<input maxLength={160} value={form.model ?? ""} onChange={event => setForm({ ...form, model: event.target.value })} disabled={busy} /></label></div>
       <label>SKU<input maxLength={100} value={form.sku ?? ""} onChange={event => setForm({ ...form, sku: event.target.value })} disabled={busy} /><small>Opcional. Debe ser único dentro de tu comercio.</small></label>
       <div className="form-columns"><label>Precio (ARS)<input type="number" inputMode="decimal" required min="0" max="9999999999.99" step="0.01" value={form.price} onChange={event => setForm({ ...form, price: event.target.value })} disabled={busy} /></label><label>Stock<input type="number" inputMode="numeric" required min="0" max="2147483647" step="1" value={form.stock_quantity} onChange={event => setForm({ ...form, stock_quantity: event.target.value })} disabled={busy} /></label></div>

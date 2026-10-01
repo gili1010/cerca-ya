@@ -1,0 +1,12 @@
+.launcher { margin-top: var(--space-3); }
+.content { text-align: center; }
+.label { max-width: calc(100% - 48px); justify-content: center; }
+.content h2 { padding-inline: var(--space-4); overflow-wrap: anywhere; }
+.qr { width: min(100%, 288px); margin: var(--space-5) auto var(--space-4); padding: var(--space-2); border: 1px solid var(--line); border-radius: var(--radius-lg); background: #fff; }
+.qr canvas { display: block; }
+.content .url { margin: var(--space-4) 0 var(--space-5); padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-soft); color: var(--green); font-size: var(--text-xs); line-height: 1.6; overflow-wrap: anywhere; }
+.actions { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
+.actions button { width: 100%; }
+.content .notice { min-height: 1.6em; margin: var(--space-3) 0 0; color: var(--green); font-size: var(--text-xs); line-height: 1.6; }
+.manualLink { width: 100%; min-height: 48px; margin-top: var(--space-2); padding: var(--space-3); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); font-size: var(--text-base); }
+@media (min-width: 420px) { .actions { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

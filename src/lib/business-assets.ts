@@ -74,7 +74,7 @@ export async function saveStoreBranding(client: Client, businessId: string, prev
     });
     if (result.error) {
       if (result.error.code === "40001") message = "Tu tienda cambió en otra sesión. Recargá los datos antes de volver a guardar.";
-      if (["PGRST202", "42883"].includes(result.error.code)) message = "Falta habilitar la personalización. Ejecutá business-store-branding.sql en Supabase.";
+      if (["PGRST202", "42883"].includes(result.error.code)) message = "La personalización no está disponible en este momento. Volvé a intentar más tarde.";
       throw result.error;
     }
     current = desired;
