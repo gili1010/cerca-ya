@@ -1,0 +1,37 @@
+.button {
+  width: 100%;
+  min-height: 52px;
+  background: #fff;
+  border-color: var(--line);
+  color: var(--ink);
+  gap: var(--space-3);
+}
+
+.button:focus-visible {
+  outline: 3px solid var(--green);
+  outline-offset: 4px;
+  box-shadow: var(--focus-ring);
+}
+
+@media (hover: hover) {
+  .button:hover:not(:disabled) {
+    background: var(--surface-soft);
+    border-color: var(--green);
+  }
+}
+
+.separator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.separator::before,
+.separator::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}

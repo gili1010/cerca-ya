@@ -8,16 +8,44 @@ import { authErrorMessage } from "@/lib/auth/errors";
 import { safeRedirect } from "@/lib/auth/redirect";
 import { normalizeArgentinaPhone } from "@/lib/phone";
 import { useAuth } from "./auth-provider";
+import { GoogleSignInButton } from "./google-sign-in-button";
 import { FormError } from "../requests/request-common";
 
-export function AuthForm({ mode, returnTo, confirmationError = false }: { mode: "login" | "signup"; returnTo: string; confirmationError?: boolean }) {
+export function AuthForm({ mode, returnTo, confirmationError = false, oauthError = false }: { mode: "login" | "signup"; returnTo: string; confirmationError?: boolean; oauthError?: boolean }) {
   const signup = mode === "signup";
   const { user, loading, error: sessionError } = useAuth();
-  const [error, setError] = useState(confirmationError ? "No pudimos confirmar tu email. El enlace puede haber vencido o ya haberse utilizado. Si ya confirmaste la cuenta, iniciá sesión." : "");
+  const [error, setError] = useState(oauthError ? "No pudimos completar el acceso con Google. Podés volver a intentarlo o ingresar con email y contraseña." : confirmationError ? "No pudimos confirmar tu email. El enlace puede haber vencido o ya haberse utilizado. Si ya confirmaste la cuenta, iniciá sesión." : "");
   const [busy, setBusy] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
   const [created, setCreated] = useState<"confirm" | "signed-in" | null>(null);
   const inFlight = useRef(false);
   const target = safeRedirect(returnTo);
+
+  async function signInWithGoogle() {
+    if (inFlight.current || loading) return;
+    inFlight.current = true;
+    setBusy(true);
+    setGoogleBusy(true);
+    setError("");
+    try {
+      const client = getSupabaseBrowserClient();
+      if (!client) throw new Error("unavailable");
+      const callback = new URL("/auth/confirm", window.location.origin);
+      callback.searchParams.set("redirect", target);
+      callback.searchParams.set("flow", "google");
+      const { error: failure } = await client.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: callback.toString() },
+      });
+      if (failure) throw failure;
+    } catch {
+      setError("No pudimos iniciar el acceso con Google. Revisá tu conexión y volvé a intentar, o ingresá con email y contraseña.");
+    } finally {
+      inFlight.current = false;
+      setBusy(false);
+      setGoogleBusy(false);
+    }
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -62,6 +90,7 @@ export function AuthForm({ mode, returnTo, confirmationError = false }: { mode: 
   if (created) return <section className="panel workflow-narrow confirmation auth-confirmation"><span className="confirmation-icon"><CircleCheck size={30} aria-hidden="true" /></span><h1>Cuenta creada.</h1><p>{created === "confirm" ? "Revisá tu email para confirmar la cuenta." : "Tu sesión ya está activa. Podés continuar."}</p>{created === "confirm" && <p className="info-note">Revisá también la carpeta de spam. Después de confirmar vas a poder continuar en CercaYa.</p>}<Link className="primary-button" href={created === "signed-in" ? target : `/login?redirect=${encodeURIComponent(target)}`}>{created === "signed-in" ? "Continuar" : "Ir a iniciar sesión"}</Link></section>;
   if (!loading && user) return <section className="panel workflow-narrow confirmation auth-confirmation"><span className="confirmation-icon"><UserRound size={30} aria-hidden="true" /></span><h1>Ya tenés una sesión activa</h1><Link className="primary-button" href={target}>Continuar</Link><Link className="secondary-link" href="/cuenta">Ir a Mi cuenta</Link></section>;
   return <div className="workflow-narrow auth-page"><div className="auth-identity"><MapPin size={24} aria-hidden="true" /><span>Encontralo cerca. Tenelo hoy.</span></div><div className="workflow-heading"><h1>{signup ? "Crear cuenta" : "Iniciar sesión"}</h1><p>{signup ? "Tu cuenta para encontrar lo que necesitás cerca." : "Entrá con tu email y contraseña."}</p></div><form className="workflow-form panel" onSubmit={submit}>
+    <GoogleSignInButton onClick={() => void signInWithGoogle()} disabled={busy || loading} busy={googleBusy} />
     {signup && <label>Nombre completo<input name="name" autoComplete="name" required maxLength={160} /></label>}
     <label>Email<input name="email" type="email" autoComplete="email" required maxLength={254} /></label>
     {signup && <label>Teléfono · Argentina (+54)<input name="phone" type="tel" autoComplete="tel" maxLength={40} placeholder="3547636574" /><small>Opcional. Incluí el código de área, sin 0 ni 15. Agregamos +54 automáticamente.</small></label>}
