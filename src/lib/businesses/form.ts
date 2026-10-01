@@ -1,4 +1,5 @@
 import type { BusinessRow } from "@/types/database";
+import { argentinaWhatsAppNumber } from "@/lib/phone";
 
 export const deliveryRadii = [5, 10, 15, 20, 30] as const;
 export type BusinessInput = Pick<BusinessRow, "name" | "description" | "pickup_enabled" | "delivery_enabled" | "delivery_radius_km" | "delivery_price" | "minimum_order"> & {
@@ -10,13 +11,13 @@ export const emptyBusiness: BusinessInput = {
   delivery_radius_km: 5, delivery_price: 0, minimum_order: 0,
 };
 export function normalizeBusiness(input: BusinessInput): BusinessInput {
-  return { ...input, name: input.name.trim(), description: input.description.trim(), whatsapp: input.whatsapp.replace(/[^0-9]/g, ""), city: input.city.trim(), address: input.address.trim(), delivery_radius_km: input.delivery_enabled ? input.delivery_radius_km : 0, delivery_price: input.delivery_enabled ? input.delivery_price : 0 };
+  return { ...input, name: input.name.trim(), description: input.description.trim(), whatsapp: argentinaWhatsAppNumber(input.whatsapp) ?? "", city: input.city.trim(), address: input.address.trim(), delivery_radius_km: input.delivery_enabled ? input.delivery_radius_km : 0, delivery_price: input.delivery_enabled ? input.delivery_price : 0 };
 }
 export function validateBusiness(input: BusinessInput, categoryIds: string[]): string | null {
   if (!input.name.trim()) return "El nombre del comercio es obligatorio.";
   if (input.name.trim().length > 160) return "El nombre puede tener hasta 160 caracteres.";
   if (input.description.trim().length > 3000) return "La descripción puede tener hasta 3000 caracteres.";
-  if (!/^\+?[\d ()-]+$/.test(input.whatsapp.trim()) || !/^\d{8,15}$/.test(input.whatsapp.replace(/[^0-9]/g, ""))) return "El WhatsApp no es válido. Ingresá entre 8 y 15 dígitos, con código de área.";
+  if (!argentinaWhatsAppNumber(input.whatsapp)) return "Ingresá un WhatsApp de Argentina con código de área y número (10 dígitos, sin 0 ni 15), o su formato internacional +54 9.";
   if (!input.city.trim() || input.city.trim().length > 120) return "Ingresá una ciudad o localidad de hasta 120 caracteres.";
   if (!input.address.trim() || input.address.trim().length > 240) return "Ingresá una dirección de hasta 240 caracteres.";
   if (!categoryIds.length) return "Seleccioná al menos una categoría.";

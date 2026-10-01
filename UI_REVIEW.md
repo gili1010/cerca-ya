@@ -136,3 +136,69 @@ si se prueban acciones de escritura, usar cuentas y publicaciones de prueba.
 
 Pendiente: revisión visual y funcional manual por el usuario. No se ejecutó una
 sesión de navegador ni se confirmó el renderizado o la compilación durante esta tarea.
+
+## Continuación · 1 de octubre de 2026
+
+### Estado al retomar
+
+El proyecto ya conservaba la nueva paleta y los tres archivos de estilos
+compartidos. Home, búsqueda, ProductCard, detalle, formularios principales,
+cuenta, panel comercial, Radar, ofertas y timeline de reservas ya tenían la
+nueva presentación en código. Se mantuvo ese trabajo.
+
+Quedaban detalles parciales: paginación y carga de Guardados sin las clases
+compartidas; confirmaciones de Auth sin el tratamiento visual de confirmación;
+stock interno sin diferenciar visualmente una confirmación faltante; botones
+secundarios de algunos diálogos sin estilo; navegación oculta en el tramo
+601–1050 px; y algunas restricciones de ancho pendientes para texto y precios.
+
+### Terminado en esta continuación
+
+- Guardados utiliza el loading compartido, botones outline e icono en el estado vacío.
+- Cuenta creada y sesión activa usan iconos y ancho coherentes con Login/Registro.
+- Confirmación de stock del comercio usa los mismos tonos de éxito/advertencia
+  que el catálogo, con texto e iconos. Fechas, cálculos y temporizadores no cambiaron.
+- Botones secundarios de los diálogos existentes reciben la variante ghost desde
+  CSS, sin editar sus handlers. En móvil las acciones pueden ocupar filas completas.
+- Header conserva la navegación en una segunda fila desplazable entre 601 y
+  1050 px; hasta 600 px mantiene el header simple y la bottom navigation existente.
+- Selector de orden, búsqueda dentro del comercio, nombres largos, importes y
+  totales tienen ajustes para evitar desbordes por su contenido.
+- Se completó la jerarquía del título del perfil, los títulos de estados vacíos y
+  los accesos del diálogo de cuenta en una columna.
+
+### Archivos modificados únicamente en esta continuación
+
+- `src/app/design-system.css`
+- `src/app/globals.css`
+- `src/app/workflows.css`
+- `src/components/auth/auth-form.tsx` — exclusivamente marcado e iconos.
+- `src/components/auth/saved-products.tsx` — exclusivamente clases e icono.
+- `src/components/merchant-products/stock-confirmation.tsx` — exclusivamente marcado e iconos.
+- `UI_REVIEW.md`
+
+No se crearon nuevos componentes ni dependencias en esta continuación. Se
+completaron los controles, feedback y superficies compartidos ya existentes.
+El diff revisado no modifica handlers, consultas, sesiones, payloads ni lógica.
+No se ejecutaron tests, build, lint, typecheck, navegador ni SQL.
+
+### Pantallas antiguas y límites de alcance
+
+En el código revisado no se encontró una pantalla que todavía cargue un sistema
+de estilos anterior: las rutas reales y demo heredan los tres archivos actuales
+desde el layout. No se afirma una validación del resultado renderizado.
+Las pantallas demo conservan sus datos y avisos; no se reconvirtieron en flujos reales.
+
+Siguen pendientes las miniaturas reales en Mis productos (requieren lectura de
+`product_images`), la selección funcional de pestañas según ruta y la revisión de
+mensajes inconsistentes sobre demo/datos reales. No se tocaron en esta tarea visual.
+
+### Revisar especialmente en móvil
+
+- [ ] Home con búsqueda escrita: selector de orden, botón de borrar y cards con nombres/precios largos.
+- [ ] Header a 600, 768 y 1024 px: navegación disponible y desplazamiento dentro de su fila.
+- [ ] Guardados: vacío, carga y paginación.
+- [ ] Crear/editar comercio y producto: ubicación, checkboxes, stock sin confirmar y upload existente.
+- [ ] Login/Registro: confirmación de cuenta, sesión activa, errores y teclado en celular.
+- [ ] Pedido Abierto, ofertas y reservas: filtros horizontales, textos largos, diálogos y timeline vertical.
+- [ ] Cuenta y su diálogo: accesos sin compresión; bottom navigation sin cubrir el contenido.

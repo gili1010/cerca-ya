@@ -6,13 +6,14 @@ import type { PublicOfferRow } from "@/types/database";
 import { offerStatusLabels, offerWhatsApp } from "@/lib/real-offers";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { money } from "@/lib/products";
+import { formatArgentinaPhone } from "@/lib/phone";
 import { useLiveOffers } from "./use-live-offers";
 import { LiveFeedback } from "./use-live-changes";
 import { FormError } from "./request-common";
 
 function OfferFacts({ offer }: { offer: PublicOfferRow }) {
   return <><div className="card-topline"><strong>{offer.business_name}</strong><span className={`request-status ${offer.status === "PENDING" ? "open" : "closed"}`}>{offerStatusLabels[offer.status]}</span></div>
-    {offer.business_city && <p>{offer.business_city}</p>}{offer.business_whatsapp && <p>WhatsApp: {offer.business_whatsapp}</p>}
+    {offer.business_city && <p>{offer.business_city}</p>}{offer.business_whatsapp && <p>WhatsApp: {formatArgentinaPhone(offer.business_whatsapp)}</p>}
     <strong className="offer-price">{money(offer.price)}</strong><p className="request-description">{offer.description}</p>
     <div className="offer-methods">{offer.pickup_available && <span>Retiro disponible</span>}{offer.delivery_available && <span>Envío disponible · {money(offer.delivery_price)}</span>}</div>
     {offer.estimated_delivery && <p>Tiempo estimado: {offer.estimated_delivery}</p>}{offer.alternative && <span className="alternative-badge">Alternativa al producto solicitado</span>}

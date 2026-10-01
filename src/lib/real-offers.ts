@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, OfferRow, PublicOfferRow } from "@/types/database";
+import { argentinaWhatsAppUrl } from "@/lib/phone";
 
 export const isUuid = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 export type RealOfferInput = Pick<OfferRow, "product_name" | "description" | "price" | "pickup_available" | "delivery_available" | "delivery_price" | "estimated_delivery" | "alternative">;
@@ -34,7 +35,5 @@ export async function readRealOffers(client: SupabaseClient<Database>, requestId
   }
 }
 export function offerWhatsApp(offer: PublicOfferRow) {
-  const phone = offer.business_whatsapp?.replace(/\D/g, "") ?? "";
-  if (!/^\d{8,15}$/.test(phone)) return null;
-  return `https://wa.me/${phone}?text=${encodeURIComponent(`Hola, recibí tu oferta por ${offer.product_name} en CercaYa.`)}`;
+  return argentinaWhatsAppUrl(offer.business_whatsapp, `Hola, recibí tu oferta por ${offer.product_name} en CercaYa.`);
 }
