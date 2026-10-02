@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Banknote, Check, Clock, LayoutDashboard, MapPin, Package, Pencil, Phone, ShieldCheck, ShoppingBag, Store, Tags, Truck, type LucideIcon } from "lucide-react";
 import type { BusinessRow } from "@/types/database";
 import { money } from "@/lib/products";
 import { formatArgentinaPhone } from "@/lib/phone";
@@ -13,6 +14,7 @@ import { useMyBusiness } from "./business-provider";
 import { MerchantStoreCard } from "../stores/merchant-store-card";
 import { StoreBrandingEditor } from "../stores/store-branding-editor";
 import storeStyles from "../stores/merchant-store.module.css";
+import styles from "./business-details.module.css";
 
 export function MyBusiness() {
   const { business, loading, error, refresh } = useMyBusiness();
@@ -37,11 +39,67 @@ function BusinessDetails({ business }: { business: BusinessRow }) {
     }).catch(() => { if (live) setError("No pudimos cargar las categorías."); });
     return () => { live = false; };
   }, [business.id, attempt]);
-  return <div className="workflow-narrow"><div className="workflow-heading"><span className="eyebrow">MI COMERCIO</span><h1>{business.name}</h1><p>{business.city}</p></div><section className="panel">
-    <p className="request-description">{business.description || "Sin descripción."}</p>
-    <dl className="request-facts"><div><dt>WhatsApp</dt><dd>{formatArgentinaPhone(business.whatsapp)}</dd></div><div><dt>Dirección</dt><dd>{business.address}</dd></div><div><dt>Retiro</dt><dd>{business.pickup_enabled ? "Disponible" : "No disponible"}</dd></div><div><dt>Envío</dt><dd>{business.delivery_enabled ? `Hasta ${business.delivery_radius_km} km` : "No disponible"}</dd></div><div><dt>Costo de envío</dt><dd>{business.delivery_enabled ? business.delivery_price === 0 ? "Gratis" : money(business.delivery_price) : "No aplica"}</dd></div><div><dt>Compra mínima</dt><dd>{business.minimum_order ? money(business.minimum_order) : "Sin mínimo"}</dd></div><div><dt>Identificador</dt><dd>{business.slug}</dd></div><div><dt>Estado</dt><dd>{business.active ? "Activo" : "Inactivo"} · {business.verified ? "Verificado" : "Sin verificar"}</dd></div></dl>
-    <h2>Categorías</h2><FormError message={error} />{error ? <button className="outline-button" onClick={() => setAttempt(value => value + 1)}>Reintentar categorías</button> : categories === null ? <p role="status">Cargando categorías…</p> : <p className="request-description">{categories.join(" · ") || "Sin categorías asignadas"}</p>}
-    <div className="offer-detail-actions"><Link className="primary-button" href="/comercio/editar">Editar comercio</Link><Link className="outline-button" href="/comercio/productos">Mis productos</Link><Link className="outline-button" href="/comercio">Ir al panel</Link></div>
-    <p className="info-note">Tu comercio y productos se guardan en tu cuenta y alimentan el catálogo público. Radar, pedidos, ofertas y reservas siguen siendo de prueba.</p>
-  </section></div>;
+  return <div className={storeStyles.workspace}>
+    <section className={styles.detailsCard} aria-label="Datos del comercio">
+      <header className={styles.header}>
+        <div className={styles.identity}>
+          <span className={styles.storeIcon}><Store size={28} aria-hidden="true" /></span>
+          <div className={styles.nameBlock}>
+            <span className={`eyebrow ${styles.label}`}>MI COMERCIO</span>
+            <h1>{business.name}</h1>
+            {business.city && <p className={styles.city}><MapPin size={16} aria-hidden="true" />{business.city}</p>}
+          </div>
+        </div>
+        <div className={styles.badges} aria-label="Estado del comercio">
+          <span className={`${styles.badge} ${business.active ? styles.positive : styles.neutral}`}>
+            {business.active && <Check size={14} aria-hidden="true" />}{business.active ? "Activo" : "Inactivo"}
+          </span>
+          <span className={`${styles.badge} ${business.verified ? styles.positive : styles.neutral}`}>
+            {business.verified ? <ShieldCheck size={14} aria-hidden="true" /> : <Clock size={14} aria-hidden="true" />}{business.verified ? "Verificado" : "Sin verificar"}
+          </span>
+        </div>
+        {business.description.trim() && <p className={styles.description}>{business.description}</p>}
+      </header>
+      <div className={styles.body}>
+        <h2 className={styles.title}>Datos del comercio</h2>
+        <div className={styles.groups}>
+          <section className={styles.group} aria-labelledby="business-contact-title">
+            <h3 id="business-contact-title">Contacto</h3>
+            <dl className={styles.facts}>
+              <BusinessFact icon={Phone} label="WhatsApp" value={formatArgentinaPhone(business.whatsapp)} />
+              <BusinessFact icon={MapPin} label="Dirección" value={business.address || "Sin informar"} />
+            </dl>
+          </section>
+          <section className={styles.group} aria-labelledby="business-delivery-title">
+            <h3 id="business-delivery-title">Entrega</h3>
+            <dl className={`${styles.facts} ${styles.deliveryFacts}`}>
+              <BusinessFact icon={Package} label="Retiro" value={business.pickup_enabled ? "Disponible" : "No disponible"} />
+              <BusinessFact icon={Truck} label="Envío" value={business.delivery_enabled ? `Hasta ${business.delivery_radius_km} km` : "No disponible"} />
+              <BusinessFact icon={Banknote} label="Costo de envío" value={business.delivery_enabled ? business.delivery_price === 0 ? "Gratis" : money(business.delivery_price) : "No aplica"} />
+              <BusinessFact icon={ShoppingBag} label="Compra mínima" value={business.minimum_order ? money(business.minimum_order) : "Sin mínimo"} />
+            </dl>
+          </section>
+        </div>
+        <section className={styles.categories} aria-labelledby="business-categories-title">
+          <h3 id="business-categories-title"><Tags size={18} aria-hidden="true" />Categorías</h3>
+          <FormError message={error} />
+          {error ? <button className="outline-button" onClick={() => setAttempt(value => value + 1)}>Reintentar categorías</button>
+            : categories === null ? <p className={styles.categoryNote} role="status">Cargando categorías…</p>
+            : categories.length ? <ul className={styles.categoryList}>{categories.map((category, index) => <li key={`${category}-${index}`}>{category}</li>)}</ul>
+            : <p className={styles.categoryNote}>Sin categorías asignadas</p>}
+        </section>
+      </div>
+      <footer className={styles.actions}>
+        <Link className="primary-button" href="/comercio/editar"><Pencil size={17} aria-hidden="true" />Editar comercio</Link>
+        <div className={styles.secondaryActions}>
+          <Link className="outline-button" href="/comercio/productos"><ShoppingBag size={17} aria-hidden="true" />Mis productos</Link>
+          <Link className="outline-button" href="/comercio"><LayoutDashboard size={17} aria-hidden="true" />Ir al panel</Link>
+        </div>
+      </footer>
+    </section>
+  </div>;
+}
+
+function BusinessFact({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }) {
+  return <div className={styles.fact}><dt><Icon size={17} aria-hidden="true" />{label}</dt><dd>{value}</dd></div>;
 }
