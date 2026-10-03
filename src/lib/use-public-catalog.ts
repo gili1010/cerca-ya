@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import { getPublicCatalog, type PublicCatalogOptions } from "@/lib/public-catalog";
+import { getPublicCatalog, publicCatalogPageSize, type PublicCatalogOptions } from "@/lib/public-catalog";
 
 export function usePublicCatalog(options: PublicCatalogOptions) {
   const key = JSON.stringify(options);
@@ -30,6 +30,6 @@ export function usePublicCatalog(options: PublicCatalogOptions) {
     return () => { live = false; controller?.abort(); clearTimeout(timer); window.removeEventListener("focus", focus); };
   }, [key, attempt]);
   const current = snapshot?.key === key ? snapshot : null;
-  return { products: current?.data?.products ?? [], total: current?.data?.total ?? 0, error: current?.error ?? "", loading: !current,
+  return { products: current?.data?.products ?? [], total: current?.data?.total ?? 0, pageSize: current?.data?.pageSize ?? publicCatalogPageSize(options.home === true && !options.query.trim()), error: current?.error ?? "", loading: !current,
     retry: () => { setSnapshot(null); setAttempt(value => value + 1); } };
 }

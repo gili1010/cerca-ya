@@ -40,7 +40,7 @@ export default function Marketplace() {
     setPageLocation(coordinates); setPage(0);
     if (!coordinates) { setFilters(effectiveFilters); setSort(effectiveSort); }
   }
-  const catalog = usePublicCatalog({ query, category, filters: effectiveFilters, sort: effectiveSort, page: pageLocation === coordinates ? page : 0, favoriteIds: favoritesOnly ? favorites : undefined, buyerLocation: coordinates });
+  const catalog = usePublicCatalog({ query, category, filters: effectiveFilters, sort: effectiveSort, home: activeTab === "home" && !query.trim() && !category && !favoritesOnly, page: pageLocation === coordinates ? page : 0, favoriteIds: favoritesOnly ? favorites : undefined, buyerLocation: coordinates });
   const storeSearch = usePublicStoreSearch(query, !favoritesOnly, Boolean(coordinates));
 
   useEffect(() => {

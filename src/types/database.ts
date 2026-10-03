@@ -7,6 +7,7 @@ import type { RequestStatus } from "./requests";
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 export type StockStatus = "IN_STOCK" | "LOW_STOCK" | "OUT_OF_STOCK" | "UNCONFIRMED";
+export type InventoryMode = "STOCKED" | "ON_DEMAND";
 export type DatabaseNeededWhen = "TODAY" | "TOMORROW" | "THIS_WEEK" | "FLEXIBLE";
 export type DatabaseRequestStatus = RequestStatus | "EXPIRED";
 // ACTIVE/EXPIRED remain readable for compatibility with the initial database enum.
@@ -28,6 +29,7 @@ export type ProductRow = Timestamps & {
   id: string; business_id: string; category_id: string; name: string; description: string;
   brand: string | null; model: string | null; sku: string | null; price: number;
   stock_quantity: number; stock_status: StockStatus; stock_confirmed_at: string | null;
+  inventory_mode: InventoryMode; available_today: boolean; availability_confirmed_at: string | null;
   pickup_enabled: boolean; delivery_enabled: boolean; active: boolean;
 };
 export type ProductImageRow = { id: string; product_id: string; url: string; position: number; created_at: string };
@@ -50,6 +52,7 @@ export type ReservationRow = {
   unit_price: number; delivery_price: number; total: number; delivery_type: DatabaseDeliveryType; status: ReservationStatus;
   created_at: string; expires_at: string; confirmed_at: string | null; ready_at: string | null;
   completed_at: string | null; cancelled_at: string | null;
+  inventory_mode: InventoryMode;
 };
 export type FavoriteRow = { user_id: string; product_id: string; created_at: string };
 export type ReservationView = Omit<ReservationRow, "buyer_id"> & {
@@ -109,6 +112,10 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      read_marketplace_page: {
+        Args: { p_query?: string; p_category?: string; p_filters?: string[]; p_sort?: string; p_home?: boolean; p_favorite_ids?: string[] | null; p_latitude?: number | null; p_longitude?: number | null; p_offset?: number; p_limit?: number };
+        Returns: { product_ids: string[]; total: number }[];
+      };
       save_my_store_branding: {
         Args: { p_description: string; p_logo_url: string | null; p_cover_url: string | null; p_expected_description: string; p_expected_logo_url: string | null; p_expected_cover_url: string | null };
         Returns: undefined;

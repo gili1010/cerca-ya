@@ -11,6 +11,7 @@ import type { DeliveryType } from "@/types/reservations";
 import { useAuth } from "../auth/auth-provider";
 import { FormError } from "../requests/request-common";
 import { ReservationProduct, ReservationTotals } from "./reservation-common";
+import { isOnDemand, isProductAvailable } from "@/lib/product-availability";
 
 export function ReservationForm({ product, initialDeliveryType }: { product: Product; initialDeliveryType?: DeliveryType }) {
   const { user } = useAuth();
@@ -25,9 +26,10 @@ function ReservationFields({ product, initialDeliveryType }: { product: Product;
   const submitting = useRef(false);
   const attempt = useRef<{ id: string; quantity: number; deliveryType: DeliveryType } | null>(null);
   const stock = product.stock;
+  const onDemand = isOnDemand(product);
   const deliveryPrice = deliveryType === "delivery" ? product.deliveryPrice ?? 0 : 0;
   const total = product.price * quantity + deliveryPrice;
-  const available = product.source === "supabase" && stock > 0 && (product.pickupToday || product.deliveryToday);
+  const available = product.source === "supabase" && isProductAvailable(product) && (product.pickupToday || product.deliveryToday);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (submitting.current || !available) return;
@@ -55,8 +57,8 @@ function ReservationFields({ product, initialDeliveryType }: { product: Product;
   const locked = busy || attempt.current !== null;
   return <div className="workflow-narrow"><Link className="secondary-link" href={`/producto/${product.id}`}>Volver al producto</Link><div className="workflow-heading"><span className="eyebrow">Reservá cerca tuyo</span><h1>Reservar producto</h1><p>El comercio confirma la disponibilidad antes de preparar tu pedido.</p></div><form className="panel workflow-form reservation-form" onSubmit={submit}>
     <ReservationProduct name={product.name} image={product.image} business={product.store} productId={product.id} />
-    <p className="offer-stock">Stock informado: {stock} unidades · {money(product.price)} c/u</p>
-    <div className="reservation-quantity"><span id="quantity-label">Cantidad</span><div role="group" aria-labelledby="quantity-label"><button type="button" aria-label="Restar una unidad" disabled={locked || quantity <= 1 || !available} onClick={() => setQuantity(quantity - 1)}><Minus size={18} /></button><output aria-live="polite">{quantity}</output><button type="button" aria-label="Sumar una unidad" disabled={locked || quantity >= stock || !available} onClick={() => setQuantity(quantity + 1)}><Plus size={18} /></button></div></div>
+    <p className="offer-stock">{onDemand ? "Se prepara a pedido" : `Stock informado: ${stock} unidades`} · {money(product.price)} c/u</p>
+    <div className="reservation-quantity"><span id="quantity-label">Cantidad</span><div role="group" aria-labelledby="quantity-label"><button type="button" aria-label="Restar una unidad" disabled={locked || quantity <= 1 || !available} onClick={() => setQuantity(quantity - 1)}><Minus size={18} /></button><output aria-live="polite">{quantity}</output><button type="button" aria-label="Sumar una unidad" disabled={locked || quantity >= (onDemand ? 2147483647 : stock) || !available} onClick={() => setQuantity(quantity + 1)}><Plus size={18} /></button></div></div>
     <fieldset className="reservation-delivery" disabled={locked || !available}><legend>¿Cómo lo querés recibir?</legend>
       {product.pickupToday && <label className={deliveryType === "pickup" ? "chosen" : ""}><input type="radio" name="deliveryType" checked={deliveryType === "pickup"} onChange={() => setDeliveryType("pickup")} /><Store size={19} /><span>Retirar en comercio<small>Sin costo</small></span></label>}
       {product.deliveryToday && <label className={deliveryType === "delivery" ? "chosen" : ""}><input type="radio" name="deliveryType" checked={deliveryType === "delivery"} onChange={() => setDeliveryType("delivery")} /><Truck size={19} /><span>Envío del comercio<small>{money(deliveryPrice)}</small></span></label>}

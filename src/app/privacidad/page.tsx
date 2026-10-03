@@ -39,9 +39,9 @@ export default function PrivacyPage() {
         <section aria-labelledby="privacy-location">
           <h2 id="privacy-location">3. Tu ubicación es opcional</h2>
           <p>Accedemos a la ubicación del dispositivo sólo cuando elegís usarla y autorizás el permiso del navegador. Puede ser aproximada o precisa, según el dispositivo y los permisos concedidos. No la solicitamos de forma automática para explorar el catálogo ni hacemos seguimiento continuo de tus movimientos.</p>
-          <p>La usamos para calcular distancias aproximadas en línea recta, ordenar productos por cercanía y aplicar los filtros de distancia disponibles. Para el catálogo, la ubicación se conserva en la memoria y el almacenamiento de sesión de tu navegador; no se guarda en Supabase por ese uso.</p>
+          <p>La usamos para calcular distancias aproximadas en línea recta, ordenar productos por cercanía y aplicar los filtros de distancia disponibles. Para el catálogo, la última ubicación, localidad y fecha de actualización se conservan localmente en tu navegador entre sesiones, hasta que las elimines; no se guardan en Supabase por ese uso.</p>
           <p>Si elegís incluir tu ubicación al publicar un Pedido Abierto, sus coordenadas se guardan asociadas a ese pedido para calcular distancias y mostrarlo a comercios dentro del radio solicitado. La respuesta del Radar a los comercios incluye la distancia, sin devolver las coordenadas del comprador.</p>
-          <p>Podés explorar o publicar un pedido sin ubicación. La opción “No usar mi ubicación” elimina la ubicación de la sesión del catálogo; no modifica la que ya incluiste en un pedido publicado. También podés revocar el permiso desde la configuración de tu navegador.</p>
+          <p>Podés explorar o publicar un pedido sin ubicación. La opción “Dejar de usar ubicación” elimina la ubicación guardada localmente para el catálogo; no modifica la que ya incluiste en un pedido publicado. También podés revocar el permiso desde la configuración de tu navegador.</p>
         </section>
 
         <section aria-labelledby="privacy-business">

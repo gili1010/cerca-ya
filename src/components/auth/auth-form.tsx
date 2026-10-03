@@ -18,6 +18,7 @@ export function AuthForm({ mode, returnTo, confirmationError = false, oauthError
   const [busy, setBusy] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
   const [created, setCreated] = useState<"confirm" | "signed-in" | null>(null);
+  const [phone, setPhone] = useState("");
   const inFlight = useRef(false);
   const target = safeRedirect(returnTo);
 
@@ -67,7 +68,7 @@ export function AuthForm({ mode, returnTo, confirmationError = false, oauthError
     setError("");
     try {
       const client = getSupabaseBrowserClient();
-      if (!client) { setError("El acceso a cuentas todavía no está configurado."); return; }
+      if (!client) { setError("No pudimos acceder a tu cuenta en este momento. Volvé a intentar más tarde."); return; }
       if (signup) {
         const callback = new URL("/auth/confirm", window.location.origin);
         callback.searchParams.set("redirect", target);
@@ -75,6 +76,7 @@ export function AuthForm({ mode, returnTo, confirmationError = false, oauthError
         if (result.error) throw result.error;
         if (result.data.user?.identities?.length === 0) { setError("El email ya está registrado. Probá iniciar sesión."); return; }
         form.reset();
+        setPhone("");
         setCreated(result.data.session ? "signed-in" : "confirm");
       } else {
         const result = await client.auth.signInWithPassword({ email, password });
@@ -93,7 +95,7 @@ export function AuthForm({ mode, returnTo, confirmationError = false, oauthError
     <GoogleSignInButton onClick={() => void signInWithGoogle()} disabled={busy || loading} busy={googleBusy} />
     {signup && <label>Nombre completo<input name="name" autoComplete="name" required maxLength={160} /></label>}
     <label>Email<input name="email" type="email" autoComplete="email" required maxLength={254} /></label>
-    {signup && <label>Teléfono · Argentina (+54)<input name="phone" type="tel" autoComplete="tel" maxLength={40} placeholder="3547636574" /><small>Opcional. Incluí el código de área, sin 0 ni 15. Agregamos +54 automáticamente.</small></label>}
+    {signup && <label>Teléfono · Argentina (+54)<input name="phone" type="tel" autoComplete="tel" maxLength={40} value={phone} onChange={event => setPhone(event.target.value)} placeholder="Ej. 3547 123456" /><small>Opcional. Incluí el código de área, sin 0 ni 15. Agregamos +54 automáticamente.</small></label>}
     <label>Contraseña<input name="password" type="password" autoComplete={signup ? "new-password" : "current-password"} required minLength={signup ? 6 : undefined} maxLength={256} /></label>
     {signup && <label>Confirmar contraseña<input name="passwordConfirmation" type="password" autoComplete="new-password" required minLength={6} maxLength={256} /></label>}
     <FormError message={error || sessionError} /><button className="primary-button" type="submit" disabled={busy || loading}>{busy ? "Un momento…" : signup ? "Crear cuenta" : "Iniciar sesión"}</button>

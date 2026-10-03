@@ -1,6 +1,6 @@
 import type { ProductRow } from "@/types/database";
 
-export type ProductInput = Pick<ProductRow, "name" | "description" | "category_id" | "brand" | "model" | "sku" | "price" | "stock_quantity" | "pickup_enabled" | "delivery_enabled" | "active">;
+export type ProductInput = Pick<ProductRow, "name" | "description" | "category_id" | "brand" | "model" | "sku" | "price" | "stock_quantity" | "inventory_mode" | "available_today" | "pickup_enabled" | "delivery_enabled" | "active">;
 // Keep number inputs as text while editing: an empty required field is not zero.
 export type ProductFormValues = Omit<ProductInput, "price" | "stock_quantity"> & { price: string; stock_quantity: string };
 
@@ -9,6 +9,7 @@ export function productFormValues(product?: ProductRow | null): ProductFormValue
     name: product?.name ?? "", description: product?.description ?? "", category_id: product?.category_id ?? "",
     brand: product?.brand ?? "", model: product?.model ?? "", sku: product?.sku ?? "",
     price: product ? String(product.price) : "", stock_quantity: product ? String(product.stock_quantity) : "0",
+    inventory_mode: product?.inventory_mode ?? "STOCKED", available_today: product?.available_today ?? true,
     pickup_enabled: product?.pickup_enabled ?? true, delivery_enabled: product?.delivery_enabled ?? false, active: product?.active ?? true,
   };
 }
@@ -19,7 +20,8 @@ export function validateProduct(form: ProductFormValues, categoryIds: string[]):
   const price = Number(form.price);
   if (!form.price.trim() || !Number.isFinite(price) || price < 0 || price > 9999999999.99 || !/^\d+(\.\d{1,2})?$/.test(form.price)) return "Ingresá un precio mayor o igual a 0, con hasta dos decimales.";
   const stock = Number(form.stock_quantity);
-  if (!form.stock_quantity.trim() || !Number.isInteger(stock) || stock < 0 || stock > 2147483647) return "Ingresá un stock entero mayor o igual a 0.";
+  if (!["STOCKED", "ON_DEMAND"].includes(form.inventory_mode)) return "Seleccioná cómo ofrecés este producto.";
+  if (form.inventory_mode === "STOCKED" && (!form.stock_quantity.trim() || !Number.isInteger(stock) || stock < 0 || stock > 2147483647)) return "Ingresá un stock entero mayor o igual a 0.";
   if (form.description.length > 5000 || (form.brand?.length ?? 0) > 160 || (form.model?.length ?? 0) > 160 || (form.sku?.length ?? 0) > 100) return "Revisá la longitud de la descripción, marca, modelo o SKU.";
   return "";
 }
@@ -28,7 +30,8 @@ export function normalizeProduct(form: ProductFormValues): ProductInput {
   return {
     name: form.name.trim(), description: form.description.trim(), category_id: form.category_id,
     brand: form.brand?.trim() || null, model: form.model?.trim() || null, sku: form.sku?.trim() || null,
-    price: Number(form.price), stock_quantity: Number(form.stock_quantity),
+    price: Number(form.price), stock_quantity: form.inventory_mode === "ON_DEMAND" ? 0 : Number(form.stock_quantity),
+    inventory_mode: form.inventory_mode, available_today: form.inventory_mode === "ON_DEMAND" && form.available_today,
     pickup_enabled: form.pickup_enabled, delivery_enabled: form.delivery_enabled, active: form.active,
   };
 }
@@ -36,6 +39,7 @@ export function normalizeProduct(form: ProductFormValues): ProductInput {
 export function productErrorMessage(cause: unknown): string {
   const code = typeof cause === "object" && cause !== null && "code" in cause ? String(cause.code) : "";
   const message = typeof cause === "object" && cause !== null && "message" in cause ? String(cause.message) : "";
+  if (message.includes("product_inventory_mode_reserved")) return "No podés cambiar cómo ofrecés el producto mientras tenga reservas pendientes, confirmadas o listas.";
   if (code === "23505") return "Ya existe un producto con ese SKU en tu comercio. Usá otro o dejalo vacío.";
   if (message.includes("product_not_owned")) return "No encontramos ese producto en tu comercio o ya no tenés acceso.";
   if (message.includes("product_business_required")) return "Necesitás crear tu comercio antes de publicar productos.";

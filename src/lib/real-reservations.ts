@@ -19,6 +19,7 @@ export async function readReservations(client: SupabaseClient<Database>, seller:
 }
 export function reservationError(error: { message?: string }, creating = false) {
   const message = error.message ?? "";
+  if (message.includes("reservation_availability_unavailable")) return "Este producto a pedido no está disponible hoy. Consultá al comercio o actualizá el producto.";
   if (message.includes("reservation_confirm_stock_insufficient")) return "No hay stock suficiente para confirmar esta reserva.";
   if (message.includes("reservation_stock_insufficient")) return "No hay stock suficiente.";
   if (message.includes("reservation_product_unavailable")) return "Este producto ya no está disponible.";

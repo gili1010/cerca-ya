@@ -75,6 +75,9 @@
 .account-links svg { color: var(--green); }
 .account-links small { display: block; color: var(--muted); font-weight: 400; font-size: var(--text-xs); overflow-wrap: anywhere; }
 .account-signout { color: var(--error); border-color: var(--error-line); }
+.account-session-actions { display: grid; justify-items: start; gap: var(--space-3); margin-top: var(--space-6); padding-top: var(--space-5); border-top: 1px solid var(--line); }
+.account-session-actions .form-error { width: 100%; margin: 0; }
+@media (max-width: 600px) { .account-session-actions { justify-items: stretch; } .account-session-actions .account-signout { width: 100%; min-height: 52px; } }
 
 /* Request cards, details and existing statuses */
 .buyer-request-id { overflow-wrap: anywhere; min-width: 0; }

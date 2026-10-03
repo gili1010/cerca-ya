@@ -22,7 +22,7 @@ function ReservationListContent({ business }: { business: boolean }) {
   const [status, setStatus] = useState("all");
   const rows = data.data ?? [];
   const reservations = rows.filter(row => status === "all" || reservationDisplay(row, now).status === status);
-  return <><div className="workflow-heading with-action"><div><span className="eyebrow">{business ? "Modo comercio" : "Tus productos cerca"}</span><h1>{business ? "Reservas recibidas" : "Mis reservas"}</h1><p>{business ? "Confirmá el stock, prepará el producto y registrá la entrega." : "Seguí la confirmación y preparación de tus productos."}</p></div><button className="outline-button" disabled={data.busy} onClick={() => void data.refresh()}>{data.busy ? "Actualizando..." : "Actualizar"}</button></div>
+  return <><div className="workflow-heading with-action"><div><span className="eyebrow">{business ? "Modo comercio" : "Tus productos cerca"}</span><h1>{business ? "Reservas recibidas" : "Mis reservas"}</h1><p>{business ? "Confirmá la disponibilidad, prepará el producto y registrá la entrega." : "Seguí la confirmación y preparación de tus productos."}</p></div><button className="outline-button" disabled={data.busy} onClick={() => void data.refresh()}>{data.busy ? "Actualizando..." : "Actualizar"}</button></div>
     <LiveFeedback state={data.live} notice={data.notice} /><FormError message={data.error} />
     <div className="reservation-filters"><label>Estado<select value={status} onChange={event => setStatus(event.target.value)}><option value="all">Todos los estados</option>{reservationStatuses.map(value => <option key={value} value={value}>{value === "READY" ? "Lista para retirar / enviar" : reservationLabels[value]}</option>)}</select></label></div>
     {data.loading && <p className="workflow-loading" role="status">Cargando reservas...</p>}
@@ -33,3 +33,4 @@ function ReservationListContent({ business }: { business: boolean }) {
       {!reservations.length && <section className="empty-state"><h2>{status !== "all" ? "No hay reservas con este filtro" : business ? "Todavía no recibiste reservas" : "Todavía no tenés reservas"}</h2><Link className="primary-button" href="/">Explorar productos</Link></section>}</>}
   </>;
 }
+

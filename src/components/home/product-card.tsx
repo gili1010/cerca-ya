@@ -6,8 +6,10 @@ import { ProductStock } from "../reservations/product-stock";
 import { ProductImage } from "../details/product-image";
 import { StockTime } from "../details/stock-time";
 import { formatDistance } from "@/lib/distance";
+import { isOnDemand, isProductAvailable } from "@/lib/product-availability";
 
 export function StockConfirmation({ product }: { product: Product }) {
+  if (isOnDemand(product)) return <div className={`stock-confirmation ${isProductAvailable(product) ? "" : "unconfirmed"}`}><span>{isProductAvailable(product) ? <Check size={13} aria-hidden="true" /> : <Clock3 size={13} aria-hidden="true" />}Se prepara a pedido</span><small>{isProductAvailable(product) ? "Disponible hoy" : "No disponible hoy"}</small></div>;
   if (product.database) return <div className={`stock-confirmation ${product.database.product.stock_confirmed_at ? "" : "unconfirmed"}`}><span>{product.database.product.stock_confirmed_at ? <Check size={13} aria-hidden="true" /> : <Clock3 size={13} aria-hidden="true" />}<StockTime date={product.database.product.stock_confirmed_at} /></span><small>Informado por el comercio</small></div>;
   return <div className={`stock-confirmation ${product.confirmedMinutesAgo === null ? "unconfirmed" : ""}`}>
     <span>{product.confirmedMinutesAgo === null ? <Clock3 size={13} /> : <Check size={13} />}{product.confirmedMinutesAgo === null ? "Stock por confirmar" : "Stock confirmado"}</span>
@@ -19,13 +21,14 @@ interface ProductCardProps { product: Product; saved: boolean; onSave: (id: stri
 
 export function ProductCard({ product, saved, onSave }: ProductCardProps) {
   const real = product.source === "supabase";
+  const available = isProductAvailable(product);
   const href = `/producto/${product.id}`;
   const storeSlug = product.database?.business.slug;
   const storeHref = real ? storeSlug ? `/tienda/${encodeURIComponent(storeSlug)}` : `${href}#comercio` : `/comercios/${product.storeId}`;
   return <article className="product-card">
     <div className="product-image">
       <Link className="product-image-link" href={href} aria-label={`Ver ${product.name}`}>{real ? <ProductImage src={product.image} alt={product.name} className="public-card-image" /> : <Image src={photo(product.image)} alt={product.name} fill sizes="(max-width: 600px) 50vw, (max-width: 1000px) 33vw, 25vw" />}</Link>
-      {real ? <span className={`stock-pill ${product.stock === 0 ? "limited" : ""}`}><span />{product.stock > 0 ? "En stock" : "Sin stock"}</span> : <ProductStock productId={product.id} badge />}
+      {real ? <span className={`stock-pill ${!available ? "limited" : ""}`}><span />{isOnDemand(product) ? available ? "Disponible hoy" : "No disponible hoy" : product.stock > 0 ? "En stock" : "Sin stock"}</span> : <ProductStock productId={product.id} badge />}
       <button className={`save-button ${saved ? "saved" : ""}`} aria-label={`${saved ? "Quitar de" : "Agregar a"} guardados: ${product.name}`} aria-pressed={saved} onClick={() => onSave(product.id)}><Heart size={18} fill={saved ? "currentColor" : "none"} /></button>
     </div>
     <div className="product-body">
