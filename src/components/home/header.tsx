@@ -4,6 +4,8 @@ import { ChevronDown, MapPin, UserRound } from "lucide-react";
 import { useAuth } from "../auth/auth-provider";
 import { Brand } from "./brand";
 import Link from "next/link";
+import { CartAccess } from "../cart/cart-access";
+import cartStyles from "../cart/cart-entry.module.css";
 
 interface HeaderProps {
   zone: string;
@@ -18,7 +20,7 @@ export function Header({ zone, onZone, onAccount, onExplore, onRequests, onHow }
   const { user, profile, loading } = useAuth();
   const accountLabel = user ? profile?.full_name.trim().split(/\s+/)[0] || "Mi cuenta" : "Iniciar sesión";
   return <header className="site-header" id="inicio">
-    <div className="shell header-content">
+    <div className={`shell header-content ${cartStyles.headerContent}`}>
       <Brand />
       <button className="zone-button" onClick={onZone}>
         <MapPin size={18} /><span><small>Tu ubicación</small><strong>{zone}</strong></span><ChevronDown size={14} />
@@ -30,7 +32,10 @@ export function Header({ zone, onZone, onAccount, onExplore, onRequests, onHow }
         <Link href="/comercio">Modo comercio</Link>
         <button onClick={onHow}>Cómo funciona</button>
       </nav>
-      <button className="login-button" onClick={onAccount} disabled={loading} aria-label={user ? "Mi cuenta" : "Iniciar sesión"}><UserRound size={17} /><span>{accountLabel}</span></button>
+      <div className={cartStyles.headerActions}>
+        <CartAccess />
+        <button className="login-button" onClick={onAccount} disabled={loading} aria-label={user ? "Mi cuenta" : "Iniciar sesión"}><UserRound size={17} /><span>{accountLabel}</span></button>
+      </div>
     </div>
   </header>;
 }

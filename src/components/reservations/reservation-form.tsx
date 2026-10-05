@@ -12,7 +12,7 @@ import { useAuth } from "../auth/auth-provider";
 import { FormError } from "../requests/request-common";
 import { ReservationProduct, ReservationTotals } from "./reservation-common";
 import { isOnDemand, isProductAvailable } from "@/lib/product-availability";
-import { emptyReservationCheckout, normalizeReservationCheckout, validateReservationCheckout } from "@/lib/reservation-checkout";
+import { emptyReservationCheckout, normalizeReservationCheckout, validateReservationCheckout, type ReservationCheckoutInput } from "@/lib/reservation-checkout";
 import { ReservationCheckoutFields } from "./reservation-checkout-fields";
 
 export function ReservationForm({ product, initialDeliveryType }: { product: Product; initialDeliveryType?: DeliveryType }) {
@@ -68,15 +68,40 @@ function ReservationFields({ product, initialDeliveryType, initialName, initialP
     <ReservationProduct name={product.name} image={product.image} business={product.store} productId={product.id} />
     <p className="offer-stock">{onDemand ? "Se prepara a pedido" : `Stock informado: ${stock} unidades`} · {money(product.price)} c/u</p>
     <div className="reservation-quantity"><span id="quantity-label">Cantidad</span><div role="group" aria-labelledby="quantity-label"><button type="button" aria-label="Restar una unidad" disabled={locked || quantity <= 1 || !available} onClick={() => setQuantity(quantity - 1)}><Minus size={18} /></button><output aria-live="polite">{quantity}</output><button type="button" aria-label="Sumar una unidad" disabled={locked || quantity >= (onDemand ? 2147483647 : stock) || !available} onClick={() => setQuantity(quantity + 1)}><Plus size={18} /></button></div></div>
-    <fieldset className="reservation-delivery" disabled={locked || !available}><legend>¿Cómo lo querés recibir?</legend>
-      {product.pickupToday && <label className={deliveryType === "pickup" ? "chosen" : ""}><input type="radio" name="deliveryType" checked={deliveryType === "pickup"} onChange={() => setDeliveryType("pickup")} /><Store size={19} /><span>Retirar en comercio<small>Sin costo</small></span></label>}
-      {product.deliveryToday && <label className={deliveryType === "delivery" ? "chosen" : ""}><input type="radio" name="deliveryType" checked={deliveryType === "delivery"} onChange={() => setDeliveryType("delivery")} /><Truck size={19} /><span>Envío del comercio<small>{money(deliveryPrice)}</small></span></label>}
-    </fieldset>
-    {deliveryType === "pickup" && <p className="info-note">Retirá en {product.store}: {product.database?.business.address || "Dirección sin informar"}{product.database?.business.city ? `, ${product.database.business.city}` : ""}.</p>}
-    <ReservationCheckoutFields value={checkout} onChange={setCheckout} delivery={deliveryType === "delivery"} disabled={locked || !available} acceptsCash={product.database?.business.accepts_cash === true} acceptsTransfer={product.database?.business.accepts_transfer === true} />
+    <ReservationCheckoutFormFields checkout={checkout} onCheckoutChange={setCheckout} deliveryType={deliveryType} onDeliveryChange={setDeliveryType} pickupEnabled={product.pickupToday} deliveryEnabled={product.deliveryToday} deliveryPrice={product.deliveryPrice ?? 0} disabled={locked || !available} businessName={product.store} pickupAddress={product.database?.business.address} pickupCity={product.database?.business.city} acceptsCash={product.database?.business.accepts_cash === true} acceptsTransfer={product.database?.business.accepts_transfer === true} />
     {!available && <p className="form-error">Este producto ya no está disponible para reservar.</p>}
     <ReservationTotals quantity={quantity} unitPrice={product.price} deliveryPrice={deliveryPrice} deliveryType={deliveryType} total={total} />
     <p className="info-note">La reserva se envía al comercio y vence en 30 minutos si no la confirma. El precio y envío vigentes se calculan al guardar; podés revisar el total final en el detalle. No se realiza ningún cobro.</p><FormError message={error} />
     <button className="primary-button" type="submit" disabled={!available || busy}>{busy ? "Guardando reserva..." : attempt.current ? "Reintentar reserva" : "Enviar reserva"}</button>
   </form></div>;
+}
+
+interface ReservationCheckoutFormFieldsProps {
+  checkout: ReservationCheckoutInput;
+  onCheckoutChange: (value: ReservationCheckoutInput) => void;
+  deliveryType: DeliveryType;
+  onDeliveryChange: (value: DeliveryType) => void;
+  pickupEnabled: boolean;
+  deliveryEnabled: boolean;
+  deliveryPrice: number;
+  disabled: boolean;
+  deliveryDisabled?: boolean;
+  businessName: string;
+  pickupAddress?: string | null;
+  pickupCity?: string | null;
+  acceptsCash: boolean;
+  acceptsTransfer: boolean;
+}
+
+// One contact, delivery and payment form serves both historical single-product
+// reservations and orders. Private checkout values remain in component memory.
+export function ReservationCheckoutFormFields({ checkout, onCheckoutChange, deliveryType, onDeliveryChange, pickupEnabled, deliveryEnabled, deliveryPrice, disabled, deliveryDisabled = disabled, businessName, pickupAddress, pickupCity, acceptsCash, acceptsTransfer }: ReservationCheckoutFormFieldsProps) {
+  return <>
+    <fieldset className="reservation-delivery" disabled={deliveryDisabled}><legend>¿Cómo lo querés recibir?</legend>
+      {pickupEnabled && <label className={deliveryType === "pickup" ? "chosen" : ""}><input type="radio" name="deliveryType" checked={deliveryType === "pickup"} onChange={() => onDeliveryChange("pickup")} /><Store size={19} /><span>Retirar en comercio<small>Sin costo</small></span></label>}
+      {deliveryEnabled && <label className={deliveryType === "delivery" ? "chosen" : ""}><input type="radio" name="deliveryType" checked={deliveryType === "delivery"} onChange={() => onDeliveryChange("delivery")} /><Truck size={19} /><span>Envío del comercio<small>{deliveryPrice ? money(deliveryPrice) : "Gratis"}</small></span></label>}
+    </fieldset>
+    {deliveryType === "pickup" && <p className="info-note">Retirá en {businessName}: {pickupAddress || "Dirección sin informar"}{pickupCity ? `, ${pickupCity}` : ""}.</p>}
+    <ReservationCheckoutFields value={checkout} onChange={onCheckoutChange} delivery={deliveryType === "delivery"} disabled={disabled} acceptsCash={acceptsCash} acceptsTransfer={acceptsTransfer} />
+  </>;
 }

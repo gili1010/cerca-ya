@@ -51,13 +51,25 @@ export type RadarRequestRow = Pick<RequestRow, "id" | "title" | "description" | 
 export type PublicOfferRow = OfferRow & { business_name: string; business_city: string | null; business_whatsapp: string | null };
 export type ReservationRow = {
   id: string; buyer_id: string; business_id: string; product_id: string; quantity: number;
-  unit_price: number; delivery_price: number; total: number; delivery_type: DatabaseDeliveryType; status: ReservationStatus;
+  unit_price: number; items_subtotal: number; delivery_price: number; total: number; delivery_type: DatabaseDeliveryType; status: ReservationStatus;
   created_at: string; expires_at: string; confirmed_at: string | null; ready_at: string | null;
   completed_at: string | null; cancelled_at: string | null;
   inventory_mode: InventoryMode;
 };
+export type ReservationItemRow = {
+  id: string; reservation_id: string; business_id: string; product_id: string; quantity: number;
+  unit_price: number; product_name_snapshot: string; inventory_mode_snapshot: InventoryMode;
+  stock_deducted: boolean; created_at: string;
+};
+// The RPC excludes internal ownership and stock-accounting fields from each item.
+export type ReservationItemView = Omit<ReservationItemRow, "business_id" | "stock_deducted"> & {
+  subtotal: number; product_image: string | null; current_stock: number;
+};
+export type ReservationOrderItemInput = { product_id: string; quantity: number };
 export type FavoriteRow = { user_id: string; product_id: string; created_at: string };
-export type ReservationView = Omit<ReservationRow, "buyer_id"> & {
+export type ReservationView = Omit<ReservationRow, "buyer_id" | "items_subtotal"> & {
+  // Optional during rollout: older RPCs still return the single-product header.
+  items?: ReservationItemView[]; items_subtotal?: number;
   product_name: string; business_name: string; product_image: string | null; current_stock: number;
   customer_name: string | null; customer_phone: string | null;
   delivery_address: string | null; delivery_city: string | null; delivery_reference: string | null;
@@ -109,7 +121,11 @@ export type Database = {
         FK<"reservations_buyer_id_fkey", ["buyer_id"], "profiles">,
         FK<"reservations_business_id_fkey", ["business_id"], "businesses">,
         FK<"reservations_product_business_fkey", ["product_id", "business_id"], "products", ["id", "business_id"]>
-      ], "total">;
+      ], "total" | "items_subtotal">;
+      reservation_items: Table<ReservationItemRow, "reservation_id" | "business_id" | "product_id" | "quantity" | "unit_price" | "product_name_snapshot" | "inventory_mode_snapshot", [
+        FK<"reservation_items_reservation_business_fkey", ["reservation_id", "business_id"], "reservations", ["id", "business_id"]>,
+        FK<"reservation_items_product_business_fkey", ["product_id", "business_id"], "products", ["id", "business_id"]>
+      ]>;
       favorites: Table<FavoriteRow, "user_id" | "product_id", [
         FK<"favorites_user_id_fkey", ["user_id"], "profiles">,
         FK<"favorites_product_id_fkey", ["product_id"], "products">
@@ -128,6 +144,10 @@ export type Database = {
       };
       create_my_reservation: {
         Args: { p_reservation_id: string; p_product_id: string; p_quantity: number; p_delivery_type: DatabaseDeliveryType; p_checkout?: Json };
+        Returns: string;
+      };
+      create_my_order: {
+        Args: { p_reservation_id: string; p_items: Json; p_delivery_type: DatabaseDeliveryType; p_checkout?: Json };
         Returns: string;
       };
       manage_my_reservation: { Args: { p_reservation_id: string; p_action: "confirm" | "cancel" | "ready" | "complete" }; Returns: string };
