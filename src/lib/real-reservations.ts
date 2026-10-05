@@ -19,6 +19,10 @@ export async function readReservations(client: SupabaseClient<Database>, seller:
 }
 export function reservationError(error: { message?: string }, creating = false) {
   const message = error.message ?? "";
+  if (message.includes("reservation_checkout_phone_invalid")) return "Revisá el teléfono: ingresá código de área y número de Argentina.";
+  if (message.includes("reservation_checkout_address_required")) return "Completá la dirección y localidad de entrega.";
+  if (message.includes("reservation_checkout_invalid")) return "Revisá tus datos de contacto, entrega y forma de pago.";
+  if (message.includes("reservation_payment_unavailable")) return "El comercio ya no acepta esa forma de pago. Volvé al producto para actualizar las opciones.";
   if (message.includes("reservation_availability_unavailable")) return "Este producto a pedido no está disponible hoy. Consultá al comercio o actualizá el producto.";
   if (message.includes("reservation_confirm_stock_insufficient")) return "No hay stock suficiente para confirmar esta reserva.";
   if (message.includes("reservation_stock_insufficient")) return "No hay stock suficiente.";

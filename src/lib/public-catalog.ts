@@ -12,7 +12,7 @@ export function publicCatalogPageSize(home = false) { return home ? publicHomePa
 export const placeholderImage = "/product-placeholder.svg";
 export const isProductUuid = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 // Public presentation fields only: no owner ID, SKU or internal timestamps.
-const selection = "id,business_id,category_id,name,description,brand,model,price,stock_quantity,stock_status,stock_confirmed_at,inventory_mode,available_today,availability_confirmed_at,pickup_enabled,delivery_enabled,active, business:businesses!inner(id,slug,name,city,address,latitude,longitude,whatsapp,pickup_enabled,delivery_enabled,delivery_price,active), category:categories!inner(id,name,slug), product_images(url,position)";
+const selection = "id,business_id,category_id,name,description,brand,model,price,stock_quantity,stock_status,stock_confirmed_at,inventory_mode,available_today,availability_confirmed_at,pickup_enabled,delivery_enabled,active, business:businesses!inner(id,slug,name,city,address,latitude,longitude,whatsapp,pickup_enabled,delivery_enabled,delivery_price,active,accepts_cash,accepts_transfer), category:categories!inner(id,name,slug), product_images(url,position)";
 
 function publicQuery(client: SupabaseClient<Database>, head = false) {
   // Explicit active checks apply even to owners, whose RLS also permits inactive rows.

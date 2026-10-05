@@ -13,6 +13,7 @@ export type DatabaseRequestStatus = RequestStatus | "EXPIRED";
 // ACTIVE/EXPIRED remain readable for compatibility with the initial database enum.
 export type DatabaseOfferStatus = "PENDING" | "ACTIVE" | "WITHDRAWN" | "ACCEPTED" | "REJECTED" | "EXPIRED";
 export type DatabaseDeliveryType = "PICKUP" | "DELIVERY";
+export type PaymentMethod = "CASH" | "TRANSFER" | "ARRANGE";
 
 type Timestamps = { created_at: string; updated_at: string };
 export type ProfileRow = Timestamps & { id: string; full_name: string; phone: string | null; avatar_url: string | null };
@@ -22,6 +23,7 @@ export type BusinessRow = Timestamps & {
   whatsapp: string | null; address: string | null; city: string | null; latitude: number | null; longitude: number | null;
   pickup_enabled: boolean; delivery_enabled: boolean; delivery_radius_km: number; delivery_price: number; minimum_order: number;
   verified: boolean; active: boolean;
+  accepts_cash: boolean; accepts_transfer: boolean; transfer_alias: string | null;
 };
 export type CategoryRow = { id: string; name: string; slug: string; parent_id: string | null; icon: string | null; created_at: string };
 export type BusinessCategoryRow = { business_id: string; category_id: string };
@@ -57,6 +59,10 @@ export type ReservationRow = {
 export type FavoriteRow = { user_id: string; product_id: string; created_at: string };
 export type ReservationView = Omit<ReservationRow, "buyer_id"> & {
   product_name: string; business_name: string; product_image: string | null; current_stock: number;
+  customer_name: string | null; customer_phone: string | null;
+  delivery_address: string | null; delivery_city: string | null; delivery_reference: string | null;
+  customer_notes: string | null; payment_method: PaymentMethod | null; transfer_alias: string | null;
+  pickup_address: string | null; pickup_city: string | null;
 };
 export type SearchEventRow = {
   id: string; user_id: string | null; query: string; latitude: number | null; longitude: number | null;
@@ -121,7 +127,7 @@ export type Database = {
         Returns: undefined;
       };
       create_my_reservation: {
-        Args: { p_reservation_id: string; p_product_id: string; p_quantity: number; p_delivery_type: DatabaseDeliveryType };
+        Args: { p_reservation_id: string; p_product_id: string; p_quantity: number; p_delivery_type: DatabaseDeliveryType; p_checkout?: Json };
         Returns: string;
       };
       manage_my_reservation: { Args: { p_reservation_id: string; p_action: "confirm" | "cancel" | "ready" | "complete" }; Returns: string };

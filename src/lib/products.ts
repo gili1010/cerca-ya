@@ -25,7 +25,7 @@ export interface Product {
   database?: {
     product: Omit<ProductRow, "sku" | "created_at" | "updated_at">;
     category: Pick<CategoryRow, "id" | "name" | "slug">;
-    business: Pick<BusinessRow, "id" | "slug" | "name" | "city" | "address" | "latitude" | "longitude" | "whatsapp" | "pickup_enabled" | "delivery_enabled" | "delivery_price" | "active">;
+    business: Pick<BusinessRow, "id" | "slug" | "name" | "city" | "address" | "latitude" | "longitude" | "whatsapp" | "pickup_enabled" | "delivery_enabled" | "delivery_price" | "active" | "accepts_cash" | "accepts_transfer">;
   };
 }
 

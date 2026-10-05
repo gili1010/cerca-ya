@@ -1,0 +1,27 @@
+.fields { display: grid; gap: var(--space-5); }
+.section { display: grid; min-width: 0; gap: var(--space-3); margin: 0; padding: 0; border: 0; }
+.section legend { margin-bottom: var(--space-3); padding: 0; font-size: var(--text-base); font-weight: 650; color: var(--ink); }
+.section label { display: grid; min-width: 0; gap: var(--space-2); font-size: var(--text-sm); font-weight: 600; }
+.fields .section textarea { min-height: 88px; }
+.columns { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); }
+.help { margin: 0; color: var(--muted); font-size: var(--text-xs); line-height: 1.6; }
+.paymentMethods { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.paymentMethods label { display: flex; align-items: center; gap: var(--space-2); min-height: 48px; padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-md); font-weight: 500; cursor: pointer; }
+.paymentMethods .selected { border-color: var(--green); background: var(--surface-soft); color: var(--green); }
+.paymentMethods label:focus-within { outline: 3px solid var(--green); outline-offset: 3px; }
+.optional { padding-top: var(--space-4); border-top: 1px solid var(--line); }
+.optional summary { min-height: 44px; padding-block: var(--space-2); color: var(--green); font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
+.optional summary span { margin-left: var(--space-2); color: var(--muted); font-size: var(--text-xs); font-weight: 400; }
+.optional .section { margin-top: var(--space-3); }
+.details { display: grid; gap: var(--space-4); margin-block: var(--space-5); }
+.detailSection { padding: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--paper); }
+.detailSection h2 { margin: 0 0 var(--space-3); }
+.detailSection dl { display: grid; gap: var(--space-3); margin: 0; }
+.detailSection dt { color: var(--muted); font-size: var(--text-xs); }
+.detailSection dd { margin: var(--space-1) 0 0; color: var(--ink); font-size: var(--text-sm); line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.detailSection .help { margin-top: var(--space-3); }
+.detailSection a, .detailSection button { margin-top: var(--space-3); }
+.alias { font-weight: 650; }
+.copyNotice { color: var(--green); font-size: var(--text-xs); line-height: 1.6; }
+.notes { margin: 0; color: var(--ink); font-size: var(--text-sm); line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (min-width: 600px) { .columns { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

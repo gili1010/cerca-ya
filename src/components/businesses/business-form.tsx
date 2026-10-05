@@ -36,6 +36,7 @@ function BusinessFormFields({ business, onLocationSaved }: { business: BusinessR
     name: business.name, description: business.description, whatsapp: business.whatsapp ?? "", city: business.city ?? "", address: business.address ?? "",
     pickup_enabled: business.pickup_enabled, delivery_enabled: business.delivery_enabled,
     delivery_radius_km: business.delivery_radius_km || 5, delivery_price: business.delivery_price, minimum_order: business.minimum_order,
+    accepts_cash: business.accepts_cash ?? true, accepts_transfer: business.accepts_transfer ?? false, transfer_alias: business.transfer_alias ?? "",
   } : { ...emptyBusiness });
   const [categories, setCategories] = useState<CategoryRow[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
@@ -100,6 +101,9 @@ function BusinessFormFields({ business, onLocationSaved }: { business: BusinessR
       <fieldset className="form-checkboxes" disabled={busy}><legend>Retiro y envío</legend><label><input type="checkbox" checked={form.pickup_enabled} onChange={event => setForm({ ...form, pickup_enabled: event.target.checked })} />Permite retiro</label><label><input type="checkbox" checked={form.delivery_enabled} onChange={event => setForm({ ...form, delivery_enabled: event.target.checked })} />Realiza envíos</label></fieldset>
       {form.delivery_enabled && <div className="form-columns"><label>Radio de entrega<select value={form.delivery_radius_km} onChange={event => setForm({ ...form, delivery_radius_km: Number(event.target.value) })} disabled={busy}>{deliveryRadii.map(radius => <option key={radius} value={radius}>{radius} km</option>)}</select></label><label>Costo de envío (ARS)<input type="number" min="0" max="9999999999.99" step="0.01" inputMode="decimal" value={form.delivery_price} onChange={event => setForm({ ...form, delivery_price: Number(event.target.value) })} required disabled={busy} /><small>0 significa envío gratis.</small></label></div>}
       <label>Compra mínima (ARS)<input type="number" min="0" max="9999999999.99" step="0.01" inputMode="decimal" value={form.minimum_order || ""} onChange={event => setForm({ ...form, minimum_order: Number(event.target.value) })} placeholder="Sin compra mínima" disabled={busy} /><small>Opcional. Dejá vacío o ingresá 0 si no hay mínimo.</small></label>
+      <fieldset className="form-checkboxes" disabled={busy}><legend>Medios de pago</legend><label><input type="checkbox" checked={form.accepts_cash} onChange={event => setForm({ ...form, accepts_cash: event.target.checked })} />Acepto efectivo</label><label><input type="checkbox" checked={form.accepts_transfer} onChange={event => setForm({ ...form, accepts_transfer: event.target.checked })} />Acepto transferencia</label></fieldset>
+      {form.accepts_transfer && <label>Alias para transferencias<input value={form.transfer_alias} onChange={event => setForm({ ...form, transfer_alias: event.target.value })} maxLength={100} placeholder="Opcional" disabled={busy} autoCapitalize="none" spellCheck={false} /><small>Se incluirá en las nuevas reservas con transferencia. CercaYa no procesa ni verifica pagos.</small></label>}
+      <p className="info-note">Tus clientes también pueden elegir coordinar el pago con vos.</p>
       <FormError message={error} /><button className="primary-button" type="submit" disabled={busy || locating || !ready || !categories.length}>{busy ? business ? "Guardando cambios…" : "Creando comercio…" : business ? "Guardar cambios" : "Crear comercio"}</button>
     </form></div>;
 }

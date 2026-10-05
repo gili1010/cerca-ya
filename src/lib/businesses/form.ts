@@ -4,14 +4,16 @@ import { argentinaWhatsAppNumber } from "@/lib/phone";
 export const deliveryRadii = [5, 10, 15, 20, 30] as const;
 export type BusinessInput = Pick<BusinessRow, "name" | "description" | "pickup_enabled" | "delivery_enabled" | "delivery_radius_km" | "delivery_price" | "minimum_order"> & {
   whatsapp: string; city: string; address: string;
+  accepts_cash: boolean; accepts_transfer: boolean; transfer_alias: string;
   latitude?: number; longitude?: number;
 };
 export const emptyBusiness: BusinessInput = {
   name: "", description: "", whatsapp: "", city: "", address: "", pickup_enabled: true, delivery_enabled: false,
   delivery_radius_km: 5, delivery_price: 0, minimum_order: 0,
+  accepts_cash: true, accepts_transfer: false, transfer_alias: "",
 };
 export function normalizeBusiness(input: BusinessInput): BusinessInput {
-  return { ...input, name: input.name.trim(), description: input.description.trim(), whatsapp: argentinaWhatsAppNumber(input.whatsapp) ?? "", city: input.city.trim(), address: input.address.trim(), delivery_radius_km: input.delivery_enabled ? input.delivery_radius_km : 0, delivery_price: input.delivery_enabled ? input.delivery_price : 0 };
+  return { ...input, name: input.name.trim(), description: input.description.trim(), whatsapp: argentinaWhatsAppNumber(input.whatsapp) ?? "", city: input.city.trim(), address: input.address.trim(), transfer_alias: input.transfer_alias.trim(), delivery_radius_km: input.delivery_enabled ? input.delivery_radius_km : 0, delivery_price: input.delivery_enabled ? input.delivery_price : 0 };
 }
 export function validateBusiness(input: BusinessInput, categoryIds: string[]): string | null {
   if (!input.name.trim()) return "El nombre del comercio es obligatorio.";
@@ -20,6 +22,7 @@ export function validateBusiness(input: BusinessInput, categoryIds: string[]): s
   if (!argentinaWhatsAppNumber(input.whatsapp)) return "Ingresá un WhatsApp de Argentina con código de área y número (10 dígitos, sin 0 ni 15), o su formato internacional +54 9.";
   if (!input.city.trim() || input.city.trim().length > 120) return "Ingresá una ciudad o localidad de hasta 120 caracteres.";
   if (!input.address.trim() || input.address.trim().length > 240) return "Ingresá una dirección de hasta 240 caracteres.";
+  if (input.transfer_alias.trim().length > 100) return "El alias puede tener hasta 100 caracteres.";
   if (!categoryIds.length) return "Seleccioná al menos una categoría.";
   if (!input.pickup_enabled && !input.delivery_enabled) return "Habilitá retiro o envío para tu comercio.";
   if (input.delivery_enabled && !deliveryRadii.includes(input.delivery_radius_km as (typeof deliveryRadii)[number])) return "Seleccioná un radio de entrega válido.";
@@ -37,6 +40,7 @@ export function businessErrorMessage(error: unknown, edit: boolean): string {
     BUSINESS_CATEGORY_INVALID: "Alguna categoría ya no está disponible. Recargá el formulario.", BUSINESS_METHOD_REQUIRED: "Habilitá retiro o envío.",
     BUSINESS_RADIUS_INVALID: "Seleccioná un radio de entrega válido.", BUSINESS_PRICE_INVALID: "Revisá los importes ingresados.",
     BUSINESS_LOCATION_INVALID: "No pudimos guardar la ubicación. Volvé a obtenerla e intentá nuevamente.",
+    BUSINESS_PAYMENT_INVALID: "Revisá los medios de pago y el alias ingresado.",
     BUSINESS_SLUG_IMMUTABLE: "El enlace de tu tienda es permanente y no puede modificarse.",
   };
   if (typeof record.message === "string" && messages[record.message]) return messages[record.message];

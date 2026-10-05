@@ -12,19 +12,23 @@ import { useAuth } from "../auth/auth-provider";
 import { FormError } from "../requests/request-common";
 import { ReservationProduct, ReservationTotals } from "./reservation-common";
 import { isOnDemand, isProductAvailable } from "@/lib/product-availability";
+import { emptyReservationCheckout, normalizeReservationCheckout, validateReservationCheckout } from "@/lib/reservation-checkout";
+import { ReservationCheckoutFields } from "./reservation-checkout-fields";
 
 export function ReservationForm({ product, initialDeliveryType }: { product: Product; initialDeliveryType?: DeliveryType }) {
-  const { user } = useAuth();
-  return user ? <ReservationFields key={`${user.id}:${product.id}`} product={product} initialDeliveryType={initialDeliveryType} /> : null;
+  const { user, profile, profileLoading } = useAuth();
+  if (user && profileLoading) return <p className="workflow-loading" role="status">Cargando tus datos de contacto…</p>;
+  return user ? <ReservationFields key={`${user.id}:${product.id}`} product={product} initialDeliveryType={initialDeliveryType} initialName={profile?.full_name ?? ""} initialPhone={profile?.phone ?? ""} /> : null;
 }
-function ReservationFields({ product, initialDeliveryType }: { product: Product; initialDeliveryType?: DeliveryType }) {
+function ReservationFields({ product, initialDeliveryType, initialName, initialPhone }: { product: Product; initialDeliveryType?: DeliveryType; initialName: string; initialPhone: string }) {
   const router = useRouter();
   const [quantity, setQuantity] = useState(1);
   const [deliveryType, setDeliveryType] = useState<DeliveryType>(initialDeliveryType === "delivery" && product.deliveryToday ? "delivery" : product.pickupToday ? "pickup" : "delivery");
+  const [checkout, setCheckout] = useState(() => ({ ...emptyReservationCheckout, customer_name: initialName, customer_phone: initialPhone }));
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const submitting = useRef(false);
-  const attempt = useRef<{ id: string; quantity: number; deliveryType: DeliveryType } | null>(null);
+  const attempt = useRef<{ id: string; quantity: number; deliveryType: DeliveryType; checkout: ReturnType<typeof normalizeReservationCheckout> } | null>(null);
   const stock = product.stock;
   const onDemand = isOnDemand(product);
   const deliveryPrice = deliveryType === "delivery" ? product.deliveryPrice ?? 0 : 0;
@@ -33,16 +37,21 @@ function ReservationFields({ product, initialDeliveryType }: { product: Product;
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (submitting.current || !available) return;
+    if (!attempt.current) {
+      const validation = validateReservationCheckout(checkout, deliveryType === "pickup" ? "PICKUP" : "DELIVERY");
+      if (validation) { setError(validation); return; }
+    }
     submitting.current = true; setBusy(true); setError("");
     try {
       const client = getSupabaseBrowserClient();
       if (!client) throw new Error("unavailable");
-      if (!attempt.current) attempt.current = { id: crypto.randomUUID(), quantity, deliveryType };
+      if (!attempt.current) attempt.current = { id: crypto.randomUUID(), quantity, deliveryType, checkout: normalizeReservationCheckout(checkout, deliveryType === "pickup" ? "PICKUP" : "DELIVERY") };
       // Reintentos conservan exactamente la misma intención después de perder una respuesta.
       const intent = attempt.current;
       const { data, error: failure } = await client.rpc("create_my_reservation", {
         p_reservation_id: intent.id, p_product_id: product.id, p_quantity: intent.quantity,
         p_delivery_type: intent.deliveryType === "pickup" ? "PICKUP" : "DELIVERY",
+        p_checkout: intent.checkout,
       });
       if (failure) {
         setError(reservationError(failure, true));
@@ -63,9 +72,11 @@ function ReservationFields({ product, initialDeliveryType }: { product: Product;
       {product.pickupToday && <label className={deliveryType === "pickup" ? "chosen" : ""}><input type="radio" name="deliveryType" checked={deliveryType === "pickup"} onChange={() => setDeliveryType("pickup")} /><Store size={19} /><span>Retirar en comercio<small>Sin costo</small></span></label>}
       {product.deliveryToday && <label className={deliveryType === "delivery" ? "chosen" : ""}><input type="radio" name="deliveryType" checked={deliveryType === "delivery"} onChange={() => setDeliveryType("delivery")} /><Truck size={19} /><span>Envío del comercio<small>{money(deliveryPrice)}</small></span></label>}
     </fieldset>
+    {deliveryType === "pickup" && <p className="info-note">Retirá en {product.store}: {product.database?.business.address || "Dirección sin informar"}{product.database?.business.city ? `, ${product.database.business.city}` : ""}.</p>}
+    <ReservationCheckoutFields value={checkout} onChange={setCheckout} delivery={deliveryType === "delivery"} disabled={locked || !available} acceptsCash={product.database?.business.accepts_cash === true} acceptsTransfer={product.database?.business.accepts_transfer === true} />
     {!available && <p className="form-error">Este producto ya no está disponible para reservar.</p>}
     <ReservationTotals quantity={quantity} unitPrice={product.price} deliveryPrice={deliveryPrice} deliveryType={deliveryType} total={total} />
     <p className="info-note">La reserva se envía al comercio y vence en 30 minutos si no la confirma. El precio y envío vigentes se calculan al guardar; podés revisar el total final en el detalle. No se realiza ningún cobro.</p><FormError message={error} />
-    <button className="primary-button" type="submit" disabled={!available || busy}>{busy ? "Guardando reserva..." : attempt.current ? "Reintentar reserva" : "Confirmar reserva"}</button>
+    <button className="primary-button" type="submit" disabled={!available || busy}>{busy ? "Guardando reserva..." : attempt.current ? "Reintentar reserva" : "Enviar reserva"}</button>
   </form></div>;
 }

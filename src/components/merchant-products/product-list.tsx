@@ -1,15 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { Package } from "lucide-react";
+import { BadgeCheck, Info, Package, Pencil, Plus, Store, Truck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { BusinessRow, Database, StockStatus } from "@/types/database";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { getMerchantProducts, productPageSize } from "@/lib/merchant-products/client";
 import { productErrorMessage } from "@/lib/merchant-products/form";
+import { placeholderImage, validImageUrl } from "@/lib/public-catalog";
+import { ProductImage } from "../details/product-image";
 import { FormError } from "../requests/request-common";
 import { MerchantBusinessGate } from "./business-gate";
 import { StockConfirmation } from "./stock-confirmation";
+import styles from "./product-list.module.css";
 
 const currency = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 2 });
 const stockLabels: Record<StockStatus, string> = { IN_STOCK: "En stock", OUT_OF_STOCK: "Sin stock", LOW_STOCK: "Stock bajo", UNCONFIRMED: "Sin confirmar" };
@@ -54,20 +57,40 @@ function BusinessProducts({ business }: { business: BusinessRow }) {
 
   function changePage(next: number) { setData(null); setError(""); setNotice(""); setActionError(""); setPage(next); }
   return <>
-    <div className="workflow-heading with-action"><div><span className="eyebrow">{business.name}</span><h1>Mis productos</h1><p>Administrá tus productos y mantené actualizada su disponibilidad.</p></div><Link className="primary-button" href="/comercio/productos/nuevo">Publicar producto</Link></div>
-    <p className="info-note">Los productos activos de tu comercio activo aparecen en la búsqueda. Con stock o disponibles a pedido, también pueden aparecer en Disponible hoy.</p>
+    <div className={`workflow-heading with-action ${styles.header}`}><div><span className="eyebrow">{business.name}</span><h1>Mis productos</h1><p>Administrá tu catálogo y mantené la disponibilidad al día.</p></div><Link className="primary-button" href="/comercio/productos/nuevo"><Plus size={18} aria-hidden="true" />Publicar producto</Link></div>
+    <p className={styles.hint}><Info size={16} aria-hidden="true" />Podés desactivar productos sin borrarlos y reactivarlos cuando quieras.</p>
     <FormError message={error} />{error && <button className="outline-button" onClick={() => { setError(""); setAttempt(value => value + 1); }}>Reintentar</button>}
     {!data && !error && <p className="workflow-loading" role="status">Cargando tus productos…</p>}
     <FormError message={actionError} />{notice && <p className="info-note" role="status">{notice}</p>}
     {data && !error && (data.total === 0 ? <section className="empty-state"><h2>Tu comercio todavía no tiene productos.</h2><Link className="primary-button" href="/comercio/productos/nuevo">Publicar primer producto</Link></section> : <>
-      <p className="merchant-product-total">{data.total} productos · incluye activos e inactivos</p>
-      <div className="merchant-product-grid">{data.products.map(product => <article className="panel merchant-product-card" key={product.id}>
-        <div className="merchant-product-top"><span className="merchant-product-placeholder" aria-label="Producto sin foto"><Package size={28} aria-hidden="true" /></span><div><span className={`reservation-status ${product.active ? "status-confirmed" : "status-cancelled"}`}>{product.active ? "Activo" : "Inactivo"}</span><h2>{product.name}</h2></div></div>
-        <p className="merchant-product-price">{currency.format(product.price)}</p>
-        <dl className="request-facts"><div><dt>Categoría</dt><dd>{data.categories.find(category => category.id === product.category_id)?.name ?? "Categoría no disponible"}</dd></div><div><dt>{product.inventory_mode === "ON_DEMAND" ? "A pedido" : "Stock"}</dt><dd>{product.inventory_mode === "ON_DEMAND" ? `Se prepara a pedido · ${product.available_today ? "Disponible hoy" : "No disponible hoy"}` : `${product.stock_quantity} unidades · ${stockLabels[product.stock_status]}`}</dd></div><div><dt>Retiro</dt><dd>{product.pickup_enabled ? "Disponible" : "No disponible"}</dd></div><div><dt>Envío</dt><dd>{product.delivery_enabled ? "Disponible" : "No disponible"}</dd></div></dl>
-        <StockConfirmation date={product.inventory_mode === "ON_DEMAND" ? product.availability_confirmed_at : product.stock_confirmed_at} label={product.inventory_mode === "ON_DEMAND" ? "Disponibilidad" : "Stock"} />
-        <div className="merchant-product-actions"><Link className="outline-button" href={`/comercio/productos/${product.id}/editar`} aria-disabled={Boolean(busy)} onClick={event => { if (busy) event.preventDefault(); }}>Editar</Link><button className="primary-button" disabled={Boolean(busy)} onClick={() => void manage(product.id, "confirm_stock")}>{busy?.id === product.id && busy.action === "confirm_stock" ? "Confirmando..." : product.inventory_mode === "ON_DEMAND" ? "Confirmar disponibilidad" : "Confirmar stock"}</button><button className="secondary-link" disabled={Boolean(busy)} onClick={() => void manage(product.id, product.active ? "deactivate" : "activate")}>{busy?.id === product.id && busy.action !== "confirm_stock" ? "Guardando..." : product.active ? "Desactivar producto" : "Reactivar producto"}</button></div>
-      </article>)}</div>
+      <div className={styles.catalogHeading}><span className={styles.count}><Package size={16} aria-hidden="true" />{data.total} {data.total === 1 ? "producto" : "productos"}</span></div>
+      <div className={styles.grid}>{data.products.map(product => {
+        const imageUrl = data.imageUrls[product.id];
+        const onDemand = product.inventory_mode === "ON_DEMAND";
+        const unavailable = onDemand ? !product.available_today : product.stock_status === "OUT_OF_STOCK" || product.stock_quantity === 0;
+        return <article className={`panel ${styles.card}`} key={product.id}>
+          <div className={styles.overview}>
+            <div className={styles.photo}><ProductImage src={imageUrl && validImageUrl(imageUrl) ? imageUrl : placeholderImage} alt={`Foto de ${product.name}`} className={styles.image} /></div>
+            <div className={styles.summary}>
+              <div className={styles.titleRow}><h2 className={styles.name} title={product.name}>{product.name}</h2><span className={`${styles.status} ${product.active ? styles.active : styles.inactive}`}>{product.active ? "Activo" : "Inactivo"}</span></div>
+              <p className={styles.price}>{currency.format(product.price)}</p>
+              <p className={styles.category}>{data.categories.find(category => category.id === product.category_id)?.name ?? "Categoría no disponible"}</p>
+            </div>
+          </div>
+          <div className={styles.inventory}>
+            <span className={styles.mode}>{onDemand ? "A pedido" : "Con stock"}</span>
+            <span className={`${styles.availability} ${unavailable ? styles.unavailable : styles.available}`}>
+              {onDemand ? product.available_today ? "Disponible hoy" : "No disponible hoy" : <>Stock: {product.stock_quantity} unidades <span className={styles.stockState}>· {stockLabels[product.stock_status]}</span></>}
+            </span>
+          </div>
+          <div className={styles.delivery}><span><Store size={14} aria-hidden="true" />{product.pickup_enabled ? "Retiro" : "Sin retiro"}</span><span><Truck size={14} aria-hidden="true" />{product.delivery_enabled ? "Envío" : "Sin envío"}</span></div>
+          <StockConfirmation compact date={onDemand ? product.availability_confirmed_at : product.stock_confirmed_at} label={onDemand ? "Disponibilidad" : "Stock"} />
+          <div className={styles.actions}>
+            <div className={styles.primaryActions}><Link className="outline-button" href={`/comercio/productos/${product.id}/editar`} aria-disabled={Boolean(busy)} onClick={event => { if (busy) event.preventDefault(); }}><Pencil size={15} aria-hidden="true" />Editar</Link><button className="primary-button" disabled={Boolean(busy)} onClick={() => void manage(product.id, "confirm_stock")}><BadgeCheck size={16} aria-hidden="true" />{busy?.id === product.id && busy.action === "confirm_stock" ? "Confirmando..." : product.inventory_mode === "ON_DEMAND" ? "Confirmar disponibilidad" : "Confirmar stock"}</button></div>
+            <button className={styles.toggle} disabled={Boolean(busy)} onClick={() => void manage(product.id, product.active ? "deactivate" : "activate")}>{busy?.id === product.id && busy.action !== "confirm_stock" ? "Guardando..." : product.active ? "Desactivar producto" : "Reactivar producto"}</button>
+          </div>
+        </article>;
+      })}</div>
       {data.total > productPageSize && <nav className="merchant-product-pagination" aria-label="Páginas de productos"><button className="outline-button" disabled={page === 0 || Boolean(busy)} onClick={() => changePage(page - 1)}>Anterior</button><span>Página {page + 1} de {Math.ceil(data.total / productPageSize)}</span><button className="outline-button" disabled={(page + 1) * productPageSize >= data.total || Boolean(busy)} onClick={() => changePage(page + 1)}>Siguiente</button></nav>}
     </>)}
   </>;

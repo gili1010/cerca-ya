@@ -3,6 +3,8 @@
 import { useId, useRef, useState } from "react";
 import { Copy, Download, QrCode } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
+import { createStoreQrPoster } from "@/lib/store-qr-poster";
+import { Brand } from "../home/brand";
 import { Dialog } from "../home/dialog";
 import styles from "./store-qr.module.css";
 
@@ -39,35 +41,41 @@ function StoreQrDialog({ name, slug, url, onClose }: StoreQrProps & { onClose: (
     } finally { copying.current = false; setBusy(false); }
   }
 
-  function downloadQr() {
+  function downloadPoster() {
     setNotice("");
     try {
       if (!canvas.current) throw new Error("qr_unavailable");
       const link = document.createElement("a");
-      link.href = canvas.current.toDataURL("image/png");
-      link.download = `cercaya-${slug}.png`;
+      const poster = createStoreQrPoster({ qrCanvas: canvas.current, name, url });
+      link.href = poster.toDataURL("image/png");
+      link.download = `cercaya-tienda-${slug}.png`;
       document.body.appendChild(link);
       try { link.click(); } finally { link.remove(); }
-      setNotice("Descarga iniciada");
+      setNotice("Descarga del cartel iniciada");
     } catch {
-      setNotice("No pudimos descargar el QR. Cerrá esta ventana y volvé a intentar.");
+      setNotice("No pudimos descargar el cartel. Cerrá esta ventana y volvé a intentar.");
     }
   }
 
   return <Dialog title={`QR de la tienda ${name}`} onClose={onClose}>
     <div className={`dialog-body ${styles.content}`}>
-      <span className={`eyebrow ${styles.label}`}><QrCode size={16} aria-hidden="true" />TU TIENDA EN CERCAYA</span>
-      <h2>{name}</h2>
-      <p id={descriptionId}>Escaneá para visitar nuestra tienda en CercaYa</p>
+      <div className={styles.brand}><Brand /><p>Encontralo cerca. Tenelo hoy.</p></div>
+      <div className={styles.heading}>
+        <span className={`eyebrow ${styles.label}`}>TU TIENDA EN CERCAYA</span>
+        <h2>{name}</h2>
+        <p className={styles.message}>Encontrame en CercaYa</p>
+        <p id={descriptionId} className={styles.description}>Escaneá para ver mis productos, precios y disponibilidad.</p>
+      </div>
       <div className={styles.qr}>
         <QRCodeCanvas ref={canvas} value={url} size={512} level="M" marginSize={4} bgColor="#FFFFFF" fgColor="#000000"
           style={{ width: "100%", height: "auto" }} role="img" aria-label={`Código QR para visitar la tienda ${name}`} aria-describedby={descriptionId} />
       </div>
-      <p className={styles.url}>{url}</p>
+      <div className={styles.link}><span>El enlace de tu tienda</span><p className={styles.url} title={url}>{url}</p></div>
       <div className={styles.actions}>
+        <button className="primary-button" type="button" onClick={downloadPoster}><Download size={18} aria-hidden="true" />Descargar cartel QR</button>
         <button className="outline-button" type="button" disabled={busy} onClick={() => void copyLink()}><Copy size={17} aria-hidden="true" />Copiar enlace</button>
-        <button className="primary-button" type="button" onClick={downloadQr}><Download size={17} aria-hidden="true" />Descargar QR</button>
       </div>
+      <p className={styles.downloadHint}>PNG de alta resolución · Para compartir o imprimir</p>
       <p className={styles.notice} role="status">{notice}</p>
       {manualCopy && <input className={styles.manualLink} aria-label="Enlace de la tienda para copiar" readOnly value={url} onFocus={event => event.currentTarget.select()} />}
     </div>

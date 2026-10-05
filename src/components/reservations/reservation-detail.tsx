@@ -11,6 +11,7 @@ import { LiveFeedback } from "../requests/use-live-changes";
 import { useRealReservations } from "./use-real-reservations";
 import { RealReservationSummary, reservationDisplay, UnavailableReservation } from "./real-reservation-common";
 import { reservationDate, ReservationProgress, ReservationStatusBadge } from "./reservation-common";
+import { ReservationCheckoutDetail } from "./reservation-checkout-detail";
 
 export function ReservationDetail({ id, business = false, confirmation = false }: { id: string; business?: boolean; confirmation?: boolean }) {
   const data = useRealReservations(business, id);
@@ -41,7 +42,8 @@ export function ReservationDetail({ id, business = false, confirmation = false }
     <LiveFeedback state={data.live} notice={data.notice} /><FormError message={data.error} /><section className="panel reservation-detail" data-reservation-status={display.status}>
       <div className="card-topline"><span className="buyer-request-id">{row.id}</span><ReservationStatusBadge reservation={display} /></div><h1>{confirmation ? "Reserva enviada" : business ? "Gestionar reserva" : "Detalle de reserva"}</h1>
       <button className="secondary-link" disabled={data.busy || busy} onClick={() => void data.refresh()}>{data.busy ? "Actualizando..." : "Actualizar"}</button>
-      <RealReservationSummary row={row} now={now} /><ReservationProgress reservation={display} />
+      <h2>Pedido</h2><RealReservationSummary row={row} now={now} /><ReservationProgress reservation={display} />
+      <ReservationCheckoutDetail row={row} business={business} status={display.status} />
       {display.status === "PENDING" && <p className="reservation-notice">{onDemand ? "El comercio debe confirmar la preparación a pedido. No se descuentan unidades de stock." : business ? "El stock se descuenta al confirmar esta reserva." : "El comercio debe confirmar que el producto sigue disponible."}<br />Vence sin confirmación el <time dateTime={row.expires_at}>{reservationDate(row.expires_at)}</time>.</p>}
       {display.status === "CONFIRMED" && <p className="reservation-notice">Reserva confirmada. El comercio está preparando tu producto.</p>}
       {display.status === "READY" && <p className="reservation-notice">{display.deliveryType === "pickup" ? "Tu pedido está listo para retirar." : "Tu pedido está listo para enviar."}</p>}

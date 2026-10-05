@@ -6,14 +6,14 @@ import type { DeliveryType, Reservation, ReservationStatus } from "@/types/reser
 import { ProductImage } from "../details/product-image";
 
 export const reservationLabels: Record<ReservationStatus, string> = {
-  PENDING: "Esperando confirmación", CONFIRMED: "Reserva confirmada", READY: "Lista para retirar",
+  PENDING: "Esperando confirmación", CONFIRMED: "Reserva confirmada", READY: "Listo para retirar",
   COMPLETED: "Completada", CANCELLED: "Cancelada", EXPIRED: "Reserva vencida",
 };
 export const deliveryLabel = (type: DeliveryType) => type === "pickup" ? "Retirar en comercio" : "Envío del comercio";
 export const reservationDate = (value: string) => new Date(value).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" });
 
 export function ReservationStatusBadge({ reservation }: { reservation: Pick<Reservation, "status" | "deliveryType"> }) {
-  return <span className={`reservation-status status-${reservation.status.toLowerCase()}`} role="status"><i />{reservation.status === "READY" && reservation.deliveryType === "delivery" ? "Lista para enviar" : reservationLabels[reservation.status]}</span>;
+  return <span className={`reservation-status status-${reservation.status.toLowerCase()}`} role="status"><i />{reservation.status === "READY" && reservation.deliveryType === "delivery" ? "Listo para enviar" : reservationLabels[reservation.status]}</span>;
 }
 
 export function ReservationProduct({ name, image, business, productId }: { name: string; image: string; business: string; productId: string }) {
@@ -33,7 +33,7 @@ export function ReservationProgress({ reservation }: { reservation: Pick<Reserva
   const steps = [
     { status: "PENDING", label: "Reserva enviada", date: reservation.createdAt },
     { status: "CONFIRMED", label: "Confirmada", date: reservation.confirmedAt },
-    { status: "READY", label: reservation.deliveryType === "pickup" ? "Lista para retirar" : "Lista para enviar", date: reservation.readyAt },
+    { status: "READY", label: reservation.deliveryType === "pickup" ? "Listo para retirar" : "Listo para enviar", date: reservation.readyAt },
     { status: "COMPLETED", label: "Completada", date: reservation.completedAt },
   ];
   return <ol className="reservation-progress" aria-label="Progreso de la reserva">{steps.map((step, index) => <li key={step.status} className={`${step.date ? "reached" : ""} ${reservation.status === step.status ? "active" : ""}`} aria-current={reservation.status === step.status ? "step" : undefined}><span aria-hidden="true">{step.date && reservation.status !== step.status ? <Check size={18} /> : index + 1}</span><div><strong>{step.label}</strong>{step.date && <time dateTime={step.date}>{reservationDate(step.date)}</time>}</div></li>)}</ol>;
