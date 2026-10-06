@@ -10,6 +10,7 @@
 .linkBox { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--success-line); border-radius: var(--radius-md); background: var(--surface); }
 .linkBox > svg { flex-shrink: 0; color: var(--green); }
 .linkBox > div { min-width: 0; }
+.linkContent { flex: 1; }
 .linkBox span { color: var(--muted); font-size: var(--text-xs); }
 .storeUrl { margin: var(--space-1) 0 0; color: var(--deep); font-size: var(--text-sm); font-weight: 600; line-height: 1.6; overflow-wrap: anywhere; }
 .merchantLinks { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-3) var(--space-5); margin-block: var(--space-5); }

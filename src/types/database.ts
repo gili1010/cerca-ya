@@ -134,6 +134,8 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      is_my_business_slug_available: { Args: { p_business_id: string; p_slug: string }; Returns: boolean };
+      change_my_business_slug: { Args: { p_business_id: string; p_slug: string }; Returns: string };
       read_marketplace_page: {
         Args: { p_query?: string; p_category?: string; p_filters?: string[]; p_sort?: string; p_home?: boolean; p_favorite_ids?: string[] | null; p_latitude?: number | null; p_longitude?: number | null; p_offset?: number; p_limit?: number };
         Returns: { product_ids: string[]; total: number }[];
