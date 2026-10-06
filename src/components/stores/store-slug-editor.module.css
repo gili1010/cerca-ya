@@ -1,21 +1,55 @@
-.editButton { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 8px 0; border: 0; color: var(--green); background: transparent; font: inherit; font-size: var(--text-xs); font-weight: 650; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.editButton { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 14px; border: 1px solid var(--line-strong); border-radius: var(--radius-md); color: var(--green); background: var(--surface); font: inherit; font-size: var(--text-xs); font-weight: 600; cursor: pointer; }
+.editButton:hover:not(:disabled) { border-color: var(--success-line); background: var(--success-bg); }
 .editButton:disabled { opacity: .5; cursor: default; }
-.form { display: grid; gap: var(--space-2); margin-top: var(--space-3); padding-top: var(--space-4); border-top: 1px solid var(--line); }
-.form label { color: var(--deep); font-size: var(--text-sm); font-weight: 600; }
-.addressField { display: grid; gap: var(--space-2); min-width: 0; }
-.addressField span { overflow-wrap: anywhere; }
-.addressField input { width: 100%; min-width: 0; min-height: 48px; padding: 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink); font: inherit; font-size: 16px; }
-.help, .status, .preview { margin: 0; font-size: var(--text-xs); line-height: 1.6; color: var(--muted); }
-.status { min-height: 22px; }
-.available { color: var(--green); }
-.preview { overflow-wrap: anywhere; }
-.preview strong { color: var(--deep); font-weight: 550; }
-.actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
-.actions button { min-height: 44px; }
-.confirmation { padding: 16px 0 0; }
-.confirmation h2 { margin: 0 40px var(--space-5) 0; font-size: 1.375rem; line-height: 1.3; color: var(--deep); }
-.confirmation p { font-size: var(--text-sm); line-height: 1.7; }
-.newAddress { padding: var(--space-3); border: 1px solid var(--success-line); border-radius: var(--radius-sm); background: var(--success-bg); color: var(--deep); font-weight: 600; overflow-wrap: anywhere; }
-.warning { color: var(--ink); }
-.editButton:focus-visible, .addressField input:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
-@media (max-width: 600px) { .actions { display: grid; grid-template-columns: minmax(0, 1fr); } .actions button { width: 100%; } }
+.form { display: grid; gap: var(--space-3); margin-top: var(--space-5); padding-top: var(--space-5); border-top: 1px solid var(--line); }
+.form label { color: var(--deep); font-size: var(--text-sm); font-weight: 650; }
+.addressField { display: flex; align-items: stretch; min-width: 0; overflow: hidden; border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--surface); transition: border-color var(--duration), box-shadow var(--duration); }
+.fixedPrefix { display: flex; align-items: center; flex: 0 1 auto; max-width: 58%; padding: 14px 16px; border-right: 1px solid var(--line); color: var(--muted); background: var(--surface-soft); font-size: var(--text-sm); line-height: 1.6; overflow-wrap: anywhere; }
+.addressField input { flex: 1; width: 0; min-width: 0; min-height: 54px; padding: 14px 16px; border: 0; border-radius: 0; background: var(--surface); color: var(--deep); font: inherit; font-size: 16px; font-weight: 600; }
+.addressField:focus-within { border-color: var(--green); box-shadow: var(--focus-ring); }
+.addressField input:focus-visible { outline: none; }
+.help, .status, .preview { margin: 0; font-size: var(--text-xs); line-height: 1.7; color: var(--muted); }
+.status { min-height: 24px; }
+.available { color: var(--green); font-weight: 550; }
+.preview { padding: 12px 14px; border-radius: var(--radius-sm); background: var(--surface-soft); overflow-wrap: anywhere; }
+.preview strong { display: block; margin-top: 4px; color: var(--deep); font-weight: 550; }
+.actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 12px; margin-top: var(--space-3); }
+.actions button { min-height: 48px; }
+.confirmationDialog:global(.dialog) { width: min(536px, calc(100% - 32px)); max-width: 536px; max-height: calc(100dvh - 32px); padding: 0; border-radius: var(--radius-xl); }
+.confirmationDialog :global(.dialog-close) { top: 24px; right: 24px; width: 44px; height: 44px; color: var(--muted); }
+.confirmation { display: grid; gap: var(--space-5); min-width: 0; padding: 32px; }
+.confirmationHeading { min-width: 0; }
+.headingIcon { display: grid; place-items: center; width: 46px; height: 46px; margin-bottom: var(--space-4); border: 1px solid var(--success-line); border-radius: var(--radius-md); color: var(--green); background: var(--success-bg); }
+.confirmationHeading h2 { margin: 0; padding-right: 28px; color: var(--deep); font-size: clamp(1.375rem, 4vw, 1.625rem); font-weight: 650; line-height: 1.25; letter-spacing: -.025em; text-wrap: balance; }
+.confirmationHeading p { margin: 12px 0 0; color: var(--muted); font-size: var(--text-sm); line-height: 1.7; }
+.urlPreview { min-width: 0; }
+.previewLabel { margin: 0 0 10px; color: var(--muted); font-size: var(--text-xs); font-weight: 600; }
+.newAddress { display: flex; align-items: start; gap: 12px; min-width: 0; padding: 16px; border: 1px solid var(--success-line); border-radius: var(--radius-md); background: var(--success-bg); }
+.newAddress > svg { flex-shrink: 0; margin-top: 3px; color: var(--green); }
+.newAddress p { min-width: 0; margin: 0; color: var(--secondary); font-size: var(--text-base); line-height: 1.7; overflow-wrap: anywhere; }
+.newAddress strong { color: var(--deep); font-weight: 650; }
+.warning { display: flex; align-items: start; gap: 12px; padding: 18px; border: 1px solid var(--warning-line); border-radius: var(--radius-md); background: var(--warning-bg); }
+.warning > svg { flex-shrink: 0; margin-top: 1px; color: var(--warning); }
+.warning h3 { margin: 0 0 8px; color: var(--warning); font-size: var(--text-sm); font-weight: 650; }
+.warning p { margin: 0; color: var(--ink); font-size: var(--text-sm); line-height: 1.75; }
+.warning p + p { margin-top: 10px; color: var(--secondary); }
+.confirmationActions { margin: 0; padding-top: var(--space-5); border-top: 1px solid var(--line); }
+.confirmationActions button { padding-inline: 20px; }
+.editButton:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+@media (max-width: 700px) {
+  .addressField { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .fixedPrefix { max-width: none; padding: 12px 14px; border-right: 0; border-bottom: 1px solid var(--line); font-size: var(--text-xs); }
+  .addressField input { width: 100%; padding: 14px; }
+}
+@media (max-width: 600px) {
+  .form { gap: 12px; }
+  .actions { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .actions button { width: 100%; min-height: 50px; }
+  .confirmationDialog:global(.dialog) { width: calc(100% - 24px); max-height: calc(100dvh - 24px); border-radius: var(--radius-lg); }
+  .confirmationDialog :global(.dialog-close) { top: 16px; right: 16px; }
+  .confirmation { gap: 20px; padding: 24px 20px; }
+  .newAddress { padding: 14px; gap: 10px; }
+  .newAddress p { font-size: var(--text-sm); }
+  .warning { padding: 16px 14px; gap: 10px; }
+  .confirmationActions { padding-top: 20px; }
+}

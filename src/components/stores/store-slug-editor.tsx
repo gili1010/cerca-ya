@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
-import { Pencil } from "lucide-react";
+import { Link2, Pencil, TriangleAlert } from "lucide-react";
 import { changeStoreSlug, checkStoreSlug, normalizeStoreSlug, storeSlugError, storeSlugValidation } from "@/lib/businesses/slug";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { Dialog } from "../home/dialog";
@@ -31,6 +31,7 @@ function SlugForm({ businessId, slug: currentSlug, origin, onSaved, onCancel }: 
   const slug = normalizeStoreSlug(value);
   const validation = storeSlugValidation(slug);
   const prefix = `${origin}/tienda/`;
+  const displayPrefix = prefix.replace(/^https?:\/\//, "");
   const available = check?.slug === slug && check.state === "available";
   const changed = slug !== currentSlug;
 
@@ -82,21 +83,31 @@ function SlugForm({ businessId, slug: currentSlug, origin, onSaved, onCancel }: 
   return <>
     <form className={styles.form} onSubmit={requestConfirmation}>
       <label htmlFor={inputId}>Dirección de tu tienda</label>
-      <div className={styles.addressField}><span>{prefix}</span><input id={inputId} value={value} onChange={event => { setValue(event.target.value); setError(""); }} onBlur={() => setValue(slug)} autoFocus autoCapitalize="none" autoCorrect="off" spellCheck={false} autoComplete="off" maxLength={200} aria-describedby={`${inputId}-help ${inputId}-status`} /></div>
+      <div className={styles.addressField}><span className={styles.fixedPrefix}>{displayPrefix}</span><input id={inputId} value={value} onChange={event => { setValue(event.target.value); setError(""); }} onBlur={() => setValue(slug)} autoFocus autoCapitalize="none" autoCorrect="off" spellCheck={false} autoComplete="off" maxLength={200} aria-describedby={`${inputId}-help ${inputId}-status`} /></div>
       <p id={`${inputId}-help`} className={styles.help}>Entre 3 y 50 caracteres. Letras, números y guiones. Tu nombre de comercio no cambia.</p>
-      {changed && !validation && <p className={styles.preview}>Así quedará: <strong>{prefix}{slug}</strong></p>}
+      {changed && !validation && <p className={styles.preview}>Así quedará: <strong>{displayPrefix}{slug}</strong></p>}
       <p id={`${inputId}-status`} className={`${styles.status} ${available && changed ? styles.available : ""}`} role="status">{status}</p>
       {check?.slug === slug && check.state === "error" && <button className={styles.editButton} type="button" onClick={() => setRevision(number => number + 1)}>Volver a comprobar</button>}
       {error && !confirming && <p className="form-error" role="alert">{error}</p>}
       <div className={styles.actions}><button className="outline-button button-sm" type="button" onClick={onCancel}>Cancelar</button><button className="primary-button button-sm" type="submit" disabled={!changed || Boolean(validation) || !available}>Continuar</button></div>
     </form>
-    {confirming && <Dialog title="Cambiar la dirección de tu tienda" onClose={closeConfirmation}>
+    {confirming && <Dialog title="Cambiar dirección de tu tienda" onClose={closeConfirmation} className={styles.confirmationDialog}>
       <div className={styles.confirmation}>
-        <h2>Cambiar la dirección de tu tienda</h2>
-        <p>Nueva dirección:</p><p className={styles.newAddress}>{prefix}{confirming}</p>
-        <p className={styles.warning}>Los enlaces y códigos QR anteriores dejarán de funcionar. Tendrás que volver a compartir tu enlace y actualizar los QR que hayas impreso.</p>
+        <header className={styles.confirmationHeading}>
+          <span className={styles.headingIcon}><Link2 size={23} aria-hidden="true" /></span>
+          <h2>Cambiar dirección de tu tienda</h2>
+          <p>Vas a cambiar el enlace público de tu tienda.</p>
+        </header>
+        <section className={styles.urlPreview} aria-label="Nueva dirección">
+          <p className={styles.previewLabel}>Nueva dirección</p>
+          <div className={styles.newAddress}><Link2 size={19} aria-hidden="true" /><p>{displayPrefix}<strong>{confirming}</strong></p></div>
+        </section>
+        <aside className={styles.warning}>
+          <TriangleAlert size={21} aria-hidden="true" />
+          <div><h3>Importante</h3><p>Los enlaces y códigos QR anteriores dejarán de funcionar.</p><p>Después del cambio vas a tener que volver a compartir tu enlace y actualizar cualquier QR que tengas impreso.</p></div>
+        </aside>
         {error && <p className="form-error" role="alert">{error}</p>}
-        <div className={styles.actions}><button className="outline-button" type="button" disabled={busy} onClick={closeConfirmation}>Cancelar</button><button className="primary-button" type="button" disabled={busy} onClick={() => void save()}>{busy ? "Cambiando dirección…" : "Cambiar dirección"}</button></div>
+        <footer className={`${styles.actions} ${styles.confirmationActions}`}><button className="outline-button" type="button" disabled={busy} onClick={closeConfirmation}>Cancelar</button><button className="primary-button" type="button" disabled={busy} onClick={() => void save()}>{busy ? "Cambiando dirección…" : "Cambiar dirección"}</button></footer>
       </div>
     </Dialog>}
   </>;
