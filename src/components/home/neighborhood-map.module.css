@@ -1,0 +1,37 @@
+.scene:global(.neighborhood-map) { height: 492px; min-width: 0; border-color: #dce7d7; background: radial-gradient(ellipse at 48% 30%, #ffffff, #f0f6e9 58%, #e9f0e3); box-shadow: 0 3px 8px -4px #28492d15, 0 26px 58px -32px #28492d55, inset 0 1px 0 #ffffff; border-radius: 30px; }
+.artwork { position: relative; height: 100%; isolation: isolate; }
+.heading { position: absolute; top: 24px; left: 24px; right: 24px; display: flex; align-items: center; gap: 8px; color: var(--green); font-size: 10px; font-weight: 650; letter-spacing: .06em; }
+.city { position: absolute; left: -5%; top: 32px; width: 110%; height: 390px; }
+.building { filter: drop-shadow(3px 7px 4px #24493214); }
+.place { position: absolute; z-index: 2; display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid #dce5d8; border-radius: 15px; background: #fffffff8; box-shadow: 0 2px 4px -2px #274d3620, 0 12px 24px -12px #274d365c; }
+.placeIcon { display: grid; place-items: center; width: 38px; height: 38px; flex-shrink: 0; border: 1px solid #ffffffaa; border-radius: 11px; background: var(--place-bg); color: var(--place-ink); }
+.place strong { display: block; color: var(--deep); font-size: 12.5px; font-weight: 650; }
+.place small { display: flex; align-items: center; gap: 4px; margin-top: 4px; color: var(--secondary); font-size: 10px; white-space: nowrap; }
+.place small i { width: 5px; height: 5px; border-radius: 50%; background: #648b57; }
+.cafe { --place-bg: #f6eddf; --place-ink: #947040; top: 95px; left: 20px; transform: rotate(-3deg); }
+.pharmacy { --place-bg: #e9f3e9; --place-ink: #457656; top: 108px; right: 20px; transform: rotate(3deg); }
+.hardware { --place-bg: #eaf0f7; --place-ink: #527597; top: 263px; left: 16px; transform: rotate(-2deg); }
+.market { --place-bg: #faebdf; --place-ink: #a26743; top: 290px; right: 16px; transform: rotate(2deg); }
+.location { position: absolute; top: 190px; left: 50%; z-index: 3; display: grid; justify-items: center; gap: 11px; transform: translateX(-50%); }
+.location > span { display: grid; place-items: center; width: 70px; height: 70px; color: var(--green); background: linear-gradient(145deg, #e4f3b5, var(--lime)); border: 6px solid #e8f2ce; border-radius: 50%; box-shadow: 0 12px 22px -8px #31563670, 0 0 0 11px #d7e8b847, inset 0 2px 0 #ffffff80; }
+.location > span > svg { width: 32px; height: 32px; }
+.location > strong { padding: 5px 10px; border: 1px solid var(--success-line); border-radius: var(--radius-pill); color: var(--green); background: #fffffff5; font-size: 11px; box-shadow: var(--shadow-sm); }
+.stock { position: absolute; bottom: 34px; left: 22px; right: 22px; z-index: 4; display: flex; align-items: center; gap: 13px; padding: 18px; border: 1px solid #d9e7d1; border-radius: 18px; background: #fffffff8; box-shadow: 0 3px 6px -4px #274d3620, 0 16px 30px -18px #274d3666; }
+.stockIcon { display: grid; place-items: center; width: 42px; height: 42px; flex-shrink: 0; border-radius: 14px; color: var(--green); background: var(--success-bg); }
+.stock strong { color: var(--deep); font-size: 15px; font-weight: 650; }
+.stock p { margin: 5px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.caption { position: absolute; bottom: 11px; left: 0; right: 0; text-align: center; color: var(--muted); font-size: 10px; }
+@media (min-width: 901px) and (max-width: 1100px) {
+  .scene:global(.neighborhood-map) { height: 450px; }
+  .place { gap: 7px; padding: 9px; }
+  .place strong { font-size: 11px; }
+  .placeIcon { width: 28px; height: 30px; }
+  .cafe { left: 12px; }
+  .pharmacy { right: 12px; }
+  .hardware { left: 12px; top: 252px; }
+  .market { right: 12px; top: 285px; }
+  .stock { left: 16px; right: 16px; padding: 14px; }
+  .stock strong { font-size: 14px; }
+  .heading { left: 18px; right: 18px; font-size: 9px; }
+}
+@media (max-width: 900px) { .scene:global(.neighborhood-map) { display: none; } }

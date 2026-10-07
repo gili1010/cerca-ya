@@ -1,0 +1,5 @@
+/* Safe-area adjustments are limited to installed app windows. */
+@media (display-mode: standalone) {
+  body { padding-top: env(safe-area-inset-top); padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+  .mobile-nav { padding-left: max(8px, env(safe-area-inset-left)); padding-right: max(8px, env(safe-area-inset-right)); }
+}

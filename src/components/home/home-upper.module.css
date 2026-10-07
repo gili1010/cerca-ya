@@ -1,0 +1,51 @@
+.hero:global(.hero) { grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); gap: clamp(32px, 3.5vw, 56px); padding-block: 56px 44px; }
+.hero :global(.hero-main) { padding-block: 4px; }
+.hero:global(.hero) h1 { margin-block: 22px 14px; }
+.hero :global(.hero-slogan) { line-height: 1.5; }
+.hero :global(.hero-description) { margin-top: 10px; line-height: 1.8; }
+.hero :global(.hero-search) { margin-top: 26px; border-color: #c9dace; box-shadow: 0 12px 30px -18px #20493655; }
+.hero :global(.hero-search:focus-within) { border-color: var(--green); box-shadow: var(--focus-ring), 0 12px 30px -18px #20493655; }
+.hero :global(.search-shortcuts) { column-gap: 16px; row-gap: 4px; margin-top: 10px; }
+.hero :global(.urgent-row) { margin-top: 20px; row-gap: 12px; }
+.categories:global(.categories) { padding-block: 28px 36px; }
+.categories :global(.section-heading) { margin-bottom: 22px; }
+.categoryGrid:global(.category-grid) { gap: 12px; }
+.categoryCard:global(.category-card) { --category-bg: #edf3e9; --category-ink: #55734d; position: relative; isolation: isolate; overflow: hidden; min-height: 142px; gap: 15px; padding: 22px 10px 18px; border-color: #ffffff; border-radius: 18px; background: var(--category-bg); color: var(--deep); box-shadow: 0 4px 12px -8px #24412c40; transition: transform var(--duration), box-shadow var(--duration), border-color var(--duration); }
+.categoryCard::after { content: ""; position: absolute; z-index: -1; top: -13px; right: -13px; width: 56px; height: 56px; border: 9px solid #ffffff55; border-radius: 50%; }
+.categoryCard > .categoryIcon { width: 60px; height: 60px; background: #ffffffc5; color: var(--category-ink); border: 1px solid #ffffffc9; border-radius: 17px; box-shadow: 0 4px 12px -8px #24412c40; }
+.categoryIcon > svg { width: 34px; height: 34px; }
+.categoryName { font-size: var(--text-xs); font-weight: 600; line-height: 1.4; }
+.categoryCard[data-category="artesanias"] { --category-bg: #f2eaf5; --category-ink: #84649a; }
+.categoryCard[data-category="automotor"] { --category-bg: #e9eef6; --category-ink: #557197; }
+.categoryCard[data-category="electricidad"] { --category-bg: #faf2d9; --category-ink: #967726; }
+.categoryCard[data-category="ferreteria"] { --category-bg: #f4e9df; --category-ink: #966746; }
+.categoryCard[data-category="gastronomia"] { --category-bg: #f8e8e2; --category-ink: #a26c53; }
+.categoryCard[data-category="herramientas"] { --category-bg: #e8eff0; --category-ink: #577b80; }
+.categoryCard[data-category="hogar"] { --category-bg: #e9f2e5; --category-ink: #648453; }
+.categoryCard[data-category="limpieza"] { --category-bg: #e4f1ef; --category-ink: #50877f; }
+.categoryCard[data-category="mascotas"] { --category-bg: #f7eddf; --category-ink: #997741; }
+.categoryCard[data-category="tecnologia"] { --category-bg: #eeebf7; --category-ink: #716497; }
+.categoryCard[data-category="indumentaria"] { --category-bg: #f5e9ee; --category-ink: #9b687f; }
+.categoryCard[data-category="bazar"] { --category-bg: #edf0df; --category-ink: #7b834c; }
+.categoryCard:global(.selected) { background: var(--deep); border-color: var(--deep); color: white; box-shadow: 0 5px 16px -9px #173d2b80; }
+.categoryCard:global(.selected) > .categoryIcon { background: #ffffff14; border-color: #ffffff26; color: var(--lime); }
+.categoryCard:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+@media (hover: hover) { .categoryCard:global(.category-card):hover { border-color: var(--category-ink); transform: translateY(-3px); box-shadow: 0 10px 22px -14px #24412c66; } }
+@media (max-width: 900px) {
+  .hero:global(.hero) { grid-template-columns: minmax(0, 1fr); padding-block: 40px 32px; }
+  .hero :global(.hero-main) { padding: 0; }
+  .categoryGrid:global(.category-grid) { display: flex; gap: 12px; padding-block: 4px 14px; }
+  .categoryCard:global(.category-card) { flex-basis: 112px; min-height: 132px; }
+}
+@media (max-width: 600px) {
+  .hero:global(.hero) { padding-block: 32px; }
+  .hero :global(.hero-search) { margin-top: 24px; }
+  .hero :global(.search-shortcuts) { column-gap: 12px; }
+  .hero :global(.urgent-row) { margin-top: 18px; }
+  .categories:global(.categories) { padding-block: 20px 24px; }
+  .categories :global(.section-heading) { margin-bottom: 14px; }
+  .categoryCard:global(.category-card) { flex-basis: 106px; min-height: 128px; padding-block: 18px; }
+  .categoryCard > .categoryIcon { width: 54px; height: 54px; border-radius: 15px; }
+  .categoryIcon > svg { width: 32px; height: 32px; }
+}
+@media (prefers-reduced-motion: reduce) { .categoryCard:global(.category-card) { transition: none; } }

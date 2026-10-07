@@ -1,6 +1,7 @@
 import { type RefObject } from "react";
 import { ArrowRight, Camera, CheckCheck, Plus, Search, X, Zap } from "lucide-react";
 import { NeighborhoodMap } from "./neighborhood-map";
+import styles from "./home-upper.module.css";
 
 interface HeroProps {
   query: string;
@@ -13,7 +14,7 @@ interface HeroProps {
 }
 
 export function Hero({ query, inputRef, onQuery, onSearch, onRequest, onUrgent, urgent }: HeroProps) {
-  return <section className="hero" aria-labelledby="hero-title">
+  return <section className={`hero ${styles.hero}`} aria-labelledby="hero-title">
     <div className="hero-main">
       <span className="eyebrow"><span className="live-dot" /> CERCA TUYO. LISTO PARA HOY.</span>
       <h1 id="hero-title">¿Qué necesitás <span>hoy?</span></h1>
