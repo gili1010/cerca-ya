@@ -13,7 +13,7 @@ export function Footer({ onHow }: { onHow: () => void }) {
         <Link className={styles.link} href="/terminos"><span>Términos y Condiciones</span></Link>
         <Link className={styles.link} href="/privacidad"><span>Privacidad</span></Link>
         <Link className={styles.link} href="/reglas-comercios"><span>Reglas para Comercios</span></Link>
-        <a className={styles.link} href="mailto:soporte@cercaya.com.ar"><Mail size={15} aria-hidden="true" /><span>Contacto</span></a>
+        <Link className={styles.link} href="/contacto"><Mail size={15} aria-hidden="true" /><span>Contacto</span></Link>
       </nav>
       <div className={styles.installAction}><InstallCercaYa /></div>
       <div className={styles.bottom}><small>© 2026 CercaYa</small><small>Una forma más local de encontrar.</small></div>

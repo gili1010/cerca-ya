@@ -103,6 +103,7 @@ export function AuthForm({ mode, returnTo, confirmationError = false, oauthError
     <label>Email<input name="email" type="email" autoComplete="email" required maxLength={254} /></label>
     {signup && <label>Teléfono · Argentina (+54)<input name="phone" type="tel" autoComplete="tel" maxLength={40} value={phone} onChange={event => setPhone(event.target.value)} placeholder="Ej. 3547 123456" /><small>Opcional. Incluí el código de área, sin 0 ni 15. Agregamos +54 automáticamente.</small></label>}
     <label>Contraseña<input name="password" type="password" autoComplete={signup ? "new-password" : "current-password"} required minLength={signup ? 6 : undefined} maxLength={256} /></label>
+    {!signup && <Link className="secondary-link" href="/recuperar-clave">¿Olvidaste tu contraseña?</Link>}
     {signup && <label>Confirmar contraseña<input name="passwordConfirmation" type="password" autoComplete="new-password" required minLength={6} maxLength={256} /></label>}
     <FormError message={error || sessionError} /><button className="primary-button" type="submit" disabled={busy || loading || (signup && !legalAccepted)}>{busy ? "Un momento…" : signup ? "Crear cuenta" : "Iniciar sesión"}</button>
     <Link className="secondary-link" href={`${signup ? "/login" : "/registro"}?redirect=${encodeURIComponent(target)}`}>{signup ? "Ya tengo cuenta. Iniciar sesión" : "No tengo cuenta. Registrarme"}</Link>

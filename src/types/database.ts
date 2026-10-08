@@ -137,6 +137,7 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      create_contact_request: { Args: { p_input: Json; p_user_id?: string | null }; Returns: string };
       mark_my_store_shared: { Args: { p_business_id: string }; Returns: string };
       accept_my_legal_terms: { Args: { p_accept: boolean; p_merchant?: boolean }; Returns: undefined };
       is_my_account_suspended: { Args: Record<string, never>; Returns: boolean };
