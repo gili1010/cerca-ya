@@ -9,9 +9,11 @@ import { StoreQr } from "./store-qr";
 import { StoreSlugEditor } from "./store-slug-editor";
 import { useMyBusiness } from "../businesses/business-provider";
 import styles from "./merchant-store.module.css";
+import { useMarkStoreShared } from "../onboarding/use-mark-store-shared";
 
 export function MerchantStoreCard({ business }: { business: Pick<BusinessRow, "id" | "name" | "slug" | "active"> }) {
   const { updateSlug } = useMyBusiness();
+  const markShared = useMarkStoreShared(business.id);
   const [notice, setNotice] = useState("");
   const path = `/tienda/${encodeURIComponent(business.slug)}`;
   const [origin, setOrigin] = useState("");
@@ -27,7 +29,7 @@ export function MerchantStoreCard({ business }: { business: Pick<BusinessRow, "i
     {notice && <p className="info-note" role="status">{notice}</p>}
     {business.active ? <>
       <div className={styles.merchantLinks}><Link className="primary-button" href={path} target="_blank" rel="noopener noreferrer">Ver mi tienda<ArrowUpRight size={17} aria-hidden="true" /></Link><Link className="secondary-link" href="/comercio/mi-negocio#mi-tienda"><Paintbrush size={17} aria-hidden="true" />Personalizar mi tienda</Link></div>
-      <div className={styles.shareArea}><p>Compartila con tus clientes</p><div className={styles.secondaryActions}><StoreShare key={business.slug} name={business.name} slug={business.slug} showCopy /><div className={styles.qrAction}><StoreQr key={business.slug} name={business.name} slug={business.slug} url={url} /></div></div></div>
+      <div className={styles.shareArea} id="compartir-tienda"><p>Compartila con tus clientes</p><div className={styles.secondaryActions}><StoreShare key={business.slug} name={business.name} slug={business.slug} showCopy onShared={markShared} /><div className={styles.qrAction}><StoreQr key={business.slug} name={business.name} slug={business.slug} url={url} onShared={markShared} /></div></div></div>
       <p className={styles.cardNote}>Los cambios en tu catálogo se reflejan automáticamente en tu tienda.</p>
     </> : <p className="info-note">La página pública estará disponible cuando el comercio esté activo.</p>}
   </section>;

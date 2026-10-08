@@ -12,6 +12,7 @@ import { PublishedProductsLink } from "../merchant-products/published-products-l
 import { MerchantStoreCard } from "../stores/merchant-store-card";
 import { useAuth } from "../auth/auth-provider";
 import styles from "./merchant-workspace.module.css";
+import { MerchantOnboarding } from "../onboarding/merchant-onboarding";
 
 export function MerchantWorkspace({ catalog = false }: { catalog?: boolean }) {
   const { profile } = useAuth();
@@ -31,6 +32,8 @@ export function MerchantWorkspace({ catalog = false }: { catalog?: boolean }) {
     </div>
     {!catalog && realBusiness && <Link className={`primary-button ${styles.businessLink}`} href="/comercio/mi-negocio">Ver mi comercio<ArrowUpRight size={17} aria-hidden="true" /></Link>}
   </header>{catalog && <BusinessSelector />}
+    {!catalog && realBusiness && !realBusiness.active && <p className="info-note" role="alert">{realBusiness.admin_suspended_at ? "Tu comercio fue suspendido por administración y no está disponible públicamente." : "Tu comercio está inactivo y no está disponible públicamente."}</p>}
+    {!catalog && realBusiness && <MerchantOnboarding key={realBusiness.id} business={realBusiness} />}
     {!catalog && realBusiness && <MerchantStoreCard business={realBusiness} />}
     {catalog ? <section className="store-products">{products.length ? <ProductList key={business.id} products={products} filterable /> : <div className="empty-state"><h2>Este comercio no tiene productos publicados</h2><p>Podés responder manualmente a pedidos del Radar.</p><Link className="primary-button" href="/comercio/radar">Abrir Radar</Link></div>}</section> : <div className="radar-panel-links"><PublishedProductsLink /><Link className="panel workspace-radar" href="/comercio/radar"><span className="workspace-icon"><Radio size={24} aria-hidden="true" /></span><strong>Radar CercaYa</strong><span>Pedidos abiertos que podrías resolver</span></Link><Link className="panel" href="/comercio/reservas"><span className="workspace-icon"><PackageCheck size={24} aria-hidden="true" /></span><strong>Reservas</strong><span>Confirmar, preparar y completar</span></Link><div className="panel"><span className="workspace-icon"><ChartNoAxesColumn size={24} aria-hidden="true" /></span><strong>Estadísticas</strong><span>Próximamente</span></div></div>}
   </>;

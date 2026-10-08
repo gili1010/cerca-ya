@@ -20,6 +20,7 @@ export function ReservationCheckoutFields({ value, onChange, delivery, disabled,
         <label>Localidad<input value={value.delivery_city} onChange={event => onChange({ ...value, delivery_city: event.target.value })} required maxLength={120} autoComplete="shipping address-level2" placeholder="Por ejemplo, Alta Gracia" /></label>
       </div>
       <p className={styles.help}>El comercio verá tu dirección exacta y teléfono sólo después de confirmar el pedido.</p>
+      <p className={styles.help}>Tus datos de entrega serán compartidos con el comercio para preparar y realizar este pedido.</p>
     </fieldset>}
     <fieldset className={styles.section} disabled={disabled}>
       <legend>Contacto</legend>
@@ -34,7 +35,7 @@ export function ReservationCheckoutFields({ value, onChange, delivery, disabled,
       <div className={styles.paymentMethods}>{methods.map(method => <label key={method} className={value.payment_method === method ? styles.selected : ""}>
         <input type="radio" name="reservation-payment" checked={value.payment_method === method} onChange={() => onChange({ ...value, payment_method: method })} />{paymentLabels[method]}
       </label>)}</div>
-      <p className={styles.help}>El pago se acuerda con el comercio. CercaYa no cobra ni procesa dinero.{value.payment_method === "TRANSFER" && " Si indicó un alias, lo verás cuando confirme el pedido."}</p>
+      <p className={styles.help}>El pago se realiza directamente con el comercio. CercaYa no procesa ni recibe el dinero.{value.payment_method === "TRANSFER" && " Si indicó un alias, lo verás cuando confirme el pedido."}</p>
     </fieldset>
     <details className={styles.optional}>
       <summary>Agregar {delivery ? "referencias o " : ""}notas <span>Opcional</span></summary>

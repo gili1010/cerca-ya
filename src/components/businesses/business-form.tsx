@@ -45,6 +45,7 @@ function BusinessFormFields({ business, onLocationSaved }: { business: BusinessR
   const [attempt, setAttempt] = useState(0);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [merchantAccepted, setMerchantAccepted] = useState(false);
   const [locating, setLocating] = useState(false);
   const inFlight = useRef(false);
 
@@ -62,6 +63,7 @@ function BusinessFormFields({ business, onLocationSaved }: { business: BusinessR
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (inFlight.current || !ready || locating) return;
+    if (!business && !merchantAccepted) { setError("Aceptá las Reglas para Comercios antes de crear tu comercio."); return; }
     const validation = validateBusiness(form, selected);
     if (validation) { setError(validation); return; }
     if (!user) { router.replace("/login?redirect=" + encodeURIComponent(business ? "/comercio/editar" : "/comercio/crear")); return; }
@@ -70,6 +72,10 @@ function BusinessFormFields({ business, onLocationSaved }: { business: BusinessR
       const client = getSupabaseBrowserClient();
       if (!client) throw new Error("unavailable");
       await ensureProfile(client, user);
+      if (!business) {
+        const { error: acceptanceError } = await client.rpc("accept_my_legal_terms", { p_accept: true, p_merchant: true });
+        if (acceptanceError) { setError("No pudimos guardar tu aceptación. Volvé a intentar."); inFlight.current = false; setBusy(false); return; }
+      }
       const { error: failure } = await client.rpc("save_my_business", {
         p_input: normalizeBusiness(form), p_category_ids: selected, p_business_id: business?.id ?? null,
       });
@@ -98,12 +104,13 @@ function BusinessFormFields({ business, onLocationSaved }: { business: BusinessR
       <fieldset className="form-checkboxes" disabled={busy || !ready}><legend>Categorías que vende tu comercio · elegí al menos una</legend>{categories.map(category => <label key={category.id}><input type="checkbox" checked={selected.includes(category.id)} onChange={event => setSelected(current => event.target.checked ? [...current, category.id] : current.filter(id => id !== category.id))} />{category.name}</label>)}</fieldset>
       {!ready && !loadError && <p role="status">Cargando categorías…</p>}<FormError message={loadError} />{loadError && <button type="button" className="outline-button" onClick={() => { setLoadError(""); setAttempt(value => value + 1); }}>Reintentar categorías</button>}
       {ready && !categories.length && <p className="form-error">No hay categorías disponibles. No se puede crear un comercio hasta que se carguen.</p>}
-      <fieldset className="form-checkboxes" disabled={busy}><legend>Retiro y envío</legend><label><input type="checkbox" checked={form.pickup_enabled} onChange={event => setForm({ ...form, pickup_enabled: event.target.checked })} />Permite retiro</label><label><input type="checkbox" checked={form.delivery_enabled} onChange={event => setForm({ ...form, delivery_enabled: event.target.checked })} />Realiza envíos</label></fieldset>
+      <fieldset id="business-delivery" className="form-checkboxes" disabled={busy}><legend>Retiro y envío</legend><label><input type="checkbox" checked={form.pickup_enabled} onChange={event => setForm({ ...form, pickup_enabled: event.target.checked })} />Permite retiro</label><label><input type="checkbox" checked={form.delivery_enabled} onChange={event => setForm({ ...form, delivery_enabled: event.target.checked })} />Realiza envíos</label></fieldset>
       {form.delivery_enabled && <div className="form-columns"><label>Radio de entrega<select value={form.delivery_radius_km} onChange={event => setForm({ ...form, delivery_radius_km: Number(event.target.value) })} disabled={busy}>{deliveryRadii.map(radius => <option key={radius} value={radius}>{radius} km</option>)}</select></label><label>Costo de envío (ARS)<input type="number" min="0" max="9999999999.99" step="0.01" inputMode="decimal" value={form.delivery_price} onChange={event => setForm({ ...form, delivery_price: Number(event.target.value) })} required disabled={busy} /><small>0 significa envío gratis.</small></label></div>}
       <label>Compra mínima (ARS)<input type="number" min="0" max="9999999999.99" step="0.01" inputMode="decimal" value={form.minimum_order || ""} onChange={event => setForm({ ...form, minimum_order: Number(event.target.value) })} placeholder="Sin compra mínima" disabled={busy} /><small>Opcional. Dejá vacío o ingresá 0 si no hay mínimo.</small></label>
-      <fieldset className="form-checkboxes" disabled={busy}><legend>Medios de pago</legend><label><input type="checkbox" checked={form.accepts_cash} onChange={event => setForm({ ...form, accepts_cash: event.target.checked })} />Acepto efectivo</label><label><input type="checkbox" checked={form.accepts_transfer} onChange={event => setForm({ ...form, accepts_transfer: event.target.checked })} />Acepto transferencia</label></fieldset>
+      <fieldset id="business-payment" className="form-checkboxes" disabled={busy}><legend>Medios de pago</legend><label><input type="checkbox" checked={form.accepts_cash} onChange={event => setForm({ ...form, accepts_cash: event.target.checked })} />Acepto efectivo</label><label><input type="checkbox" checked={form.accepts_transfer} onChange={event => setForm({ ...form, accepts_transfer: event.target.checked })} />Acepto transferencia</label></fieldset>
       {form.accepts_transfer && <label>Alias para transferencias<input value={form.transfer_alias} onChange={event => setForm({ ...form, transfer_alias: event.target.value })} maxLength={100} placeholder="Opcional" disabled={busy} autoCapitalize="none" spellCheck={false} /><small>Se incluirá en las nuevas reservas con transferencia. CercaYa no procesa ni verifica pagos.</small></label>}
       <p className="info-note">Tus clientes también pueden elegir coordinar el pago con vos.</p>
+      {!business && <label className="checkbox-label"><input type="checkbox" required checked={merchantAccepted} onChange={event => setMerchantAccepted(event.target.checked)} disabled={busy} /><span>Declaro que la información de mi comercio es verdadera y acepto las <Link href="/reglas-comercios" target="_blank" rel="noopener noreferrer">Reglas para Comercios</Link>.</span></label>}
       <FormError message={error} /><button className="primary-button" type="submit" disabled={busy || locating || !ready || !categories.length}>{busy ? business ? "Guardando cambios…" : "Creando comercio…" : business ? "Guardar cambios" : "Crear comercio"}</button>
     </form></div>;
 }

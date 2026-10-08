@@ -9,7 +9,7 @@ export function BuyerLocationControls() {
   const [openedAt] = useState(() => Date.now());
   const olderThanWeek = updatedAt !== null && openedAt - updatedAt > 7 * 24 * 60 * 60 * 1000;
   return <>
-    <p>Encontrá comercios cerca tuyo. Recordamos tu última ubicación en este navegador hasta que decidas quitarla.</p>
+    <p>Usamos tu ubicación para mostrarte productos y comercios cercanos. Recordamos tu última ubicación en este navegador hasta que decidas quitarla.</p>
     {coordinates && <p role="status"><MapPin size={16} aria-hidden="true" /> {locality || "Ubicación actual"}</p>}
     {coordinates && olderThanWeek && <p className="location-age-note">Tu ubicación tiene más de 7 días. Podés actualizarla; mientras tanto, seguimos usando la última.</p>}
     <button className="zone-option" disabled={loading} onClick={() => void useCurrentLocation()}>{coordinates ? <RotateCcw size={16} aria-hidden="true" /> : <MapPin size={16} aria-hidden="true" />}{loading ? "Obteniendo ubicación…" : coordinates ? "Actualizar ubicación" : "Usar mi ubicación"}</button>

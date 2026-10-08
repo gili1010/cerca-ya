@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { PwaProvider } from "@/components/pwa/pwa-provider";
 import { DemoProvider } from "@/components/demo-provider";
 import { AuthProvider } from "@/components/auth/auth-provider";
+import { LegalAcceptanceGate } from "@/components/legal/legal-acceptance-gate";
 import { AccountSuspensionNotice } from "@/components/auth/account-suspension-notice";
 import { BusinessProvider } from "@/components/businesses/business-provider";
 import { UserLocationProvider } from "@/components/location/user-location-provider";
@@ -22,5 +23,5 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#196747" };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="es-AR" data-scroll-behavior="smooth"><body><PwaProvider><AuthProvider><AccountSuspensionNotice /><BusinessProvider><UserLocationProvider><CartProvider><DemoProvider>{children}</DemoProvider></CartProvider></UserLocationProvider></BusinessProvider></AuthProvider></PwaProvider></body></html>;
+  return <html lang="es-AR" data-scroll-behavior="smooth"><body><PwaProvider><AuthProvider><AccountSuspensionNotice /><BusinessProvider><UserLocationProvider><CartProvider><DemoProvider><LegalAcceptanceGate>{children}</LegalAcceptanceGate></DemoProvider></CartProvider></UserLocationProvider></BusinessProvider></AuthProvider></PwaProvider></body></html>;
 }

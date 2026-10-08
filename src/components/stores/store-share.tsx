@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Copy, Share2 } from "lucide-react";
 import styles from "./store.module.css";
 
-export function StoreShare({ name, slug, showCopy = false }: { name: string; slug: string; showCopy?: boolean }) {
+export function StoreShare({ name, slug, showCopy = false, onShared }: { name: string; slug: string; showCopy?: boolean; onShared?: () => Promise<string | undefined> }) {
   const [canShare, setCanShare] = useState(false);
   const [notice, setNotice] = useState("");
   const [manualUrl, setManualUrl] = useState("");
@@ -20,6 +20,8 @@ export function StoreShare({ name, slug, showCopy = false }: { name: string; slu
       if (!copyOnly && typeof navigator.share === "function") {
         try {
           await navigator.share({ title: `${name} en CercaYa`, text: `Mirá la tienda de ${name} en CercaYa`, url });
+          const progressNotice = await onShared?.();
+          if (progressNotice) setNotice(progressNotice);
           return;
         } catch (cause) {
           if (cause instanceof Error && cause.name === "AbortError") return;
@@ -28,7 +30,8 @@ export function StoreShare({ name, slug, showCopy = false }: { name: string; slu
       }
       if (!navigator.clipboard) throw new Error("clipboard_unavailable");
       await navigator.clipboard.writeText(url);
-      setNotice("Enlace copiado");
+      const progressNotice = await onShared?.();
+      setNotice(`Enlace copiado${progressNotice ? `. ${progressNotice}` : ""}`);
     } catch {
       setNotice("No pudimos copiar automáticamente. Seleccioná el enlace y copialo.");
       setManualUrl(url);

@@ -10,6 +10,7 @@ import { normalizeArgentinaPhone } from "@/lib/phone";
 import { useAuth } from "./auth-provider";
 import { GoogleSignInButton } from "./google-sign-in-button";
 import { FormError } from "../requests/request-common";
+import { LegalCheckbox } from "../legal/legal-checkbox";
 
 export function AuthForm({ mode, returnTo, confirmationError = false, oauthError = false }: { mode: "login" | "signup"; returnTo: string; confirmationError?: boolean; oauthError?: boolean }) {
   const signup = mode === "signup";
@@ -19,11 +20,13 @@ export function AuthForm({ mode, returnTo, confirmationError = false, oauthError
   const [googleBusy, setGoogleBusy] = useState(false);
   const [created, setCreated] = useState<"confirm" | "signed-in" | null>(null);
   const [phone, setPhone] = useState("");
+  const [legalAccepted, setLegalAccepted] = useState(false);
   const inFlight = useRef(false);
   const target = safeRedirect(returnTo);
 
   async function signInWithGoogle() {
     if (inFlight.current || loading) return;
+    if (signup && !legalAccepted) { setError("Confirmá tu declaración y aceptación para continuar."); return; }
     inFlight.current = true;
     setBusy(true);
     setGoogleBusy(true);
@@ -57,6 +60,7 @@ export function AuthForm({ mode, returnTo, confirmationError = false, oauthError
     const password = String(data.get("password") ?? "");
     const name = String(data.get("name") ?? "").trim();
     const phone = String(data.get("phone") ?? "").trim();
+    if (signup && !legalAccepted) { setError("Confirmá tu declaración y aceptación para crear tu cuenta."); return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("Ingresá un email válido."); return; }
     if (signup && (!name || name.length > 160)) { setError("Ingresá tu nombre completo, de hasta 160 caracteres."); return; }
     if (password.length < (signup ? 6 : 1)) { setError("La contraseña debe tener al menos 6 caracteres."); return; }
@@ -72,11 +76,12 @@ export function AuthForm({ mode, returnTo, confirmationError = false, oauthError
       if (signup) {
         const callback = new URL("/auth/confirm", window.location.origin);
         callback.searchParams.set("redirect", target);
-        const result = await client.auth.signUp({ email, password, options: { data: { full_name: name, phone: normalizeArgentinaPhone(phone) }, emailRedirectTo: callback.toString() } });
+        const result = await client.auth.signUp({ email, password, options: { data: { full_name: name, phone: normalizeArgentinaPhone(phone), legal_accepted: true }, emailRedirectTo: callback.toString() } });
         if (result.error) throw result.error;
         if (result.data.user?.identities?.length === 0) { setError("El email ya está registrado. Probá iniciar sesión."); return; }
         form.reset();
         setPhone("");
+        setLegalAccepted(false);
         setCreated(result.data.session ? "signed-in" : "confirm");
       } else {
         const result = await client.auth.signInWithPassword({ email, password });
@@ -92,13 +97,14 @@ export function AuthForm({ mode, returnTo, confirmationError = false, oauthError
   if (created) return <section className="panel workflow-narrow confirmation auth-confirmation"><span className="confirmation-icon"><CircleCheck size={30} aria-hidden="true" /></span><h1>Cuenta creada.</h1><p>{created === "confirm" ? "Revisá tu email para confirmar la cuenta." : "Tu sesión ya está activa. Podés continuar."}</p>{created === "confirm" && <p className="info-note">Revisá también la carpeta de spam. Después de confirmar vas a poder continuar en CercaYa.</p>}<Link className="primary-button" href={created === "signed-in" ? target : `/login?redirect=${encodeURIComponent(target)}`}>{created === "signed-in" ? "Continuar" : "Ir a iniciar sesión"}</Link></section>;
   if (!loading && user) return <section className="panel workflow-narrow confirmation auth-confirmation"><span className="confirmation-icon"><UserRound size={30} aria-hidden="true" /></span><h1>Ya tenés una sesión activa</h1><Link className="primary-button" href={target}>Continuar</Link><Link className="secondary-link" href="/cuenta">Ir a Mi cuenta</Link></section>;
   return <div className="workflow-narrow auth-page"><div className="auth-identity"><MapPin size={24} aria-hidden="true" /><span>Encontralo cerca. Tenelo hoy.</span></div><div className="workflow-heading"><h1>{signup ? "Crear cuenta" : "Iniciar sesión"}</h1><p>{signup ? "Tu cuenta para encontrar lo que necesitás cerca." : "Entrá con tu email y contraseña."}</p></div><form className="workflow-form panel" onSubmit={submit}>
-    <GoogleSignInButton onClick={() => void signInWithGoogle()} disabled={busy || loading} busy={googleBusy} />
+    {signup && <LegalCheckbox checked={legalAccepted} onChange={setLegalAccepted} disabled={busy} />}
+    <GoogleSignInButton onClick={() => void signInWithGoogle()} disabled={busy || loading || (signup && !legalAccepted)} busy={googleBusy} />
     {signup && <label>Nombre completo<input name="name" autoComplete="name" required maxLength={160} /></label>}
     <label>Email<input name="email" type="email" autoComplete="email" required maxLength={254} /></label>
     {signup && <label>Teléfono · Argentina (+54)<input name="phone" type="tel" autoComplete="tel" maxLength={40} value={phone} onChange={event => setPhone(event.target.value)} placeholder="Ej. 3547 123456" /><small>Opcional. Incluí el código de área, sin 0 ni 15. Agregamos +54 automáticamente.</small></label>}
     <label>Contraseña<input name="password" type="password" autoComplete={signup ? "new-password" : "current-password"} required minLength={signup ? 6 : undefined} maxLength={256} /></label>
     {signup && <label>Confirmar contraseña<input name="passwordConfirmation" type="password" autoComplete="new-password" required minLength={6} maxLength={256} /></label>}
-    <FormError message={error || sessionError} /><button className="primary-button" type="submit" disabled={busy || loading}>{busy ? "Un momento…" : signup ? "Crear cuenta" : "Iniciar sesión"}</button>
+    <FormError message={error || sessionError} /><button className="primary-button" type="submit" disabled={busy || loading || (signup && !legalAccepted)}>{busy ? "Un momento…" : signup ? "Crear cuenta" : "Iniciar sesión"}</button>
     <Link className="secondary-link" href={`${signup ? "/login" : "/registro"}?redirect=${encodeURIComponent(target)}`}>{signup ? "Ya tengo cuenta. Iniciar sesión" : "No tengo cuenta. Registrarme"}</Link>
   </form></div>;
 }

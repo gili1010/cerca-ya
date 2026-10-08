@@ -1,4 +1,9 @@
 .page { max-width: 800px; margin-inline: auto; padding-bottom: var(--space-5); }
+.backLink { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; max-width: 100%; padding: 10px 15px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--green); font-size: 14px; font-weight: 600; line-height: 1.4; text-decoration: none; transition: background-color 160ms ease, border-color 160ms ease; }
+.backArrow { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 20px; font-size: 20px; line-height: 1; }
+.backLink:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+@media (hover: hover) { .backLink:hover { background: var(--surface-soft); border-color: var(--line-strong); } }
+@media (prefers-reduced-motion: reduce) { .backLink { transition: none; } }
 .heading { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); margin-block: var(--space-5) var(--space-6); }
 .icon { display: inline-flex; padding: var(--space-4); border: 1px solid var(--success-line); border-radius: var(--radius-lg); background: var(--success-bg); color: var(--green); }
 .heading h1 { margin: 0; }

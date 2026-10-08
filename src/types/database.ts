@@ -16,13 +16,14 @@ export type DatabaseDeliveryType = "PICKUP" | "DELIVERY";
 export type PaymentMethod = "CASH" | "TRANSFER" | "ARRANGE";
 
 type Timestamps = { created_at: string; updated_at: string };
-export type ProfileRow = Timestamps & { id: string; full_name: string; phone: string | null; avatar_url: string | null };
+export type ProfileRow = Timestamps & { id: string; full_name: string; phone: string | null; avatar_url: string | null; terms_accepted_at?: string | null; privacy_accepted_at?: string | null; merchant_terms_accepted_at?: string | null };
 export type BusinessRow = Timestamps & {
   id: string; owner_id: string | null; name: string; slug: string; description: string;
   logo_url: string | null; cover_url: string | null;
   whatsapp: string | null; address: string | null; city: string | null; latitude: number | null; longitude: number | null;
   pickup_enabled: boolean; delivery_enabled: boolean; delivery_radius_km: number; delivery_price: number; minimum_order: number;
   verified: boolean; active: boolean;
+  store_shared_at?: string | null;
   admin_suspended_at?: string | null;
   accepts_cash: boolean; accepts_transfer: boolean; transfer_alias: string | null;
 };
@@ -136,6 +137,8 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      mark_my_store_shared: { Args: { p_business_id: string }; Returns: string };
+      accept_my_legal_terms: { Args: { p_accept: boolean; p_merchant?: boolean }; Returns: undefined };
       is_my_account_suspended: { Args: Record<string, never>; Returns: boolean };
       admin_read_phase2: { Args: { p_section: string; p_filters?: Json; p_id?: string }; Returns: Json };
       admin_set_user_suspension: { Args: { p_user_id: string; p_suspended: boolean; p_reason?: string; p_note?: string }; Returns: undefined };

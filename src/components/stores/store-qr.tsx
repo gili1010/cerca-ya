@@ -8,19 +8,19 @@ import { Brand } from "../home/brand";
 import { Dialog } from "../home/dialog";
 import styles from "./store-qr.module.css";
 
-interface StoreQrProps { name: string; slug: string; url: string }
+interface StoreQrProps { name: string; slug: string; url: string; onShared?: () => Promise<string | undefined> }
 
-export function StoreQr({ name, slug, url }: StoreQrProps) {
+export function StoreQr({ name, slug, url, onShared }: StoreQrProps) {
   const [open, setOpen] = useState(false);
   return <>
     <button className={`outline-button ${styles.launcher}`} type="button" disabled={!url} aria-haspopup="dialog" onClick={() => setOpen(true)}>
       <QrCode size={18} aria-hidden="true" />Mostrar QR
     </button>
-    {open && url && <StoreQrDialog key={url} name={name} slug={slug} url={url} onClose={() => setOpen(false)} />}
+    {open && url && <StoreQrDialog key={url} name={name} slug={slug} url={url} onShared={onShared} onClose={() => setOpen(false)} />}
   </>;
 }
 
-function StoreQrDialog({ name, slug, url, onClose }: StoreQrProps & { onClose: () => void }) {
+function StoreQrDialog({ name, slug, url, onClose, onShared }: StoreQrProps & { onClose: () => void }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const copying = useRef(false);
   const [busy, setBusy] = useState(false);
@@ -34,14 +34,15 @@ function StoreQrDialog({ name, slug, url, onClose }: StoreQrProps & { onClose: (
     try {
       if (!navigator.clipboard) throw new Error("clipboard_unavailable");
       await navigator.clipboard.writeText(url);
-      setNotice("Enlace copiado");
+      const progressNotice = await onShared?.();
+      setNotice(`Enlace copiado${progressNotice ? `. ${progressNotice}` : ""}`);
     } catch {
       setNotice("No pudimos copiar automáticamente. Seleccioná el enlace y copialo.");
       setManualCopy(true);
     } finally { copying.current = false; setBusy(false); }
   }
 
-  function downloadPoster() {
+  async function downloadPoster() {
     setNotice("");
     try {
       if (!canvas.current) throw new Error("qr_unavailable");
@@ -51,7 +52,8 @@ function StoreQrDialog({ name, slug, url, onClose }: StoreQrProps & { onClose: (
       link.download = `cercaya-tienda-${slug}.png`;
       document.body.appendChild(link);
       try { link.click(); } finally { link.remove(); }
-      setNotice("Descarga del cartel iniciada");
+      const progressNotice = await onShared?.();
+      setNotice(`Descarga del cartel iniciada${progressNotice ? `. ${progressNotice}` : ""}`);
     } catch {
       setNotice("No pudimos descargar el cartel. Cerrá esta ventana y volvé a intentar.");
     }
@@ -72,7 +74,7 @@ function StoreQrDialog({ name, slug, url, onClose }: StoreQrProps & { onClose: (
       </div>
       <div className={styles.link}><span>El enlace de tu tienda</span><p className={styles.url} title={url}>{url}</p></div>
       <div className={styles.actions}>
-        <button className="primary-button" type="button" onClick={downloadPoster}><Download size={18} aria-hidden="true" />Descargar cartel QR</button>
+        <button className="primary-button" type="button" onClick={() => void downloadPoster()}><Download size={18} aria-hidden="true" />Descargar cartel QR</button>
         <button className="outline-button" type="button" disabled={busy} onClick={() => void copyLink()}><Copy size={17} aria-hidden="true" />Copiar enlace</button>
       </div>
       <p className={styles.downloadHint}>PNG de alta resolución · Para compartir o imprimir</p>
