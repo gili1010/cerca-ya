@@ -23,7 +23,7 @@ export function MyBusiness() {
   if (loading) return <p className="workflow-loading" role="status">Cargando tu comercio…</p>;
   if (error) return <section className="panel"><FormError message={error} /><button className="outline-button" onClick={() => void refresh().catch(() => {})}>Reintentar</button></section>;
   if (!business) return <p role="status">Abriendo el formulario de creación…</p>;
-  return <><BusinessDetails key={`${business.id}-${business.updated_at}`} business={business} /><div className={storeStyles.workspace}><MerchantStoreCard business={business} /><StoreBrandingEditor key={business.id} business={business} /></div></>;
+  return <>{business.admin_suspended_at && <p className="info-note">Tu comercio fue suspendido por administración y no está disponible públicamente.</p>}<BusinessDetails key={`${business.id}-${business.updated_at}`} business={business} /><div className={storeStyles.workspace}><MerchantStoreCard business={business} /><StoreBrandingEditor key={business.id} business={business} /></div></>;
 }
 
 function BusinessDetails({ business }: { business: BusinessRow }) {

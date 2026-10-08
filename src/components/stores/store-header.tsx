@@ -6,6 +6,7 @@ import { BusinessDistance } from "../location/business-distance";
 import { StoreAssetImage } from "./store-asset-image";
 import { StoreShare } from "./store-share";
 import styles from "./store.module.css";
+import { ReportButton } from "../reports/report-button";
 
 export function StoreHeader({ business, categories }: Pick<PublicStore, "business" | "categories">) {
   const whatsapp = argentinaWhatsAppUrl(business.whatsapp, `Hola, vi la tienda de ${business.name} en CercaYa. Quería consultar por sus productos.`);
@@ -25,6 +26,7 @@ export function StoreHeader({ business, categories }: Pick<PublicStore, "busines
       </div>
       {business.description.trim() && <p className={styles.description}>{business.description}</p>}
       <div className={styles.headerActions}><a className={`secondary-link ${styles.explore}`} href="#productos">Ver productos<ArrowDown size={16} aria-hidden="true" /></a><StoreShare name={business.name} slug={business.slug} /></div>
+      <ReportButton entity="business" id={business.id} name={business.name} />
     </div>
     <section className={styles.purchase} aria-labelledby="store-purchase-title">
       <h2 id="store-purchase-title">En este comercio</h2>

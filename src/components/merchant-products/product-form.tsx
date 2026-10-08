@@ -128,7 +128,8 @@ function ProductFormFields({ business, product, initialImage, categories, prefer
       <p className="info-note">{form.inventory_mode === "ON_DEMAND" ? "Se prepara a pedido, sin cantidad de stock. Al guardar, confirmás si está disponible hoy." : "Al publicar o cambiar la cantidad, se confirma el stock con la hora actual. Con 0 unidades, el producto queda sin stock."}</p>
       {product && form.inventory_mode === "STOCKED" && <StockConfirmation date={product.stock_confirmed_at} />}
       <fieldset className="form-checkboxes" disabled={busy}><legend>Opciones de entrega</legend><label><input type="checkbox" checked={form.pickup_enabled} onChange={event => setForm({ ...form, pickup_enabled: event.target.checked })} />Permite retiro</label><label><input type="checkbox" checked={form.delivery_enabled} onChange={event => setForm({ ...form, delivery_enabled: event.target.checked })} />Permite envío</label></fieldset>
-      {product && <label className="checkbox-label"><input type="checkbox" checked={form.active} onChange={event => setForm({ ...form, active: event.target.checked })} disabled={busy} />Producto activo</label>}
+      {product?.admin_blocked_at && <p className="info-note">Este producto fue desactivado por administración.</p>}
+      {product && <label className="checkbox-label"><input type="checkbox" checked={form.active} onChange={event => setForm({ ...form, active: event.target.checked })} disabled={busy || Boolean(product.admin_blocked_at)} />Producto activo</label>}
       <ProductPhotoInput initialImage={photo} change={photoChange} onChange={setPhotoChange} busy={busy} processing={processing} onProcessing={setProcessing} />
       {notice && <p className="info-note" role="status">{notice}</p>}
       {savedId && notice && <Link className="secondary-link" href={`/comercio/productos/${savedId}/editar`}>Abrir Editar producto</Link>}

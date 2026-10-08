@@ -1,0 +1,14 @@
+.trigger { display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 12px; color: #6b796f; border: 0; background: transparent; padding: 10px 0; cursor: pointer; }
+.trigger:hover { color: #196747; text-decoration: underline; }
+.trigger:focus-visible,.modal :is(button,a,input,select,textarea):focus-visible { outline: 3px solid #74af91; outline-offset: 3px; }
+.modal { max-width: 480px; padding: 30px; }
+.modal h2 { font-size: 24px; padding-right: 20px; }
+.modal p { line-height: 1.6; margin: 14px 0; overflow-wrap: anywhere; }
+.modal form { display: grid; gap: 18px; }
+.modal label { display: grid; gap: 7px; font-size: 14px; font-weight: 650; }
+.modal small { font-weight: 400; color: #6b796f; }
+.modal select,.modal textarea { font: inherit; width: 100%; border: 1px solid #d4dfd7; border-radius: 8px; padding: 12px; background: white; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.actions button { flex: 1; }
+.error { color: #9a3726; font-size: 14px; }
+@media(max-width: 600px) { .modal { padding: 24px; } }

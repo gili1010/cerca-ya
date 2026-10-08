@@ -9,6 +9,7 @@ import { SaveProduct } from "./save-product";
 import { BusinessDistance } from "../location/business-distance";
 import { isOnDemand, isProductAvailable } from "@/lib/product-availability";
 import { AddToOrder } from "../cart/add-to-order";
+import { ReportButton } from "../reports/report-button";
 
 export function PublicProductDetail({ product }: { product: Product }) {
   if (!product.database) return null;
@@ -25,6 +26,7 @@ export function PublicProductDetail({ product }: { product: Product }) {
         <AddToOrder product={product} />
         {whatsapp && <a className="outline-button product-reserve" href={whatsapp} target="_blank" rel="noopener noreferrer"><MessageCircle size={18} aria-hidden="true" />Hablar por WhatsApp</a>}
         <p className="info-note">Podés sumar otros productos de esta tienda. Al continuar, elegís cómo recibir tu pedido y se lo enviás al comercio para que lo confirme. No se realiza ningún cobro.</p><SaveProduct id={product.id} />
+        <ReportButton entity="product" id={row.id} name={product.name} />
       </section>
     </div></>;
 }

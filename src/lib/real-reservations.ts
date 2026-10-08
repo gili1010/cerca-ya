@@ -46,6 +46,7 @@ export async function readReservations(client: SupabaseClient<Database>, seller:
 }
 export function reservationError(error: { message?: string }, creating = false) {
   const message = error.message ?? "";
+  if (message.includes("account_suspended")) return "Tu cuenta está suspendida.";
   if (message.includes("reservation_items_invalid")) return "Revisá los productos y sus cantidades para enviar el pedido.";
   if (message.includes("reservation_items_mixed_business")) return "Todos los productos del pedido deben pertenecer al mismo comercio.";
   if (message.includes("reservation_minimum_order_not_met")) return "El subtotal del pedido no alcanza la compra mínima del comercio.";

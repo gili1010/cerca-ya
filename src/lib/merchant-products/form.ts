@@ -39,6 +39,8 @@ export function normalizeProduct(form: ProductFormValues): ProductInput {
 export function productErrorMessage(cause: unknown): string {
   const code = typeof cause === "object" && cause !== null && "code" in cause ? String(cause.code) : "";
   const message = typeof cause === "object" && cause !== null && "message" in cause ? String(cause.message) : "";
+  if (message.includes("account_suspended")) return "Tu cuenta está suspendida.";
+  if (message.includes("admin_resource_blocked")) return "Este producto fue desactivado por administración.";
   if (message.includes("product_inventory_mode_reserved")) return "No podés cambiar cómo ofrecés el producto mientras tenga reservas pendientes, confirmadas o listas.";
   if (code === "23505") return "Ya existe un producto con ese SKU en tu comercio. Usá otro o dejalo vacío.";
   if (message.includes("product_not_owned")) return "No encontramos ese producto en tu comercio o ya no tenés acceso.";

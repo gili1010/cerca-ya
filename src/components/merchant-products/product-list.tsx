@@ -83,11 +83,12 @@ function BusinessProducts({ business }: { business: BusinessRow }) {
               {onDemand ? product.available_today ? "Disponible hoy" : "No disponible hoy" : <>Stock: {product.stock_quantity} unidades <span className={styles.stockState}>· {stockLabels[product.stock_status]}</span></>}
             </span>
           </div>
+          {product.admin_blocked_at && <p className="info-note">Este producto fue desactivado por administración.</p>}
           <div className={styles.delivery}><span><Store size={14} aria-hidden="true" />{product.pickup_enabled ? "Retiro" : "Sin retiro"}</span><span><Truck size={14} aria-hidden="true" />{product.delivery_enabled ? "Envío" : "Sin envío"}</span></div>
           <StockConfirmation compact date={onDemand ? product.availability_confirmed_at : product.stock_confirmed_at} label={onDemand ? "Disponibilidad" : "Stock"} />
           <div className={styles.actions}>
             <div className={styles.primaryActions}><Link className="outline-button" href={`/comercio/productos/${product.id}/editar`} aria-disabled={Boolean(busy)} onClick={event => { if (busy) event.preventDefault(); }}><Pencil size={15} aria-hidden="true" />Editar</Link><button className="primary-button" disabled={Boolean(busy)} onClick={() => void manage(product.id, "confirm_stock")}><BadgeCheck size={16} aria-hidden="true" />{busy?.id === product.id && busy.action === "confirm_stock" ? "Confirmando..." : product.inventory_mode === "ON_DEMAND" ? "Confirmar disponibilidad" : "Confirmar stock"}</button></div>
-            <button className={styles.toggle} disabled={Boolean(busy)} onClick={() => void manage(product.id, product.active ? "deactivate" : "activate")}>{busy?.id === product.id && busy.action !== "confirm_stock" ? "Guardando..." : product.active ? "Desactivar producto" : "Reactivar producto"}</button>
+            <button className={styles.toggle} disabled={Boolean(busy) || Boolean(product.admin_blocked_at)} onClick={() => void manage(product.id, product.active ? "deactivate" : "activate")}>{busy?.id === product.id && busy.action !== "confirm_stock" ? "Guardando..." : product.admin_blocked_at ? "Desactivado por administración" : product.active ? "Desactivar producto" : "Reactivar producto"}</button>
           </div>
         </article>;
       })}</div>

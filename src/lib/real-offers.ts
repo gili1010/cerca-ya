@@ -17,6 +17,7 @@ export function validateOffer(input: RealOfferInput) {
   return "";
 }
 export function offerError(error: { message?: string; code?: string }) {
+  if (error.message?.includes("account_suspended")) return "Tu cuenta está suspendida.";
   if (error.message?.includes("offer_request_unavailable")) return "Este pedido ya no acepta ofertas.";
   if (error.code === "23505") return "Ya enviaste una oferta para este pedido.";
   if (error.message?.includes("offer_product_unavailable")) return "El producto ya no está disponible para ofrecer. Revisá tu catálogo.";

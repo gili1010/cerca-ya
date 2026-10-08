@@ -32,6 +32,7 @@ export function validateBusiness(input: BusinessInput, categoryIds: string[]): s
 }
 export function businessErrorMessage(error: unknown, edit: boolean): string {
   const record = typeof error === "object" && error !== null ? error as Record<string, unknown> : {};
+  if (typeof record.message === "string" && record.message.includes("account_suspended")) return "Tu cuenta está suspendida.";
   const messages: Record<string, string> = {
     AUTH_REQUIRED: "Iniciá sesión para guardar tu comercio.", PROFILE_REQUIRED: "No pudimos cargar tu perfil. Volvé a Mi cuenta e intentá nuevamente.",
     BUSINESS_NOT_OWNED: "No tenés permiso para modificar ese comercio.", BUSINESS_NAME_REQUIRED: "El nombre del comercio es obligatorio.",

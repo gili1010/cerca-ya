@@ -23,6 +23,7 @@ export type BusinessRow = Timestamps & {
   whatsapp: string | null; address: string | null; city: string | null; latitude: number | null; longitude: number | null;
   pickup_enabled: boolean; delivery_enabled: boolean; delivery_radius_km: number; delivery_price: number; minimum_order: number;
   verified: boolean; active: boolean;
+  admin_suspended_at?: string | null;
   accepts_cash: boolean; accepts_transfer: boolean; transfer_alias: string | null;
 };
 export type CategoryRow = { id: string; name: string; slug: string; parent_id: string | null; icon: string | null; created_at: string };
@@ -33,6 +34,7 @@ export type ProductRow = Timestamps & {
   stock_quantity: number; stock_status: StockStatus; stock_confirmed_at: string | null;
   inventory_mode: InventoryMode; available_today: boolean; availability_confirmed_at: string | null;
   pickup_enabled: boolean; delivery_enabled: boolean; active: boolean;
+  admin_blocked_at?: string | null;
 };
 export type ProductImageRow = { id: string; product_id: string; url: string; position: number; created_at: string };
 export type RequestRow = {
@@ -134,6 +136,20 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      is_my_account_suspended: { Args: Record<string, never>; Returns: boolean };
+      admin_read_phase2: { Args: { p_section: string; p_filters?: Json; p_id?: string }; Returns: Json };
+      admin_set_user_suspension: { Args: { p_user_id: string; p_suspended: boolean; p_reason?: string; p_note?: string }; Returns: undefined };
+      admin_resolve_report: { Args: { p_report_id: string; p_status: string; p_note?: string }; Returns: undefined };
+      create_my_report: { Args: { p_entity: string; p_entity_id: string; p_reason: string; p_details?: string }; Returns: string };
+      is_admin: { Args: Record<string, never>; Returns: boolean };
+      admin_read: {
+        Args: { p_section: string; p_query?: string; p_business_query?: string; p_state?: string; p_offset?: number; p_limit?: number; p_id?: string };
+        Returns: Json;
+      };
+      admin_set_resource_status: {
+        Args: { p_entity: string; p_id: string; p_blocked: boolean; p_reason?: string; p_note?: string };
+        Returns: undefined;
+      };
       is_my_business_slug_available: { Args: { p_business_id: string; p_slug: string }; Returns: boolean };
       change_my_business_slug: { Args: { p_business_id: string; p_slug: string }; Returns: string };
       read_marketplace_page: {

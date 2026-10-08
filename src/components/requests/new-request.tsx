@@ -72,10 +72,11 @@ function NewRequestFields({ initialTitle }: { initialTitle: string }) {
         throw failure;
       }
       router.replace(`/pedido/${id}/confirmacion`);
-    } catch {
+    } catch (cause) {
       const pending = submission.current !== null;
       setUncertain(pending);
-      setError(pending ? "No pudimos confirmar si se publicó. Reintentá con los mismos datos y la misma elección de ubicación, o revisá Mis pedidos." : "No pudimos publicar tu pedido. Volvé a intentar.");
+      const suspended = typeof cause === "object" && cause !== null && "message" in cause && String(cause.message).includes("account_suspended");
+      setError(suspended ? "Tu cuenta está suspendida." : pending ? "No pudimos confirmar si se publicó. Reintentá con los mismos datos y la misma elección de ubicación, o revisá Mis pedidos." : "No pudimos publicar tu pedido. Volvé a intentar.");
       inFlight.current = false; setSubmitting(false);
     }
   }
