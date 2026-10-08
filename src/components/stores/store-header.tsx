@@ -7,6 +7,8 @@ import { StoreAssetImage } from "./store-asset-image";
 import { StoreShare } from "./store-share";
 import styles from "./store.module.css";
 import { ReportButton } from "../reports/report-button";
+import { VerificationBadge } from "../businesses/verification-badge";
+import verificationStyles from "../businesses/verification.module.css";
 
 export function StoreHeader({ business, categories }: Pick<PublicStore, "business" | "categories">) {
   const whatsapp = argentinaWhatsAppUrl(business.whatsapp, `Hola, vi la tienda de ${business.name} en CercaYa. Quería consultar por sus productos.`);
@@ -16,7 +18,7 @@ export function StoreHeader({ business, categories }: Pick<PublicStore, "busines
     <div className={styles.identity}>
       <StoreAssetImage url={business.logo_url} businessId={business.id} kind="logo" name={business.name} />
       <span className={styles.storeLabel}><Store size={18} aria-hidden="true" />TIENDA EN CERCAYA</span>
-      <h1 className={styles.name}>{business.name}</h1>
+      <div className={verificationStyles.name}><h1 className={styles.name}>{business.name}</h1>{business.verified && <VerificationBadge />}</div>
       {categories.length > 0 && <ul className={styles.businessCategories} aria-label="Categorías del comercio">
         {categories.map(category => <li key={category.id}>{category.name}</li>)}
       </ul>}

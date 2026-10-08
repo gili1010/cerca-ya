@@ -82,6 +82,7 @@ export type ReservationView = Omit<ReservationRow, "buyer_id" | "items_subtotal"
 export type SearchEventRow = {
   id: string; user_id: string | null; query: string; latitude: number | null; longitude: number | null;
   results_count: number; created_at: string;
+  normalized_query: string; has_results: boolean; category_id: string | null; locality: string | null;
 };
 
 type Relationship = { foreignKeyName: string; columns: string[]; isOneToOne: boolean; referencedRelation: string; referencedColumns: string[] };
@@ -137,6 +138,10 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      admin_set_business_verification: { Args: { p_business_id: string; p_verified: boolean; p_reason?: string; p_note?: string }; Returns: undefined };
+      admin_read_business_verification: { Args: { p_business_id: string }; Returns: Json };
+      record_search_event: { Args: { p_id: string; p_query: string; p_results_count: number; p_category_id?: string | null; p_locality?: string | null }; Returns: undefined };
+      admin_search_analytics: { Args: { p_days?: number; p_locality?: string | null; p_min_searches?: number; p_opportunity_page?: number; p_top_page?: number }; Returns: Json };
       create_contact_request: { Args: { p_input: Json; p_user_id?: string | null }; Returns: string };
       mark_my_store_shared: { Args: { p_business_id: string }; Returns: string };
       accept_my_legal_terms: { Args: { p_accept: boolean; p_merchant?: boolean }; Returns: undefined };

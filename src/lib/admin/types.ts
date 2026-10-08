@@ -18,7 +18,7 @@ export type AdminProduct = {
 };
 export type AdminAudit = {
   id: string; admin_user_id: string; admin_name: string | null;
-  action: "BUSINESS_SUSPENDED" | "BUSINESS_REACTIVATED" | "PRODUCT_BLOCKED" | "PRODUCT_UNBLOCKED" | "USER_SUSPENDED" | "USER_REACTIVATED" | "REPORT_RESOLVED" | "REPORT_DISMISSED";
+  action: "BUSINESS_SUSPENDED" | "BUSINESS_REACTIVATED" | "BUSINESS_VERIFIED" | "BUSINESS_UNVERIFIED" | "PRODUCT_BLOCKED" | "PRODUCT_UNBLOCKED" | "USER_SUSPENDED" | "USER_REACTIVATED" | "REPORT_RESOLVED" | "REPORT_DISMISSED";
   entity_type: AdminEntity | "user" | "report"; entity_id: string; resource_name: string | null;
   reason: string; note: string | null; created_at: string;
 };

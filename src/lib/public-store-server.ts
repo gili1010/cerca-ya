@@ -7,7 +7,7 @@ import { getPublicStoreProducts } from "@/lib/public-catalog";
 
 export type PublicStoreBusiness = Pick<BusinessRow,
   "id" | "slug" | "name" | "description" | "city" | "latitude" | "longitude" |
-  "whatsapp" | "pickup_enabled" | "delivery_enabled" | "delivery_price" | "logo_url" | "cover_url"
+  "whatsapp" | "pickup_enabled" | "delivery_enabled" | "delivery_price" | "logo_url" | "cover_url" | "verified"
 >;
 export interface PublicStore {
   business: PublicStoreBusiness;
@@ -23,12 +23,12 @@ export const loadPublicStore = cache(async (slug: string): Promise<{ store: Publ
     const client = await createSupabaseServerClient();
     if (!client) throw new Error("unavailable");
     let { data: business, error } = await client.from("businesses")
-      .select("id,slug,name,description,city,latitude,longitude,whatsapp,pickup_enabled,delivery_enabled,delivery_price,logo_url,cover_url")
+      .select("id,slug,name,description,city,latitude,longitude,whatsapp,pickup_enabled,delivery_enabled,delivery_price,logo_url,cover_url,verified")
       .eq("slug", slug).eq("active", true).maybeSingle();
     // Keep the first-stage public store readable until the manual migration runs.
     if (error && ["42703", "PGRST204"].includes(error.code)) {
       const legacy = await client.from("businesses")
-        .select("id,slug,name,description,city,latitude,longitude,whatsapp,pickup_enabled,delivery_enabled,delivery_price")
+        .select("id,slug,name,description,city,latitude,longitude,whatsapp,pickup_enabled,delivery_enabled,delivery_price,verified")
         .eq("slug", slug).eq("active", true).maybeSingle();
       business = legacy.data ? { ...legacy.data, logo_url: null, cover_url: null } : null;
       error = legacy.error;

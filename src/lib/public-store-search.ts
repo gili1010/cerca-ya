@@ -4,7 +4,7 @@ import type { BusinessRow, CategoryRow, Database } from "@/types/database";
 export const storeSearchLimit = 8;
 type StoreCategory = Pick<CategoryRow, "id" | "name" | "slug">;
 export type StoreSearchBusiness = Pick<BusinessRow,
-  "id" | "slug" | "name" | "city" | "logo_url" | "pickup_enabled" | "delivery_enabled" | "latitude" | "longitude"
+  "id" | "slug" | "name" | "city" | "logo_url" | "pickup_enabled" | "delivery_enabled" | "latitude" | "longitude" | "verified"
 > & { categories: StoreCategory[] };
 
 // Optional columns are omitted until needed (distance) or available (logo).
@@ -21,7 +21,7 @@ export async function searchPublicStores(client: SupabaseClient<Database>, query
   async function readBusinesses(mode: "exact" | "prefix" | "name" | "details" | "category", categoryIds: string[] = [], withLogo = true): Promise<SearchRow[]> {
     // No owner, contact, address or internal fields. Buyer coordinates never leave the browser.
     const fields = [
-      "id,slug,name,city,pickup_enabled,delivery_enabled",
+      "id,slug,name,city,pickup_enabled,delivery_enabled,verified",
       "business_categories(category:categories(id,name,slug))",
       ...(withLogo ? ["logo_url"] : []),
       ...(withDistance ? ["latitude,longitude"] : []),
@@ -70,7 +70,7 @@ export async function searchPublicStores(client: SupabaseClient<Database>, query
     .sort((a, b) => priority(a.name) - priority(b.name) || a.name.localeCompare(b.name, "es-AR") || a.id.localeCompare(b.id))
     .slice(0, storeSearchLimit)
     .map(row => ({
-      id: row.id, slug: row.slug, name: row.name, city: row.city,
+      id: row.id, slug: row.slug, name: row.name, city: row.city, verified: row.verified,
       logo_url: row.logo_url ?? null, pickup_enabled: row.pickup_enabled, delivery_enabled: row.delivery_enabled,
       latitude: row.latitude ?? null, longitude: row.longitude ?? null,
       categories: [...new Map(row.business_categories.flatMap(relation => relation.category ? [[relation.category.id, relation.category] as const] : [])).values()]

@@ -16,10 +16,11 @@ import { Footer } from "./home/footer";
 import { MobileNav, type MobileTab } from "./home/mobile-nav";
 import { useDemo } from "./demo-provider";
 import { useUserLocation } from "./location/user-location-provider";
+import { recordSearch } from "@/lib/search-analytics";
 
 export default function Marketplace() {
   const router = useRouter();
-  const { coordinates } = useUserLocation();
+  const { coordinates, locality } = useUserLocation();
   const { favorites, toggleFavorite, zone, setModal, homeTab: activeTab, setHomeTab: setActiveTab } = useDemo();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
@@ -42,6 +43,19 @@ export default function Marketplace() {
   }
   const catalog = usePublicCatalog({ query, category, filters: effectiveFilters, sort: effectiveSort, home: activeTab === "home" && !query.trim() && !category && !favoritesOnly, page: pageLocation === coordinates ? page : 0, favoriteIds: favoritesOnly ? favorites : undefined, buyerLocation: coordinates });
   const storeSearch = usePublicStoreSearch(query, !favoritesOnly, Boolean(coordinates));
+  // Sólo se arma una medición con intención explícita, nunca al escribir/renderizar.
+  const searchContext = JSON.stringify({ query, category, filters: effectiveFilters, sort: effectiveSort, coordinates, favoritesOnly });
+  const [measurement, setMeasurement] = useState<{ id: string; context: string; query: string; categoryId: string | null; locality: string | null } | null>(null);
+  const lastSubmit = useRef<{ context: string; at: number } | null>(null);
+  const consumedMeasurement = useRef<string | null>(null);
+  useEffect(() => {
+    if (!measurement || consumedMeasurement.current === measurement.id) return;
+    if (measurement.context !== searchContext || catalog.error) { setMeasurement(null); return; }
+    if (catalog.loading) return;
+    consumedMeasurement.current = measurement.id;
+    setMeasurement(null);
+    void recordSearch({ ...measurement, resultCount: catalog.total });
+  }, [measurement, searchContext, catalog.loading, catalog.error, catalog.total]);
 
   useEffect(() => {
     let live = true;
@@ -56,7 +70,17 @@ export default function Marketplace() {
   const reset = () => { setQuery(""); setCategory(""); setFilters([]); setSort("recommended"); setActiveTab("search"); setPage(0); };
   const toggleFilter = (filter: QuickFilter) => { if (filter === "nearby" && !coordinates) return; setFilters(current => current.includes(filter) ? current.filter(item => item !== filter) : [...current, filter]); setPage(0); };
   const showSaved = () => { setActiveTab(favoritesOnly ? "home" : "saved"); setQuery(""); setCategory(""); setFilters([]); setPage(0); goToCatalog(); };
-  const search = () => { setActiveTab("search"); setPage(0); goToCatalog(); };
+  const search = () => {
+    const term = query.trim().replace(/\s+/g, " ");
+    const previous = lastSubmit.current;
+    try {
+      if (!favoritesOnly && term.length >= 2 && term.length <= 120 && (!previous || previous.context !== searchContext || Date.now() - previous.at >= 2000)) {
+        lastSubmit.current = { context: searchContext, at: Date.now() };
+        setMeasurement({ id: crypto.randomUUID(), context: searchContext, query: term, categoryId: categories.find(item => item.slug === category)?.id ?? null, locality });
+      }
+    } catch { /* Incluso sin soporte para UUID, la búsqueda sigue funcionando. */ }
+    setActiveTab("search"); setPage(0); goToCatalog();
+  };
   const selectTab = (tab: MobileTab) => {
     if (tab === "account") { setModal("account"); return; }
     if (tab === "requests") { router.push("/pedidos"); return; }

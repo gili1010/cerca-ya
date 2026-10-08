@@ -4,7 +4,7 @@ import { parseAdminFilters, type AdminAudit, type AdminPage, type AdminParams } 
 import { AdminEmpty, AdminHeading, AdminPagination, adminDate } from "@/components/admin/admin-common";
 import styles from "@/components/admin/admin.module.css";
 
-const labels = { BUSINESS_SUSPENDED: "Comercio suspendido", BUSINESS_REACTIVATED: "Suspensión retirada", PRODUCT_BLOCKED: "Producto bloqueado", PRODUCT_UNBLOCKED: "Bloqueo retirado", USER_SUSPENDED: "Usuario suspendido", USER_REACTIVATED: "Usuario reactivado", REPORT_RESOLVED: "Reporte resuelto", REPORT_DISMISSED: "Reporte descartado" };
+const labels = { BUSINESS_SUSPENDED: "Comercio suspendido", BUSINESS_REACTIVATED: "Suspensión retirada", BUSINESS_VERIFIED: "Comercio verificado", BUSINESS_UNVERIFIED: "Verificación retirada", PRODUCT_BLOCKED: "Producto bloqueado", PRODUCT_UNBLOCKED: "Bloqueo retirado", USER_SUSPENDED: "Usuario suspendido", USER_REACTIVATED: "Usuario reactivado", REPORT_RESOLVED: "Reporte resuelto", REPORT_DISMISSED: "Reporte descartado" };
 const types = { business: "Comercio", product: "Producto", user: "Usuario", report: "Reporte" };
 const routes = { business: "/admin/comercios", product: "/admin/productos", user: "/admin/usuarios", report: "/admin/reportes" };
 export default async function AdminAuditPage({ searchParams }: { searchParams: Promise<AdminParams> }) {

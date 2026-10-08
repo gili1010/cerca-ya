@@ -1,0 +1,8 @@
+.section { margin-top: 30px; scroll-margin-top: 20px; }
+.section h2 { font-size: 20px; line-height: 1.35; margin-bottom: 10px; letter-spacing: -.02em; }
+.section > p { font-size: 13px; margin-bottom: 14px; line-height: 1.6; }
+.section [role=region]:focus-visible { outline: 3px solid #74af91; outline-offset: -3px; }
+.metrics { margin-bottom: 16px; }
+.dashboard { margin-top: 24px; }
+@media(min-width: 1000px) { .metrics { grid-template-columns: repeat(4,minmax(0,1fr)); } }
+@media(max-width: 600px) { .metrics { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; } }
