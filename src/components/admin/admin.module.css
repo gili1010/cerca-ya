@@ -70,3 +70,4 @@
   .table th,.table td { padding: 12px; } .facts { grid-template-columns: 1fr; } .detail { padding: 20px; }
   .dialog { padding: 24px; } .dialogActions { flex-wrap: wrap; } .dialogActions button { flex: 1; }
 }
+.listActions { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; }

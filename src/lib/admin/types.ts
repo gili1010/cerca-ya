@@ -7,7 +7,7 @@ export type AdminPage<T> = { total: number; rows: T[] };
 export type AdminMetrics = { users: number; businesses: number; active_businesses: number; active_products: number; orders: number; recent_orders: number; active_users: number; suspended_users: number; open_reports: number };
 export type AdminBusiness = {
   id: string; name: string; slug: string; city: string | null; description: string | null;
-  active: boolean; admin_suspended_at: string | null; created_at: string;
+  active: boolean; verified: boolean; admin_suspended_at: string | null; created_at: string;
   pickup_enabled: boolean; delivery_enabled: boolean; owner_name: string | null;
   product_count: number; categories: string[];
 };
