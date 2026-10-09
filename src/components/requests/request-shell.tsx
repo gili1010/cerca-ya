@@ -28,7 +28,7 @@ export function RequestShell({ children, business = false, realRequests = false 
           <span aria-disabled="true">Estadísticas · Próximamente</span>
         </> : <><Link href="/pedidos" aria-current={!reservationScreen ? "page" : undefined}>Mis pedidos</Link><Link href="/reservas" aria-current={reservationScreen ? "page" : undefined}>Mis reservas</Link></>}
       </nav>
-      {realRequests ? <p className="workflow-demo">Tus pedidos, Radar, ofertas y reservas se actualizan en vivo. También podés usar Actualizar.</p> : <LocalWorkflowNotice />}
+      {realRequests ? <p className="workflow-demo">Tus pedidos, Radar, ofertas y reservas se actualizan en vivo. También podés usar Actualizar.</p> : pathname.startsWith("/demo/") ? <LocalWorkflowNotice /> : null}
       {children}
     </main>
     <MobileNav active="requests" savedCount={favorites.length} onSelect={tab => {

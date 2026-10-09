@@ -24,7 +24,7 @@ export function ProductCard({ product, saved, onSave }: ProductCardProps) {
   const available = isProductAvailable(product);
   const href = `/producto/${product.id}`;
   const storeSlug = product.database?.business.slug;
-  const storeHref = real ? storeSlug ? `/tienda/${encodeURIComponent(storeSlug)}` : `${href}#comercio` : `/comercios/${product.storeId}`;
+  const storeHref = real ? storeSlug ? `/tienda/${encodeURIComponent(storeSlug)}` : `${href}#comercio` : `/demo/comercios/${product.storeId}`;
   return <article className="product-card">
     <div className="product-image">
       <Link className="product-image-link" href={href} aria-label={`Ver ${product.name}`}>{real ? <ProductImage src={product.image} alt={product.name} className="public-card-image" /> : <Image src={photo(product.image)} alt={product.name} fill sizes="(max-width: 600px) 50vw, (max-width: 1000px) 33vw, 25vw" />}</Link>
