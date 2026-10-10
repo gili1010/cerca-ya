@@ -37,6 +37,7 @@ function BusinessFormFields({ business, onLocationSaved }: { business: BusinessR
     pickup_enabled: business.pickup_enabled, delivery_enabled: business.delivery_enabled,
     delivery_radius_km: business.delivery_radius_km || 5, delivery_price: business.delivery_price, minimum_order: business.minimum_order,
     accepts_cash: business.accepts_cash ?? true, accepts_transfer: business.accepts_transfer ?? false, transfer_alias: business.transfer_alias ?? "",
+    instagram_url: business.instagram_url ?? "", facebook_url: business.facebook_url ?? "",
   } : { ...emptyBusiness });
   const [categories, setCategories] = useState<CategoryRow[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
@@ -76,7 +77,7 @@ function BusinessFormFields({ business, onLocationSaved }: { business: BusinessR
         const { error: acceptanceError } = await client.rpc("accept_my_legal_terms", { p_accept: true, p_merchant: true });
         if (acceptanceError) { setError("No pudimos guardar tu aceptación. Volvé a intentar."); inFlight.current = false; setBusy(false); return; }
       }
-      const { error: failure } = await client.rpc("save_my_business", {
+      const { error: failure } = await client.rpc("save_my_business_with_social_links", {
         p_input: normalizeBusiness(form), p_category_ids: selected, p_business_id: business?.id ?? null,
       });
       if (failure) throw failure;
@@ -94,6 +95,14 @@ function BusinessFormFields({ business, onLocationSaved }: { business: BusinessR
       <label>Nombre del comercio<input value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} required maxLength={160} autoComplete="organization" disabled={busy} /></label>
       {business && <p className="info-note">Tu enlace permanente: /tienda/{business.slug}. Se conserva aunque cambies el nombre, la localidad u otros datos del comercio.</p>}
       <label>Descripción<textarea value={form.description} onChange={event => setForm({ ...form, description: event.target.value })} maxLength={3000} disabled={busy} /></label>
+      <fieldset className="workflow-form" disabled={busy}>
+        <legend>Redes sociales</legend>
+        <p className="info-note">Opcional. Agregá tus redes para que los clientes puedan conocer más sobre tu negocio.</p>
+        <div className="form-columns">
+          <label>Instagram<input value={form.instagram_url} onChange={event => setForm({ ...form, instagram_url: event.target.value })} maxLength={300} placeholder="@mitienda o instagram.com/mitienda" autoCapitalize="none" spellCheck={false} /><small>Podés ingresar tu usuario o el enlace de tu perfil.</small></label>
+          <label>Facebook<input value={form.facebook_url} onChange={event => setForm({ ...form, facebook_url: event.target.value })} maxLength={300} placeholder="mitienda o facebook.com/mitienda" autoCapitalize="none" spellCheck={false} /><small>Dejá el campo vacío para quitar una red existente.</small></label>
+        </div>
+      </fieldset>
       <label>WhatsApp · Argentina (+54)<input type="tel" value={form.whatsapp} onChange={event => setForm({ ...form, whatsapp: event.target.value })} required maxLength={40} autoComplete="tel" placeholder="Código de área + número" disabled={busy} /><small>Ingresá código de área y número, sin 0 ni 15. Agregamos +54 y el 9 para WhatsApp automáticamente. Si ya escribiste +54 9, no lo duplicamos.</small></label>
       <section className="workflow-form" aria-labelledby="business-location-title">
         <h2 id="business-location-title">Ubicación del comercio</h2>

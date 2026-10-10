@@ -6,6 +6,7 @@ import { StoreHeader } from "@/components/stores/store-header";
 import { StoreCatalog } from "@/components/stores/store-catalog";
 import { loadPublicStore } from "@/lib/public-store-server";
 import { StoreCartBar } from "@/components/cart/store-cart-bar";
+import styles from "@/components/stores/store.module.css";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +31,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
   if (!store) notFound();
 
   return <DetailShell>
-    <Link className="secondary-link" href="/"><ArrowLeft size={16} aria-hidden="true" />Explorar productos</Link>
+    <Link className={styles.backLink} href="/"><ArrowLeft size={16} aria-hidden="true" />Explorar productos</Link>
     <StoreHeader business={store.business} categories={store.categories} />
     <StoreCatalog products={store.products} />
     <StoreCartBar businessId={store.business.id} products={store.products} />

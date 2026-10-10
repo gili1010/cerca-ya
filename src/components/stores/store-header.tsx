@@ -1,4 +1,5 @@
-import { ArrowDown, MapPin, MessageCircle, Store, Truck } from "lucide-react";
+import { ArrowDown, Facebook, Instagram, MapPin, MessageCircle, Store, Truck } from "lucide-react";
+import { normalizeSocialLink } from "@/lib/businesses/social-links";
 import type { PublicStore } from "@/lib/public-store-server";
 import { argentinaWhatsAppUrl, formatArgentinaPhone } from "@/lib/phone";
 import { money } from "@/lib/products";
@@ -8,9 +9,10 @@ import { StoreShare } from "./store-share";
 import styles from "./store.module.css";
 import { ReportButton } from "../reports/report-button";
 import { VerificationBadge } from "../businesses/verification-badge";
-import verificationStyles from "../businesses/verification.module.css";
 
 export function StoreHeader({ business, categories }: Pick<PublicStore, "business" | "categories">) {
+  const instagram = normalizeSocialLink(business.instagram_url ?? "", "instagram");
+  const facebook = normalizeSocialLink(business.facebook_url ?? "", "facebook");
   const whatsapp = argentinaWhatsAppUrl(business.whatsapp, `Hola, vi la tienda de ${business.name} en CercaYa. Quería consultar por sus productos.`);
   return <header className={styles.storeHeader}>
     <StoreAssetImage url={business.cover_url} businessId={business.id} kind="cover" name={business.name} />
@@ -18,7 +20,7 @@ export function StoreHeader({ business, categories }: Pick<PublicStore, "busines
     <div className={styles.identity}>
       <StoreAssetImage url={business.logo_url} businessId={business.id} kind="logo" name={business.name} />
       <span className={styles.storeLabel}><Store size={18} aria-hidden="true" />TIENDA EN CERCAYA</span>
-      <div className={verificationStyles.name}><h1 className={styles.name}>{business.name}</h1>{business.verified && <VerificationBadge />}</div>
+      <div className={styles.titleRow}><h1 className={styles.name}>{business.name}</h1>{business.verified && <VerificationBadge />}</div>
       {categories.length > 0 && <ul className={styles.businessCategories} aria-label="Categorías del comercio">
         {categories.map(category => <li key={category.id}>{category.name}</li>)}
       </ul>}
@@ -27,7 +29,11 @@ export function StoreHeader({ business, categories }: Pick<PublicStore, "busines
         <BusinessDistance latitude={business.latitude} longitude={business.longitude} />
       </div>
       {business.description.trim() && <p className={styles.description}>{business.description}</p>}
-      <div className={styles.headerActions}><a className={`secondary-link ${styles.explore}`} href="#productos">Ver productos<ArrowDown size={16} aria-hidden="true" /></a><StoreShare name={business.name} slug={business.slug} /></div>
+      <div className={styles.headerActions}><a className={`primary-button ${styles.explore}`} href="#productos">Ver productos<ArrowDown size={16} aria-hidden="true" /></a><StoreShare name={business.name} slug={business.slug} /></div>
+      {(instagram || facebook) && <nav className={styles.socialLinks} aria-label="Redes sociales del comercio"><span>Seguinos</span><div>
+        {instagram && <a href={instagram} target="_blank" rel="noopener noreferrer"><Instagram size={17} aria-hidden="true" />Instagram</a>}
+        {facebook && <a href={facebook} target="_blank" rel="noopener noreferrer"><Facebook size={17} aria-hidden="true" />Facebook</a>}
+      </div></nav>}
       <ReportButton entity="business" id={business.id} name={business.name} />
     </div>
     <section className={styles.purchase} aria-labelledby="store-purchase-title">

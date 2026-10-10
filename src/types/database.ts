@@ -20,6 +20,7 @@ export type ProfileRow = Timestamps & { id: string; full_name: string; phone: st
 export type BusinessRow = Timestamps & {
   id: string; owner_id: string | null; name: string; slug: string; description: string;
   logo_url: string | null; cover_url: string | null;
+  instagram_url: string | null; facebook_url: string | null;
   whatsapp: string | null; address: string | null; city: string | null; latitude: number | null; longitude: number | null;
   pickup_enabled: boolean; delivery_enabled: boolean; delivery_radius_km: number; delivery_price: number; minimum_order: number;
   verified: boolean; active: boolean;
@@ -221,6 +222,10 @@ export type Database = {
         Returns: ProductRow;
       };
       save_my_business: {
+        Args: { p_input: Json; p_category_ids: string[]; p_business_id?: string | null };
+        Returns: string;
+      };
+      save_my_business_with_social_links: {
         Args: { p_input: Json; p_category_ids: string[]; p_business_id?: string | null };
         Returns: string;
       };

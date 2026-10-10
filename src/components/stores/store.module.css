@@ -112,3 +112,29 @@
 @media (max-width: 380px) {
   .catalog .grid, .methods { grid-template-columns: 1fr; }
 }
+
+/* Store identity keeps trust, categories and primary actions distinct. */
+.titleRow { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 16px; margin: 16px 0 22px; min-width: 0; }
+.header .titleRow .name { margin: 0; min-width: 0; }
+.titleRow > button { flex-shrink: 0; }
+.backLink { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; max-width: 100%; padding: 10px 14px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); color: var(--green); font-size: var(--text-sm); font-weight: 600; text-decoration: none; transition: background .18s, border-color .18s; }
+.backLink svg, .socialLinks svg { flex-shrink: 0; }
+.backLink:focus-visible, .explore:focus-visible, .socialLinks a:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+.headerActions { align-items: flex-start; gap: 12px; margin-top: 24px; }
+.explore { min-height: 48px; padding: 12px 20px; text-decoration: none; }
+.headerActions .shareButtons > button { min-height: 48px; }
+.socialLinks { display: grid; gap: 10px; margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--line); }
+.socialLinks > span { color: var(--muted); font-size: var(--text-xs); font-weight: 600; }
+.socialLinks > div { display: flex; flex-wrap: wrap; gap: 8px; }
+.socialLinks a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 9px 12px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); color: var(--green); font-size: var(--text-sm); font-weight: 550; text-decoration: none; transition: background .18s, border-color .18s; }
+@media (hover: hover) { .backLink:hover, .socialLinks a:hover { background: var(--surface-soft); border-color: var(--line-strong); } }
+@media (max-width: 760px) {
+  .titleRow { flex-direction: column; align-items: flex-start; gap: 12px; margin: 16px 0 22px; }
+  .titleRow .name { width: 100%; }
+  .businessCategories { gap: 8px; }
+  .location { margin-top: 18px; }
+  .headerActions { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .headerActions .explore, .headerActions .shareButtons > button { width: 100%; justify-content: center; }
+  .headerActions .shareButtons { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .socialLinks { margin-top: 22px; }
+}
