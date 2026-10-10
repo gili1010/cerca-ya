@@ -26,7 +26,7 @@ export function ReservationCheckoutFields({ value, onChange, delivery, disabled,
       <legend>Contacto</legend>
       <div className={styles.columns}>
         <label>{delivery ? "Nombre y apellido" : "Nombre"}<input value={value.customer_name} onChange={event => onChange({ ...value, customer_name: event.target.value })} required maxLength={160} autoComplete="shipping name" /></label>
-        <label>Teléfono · Argentina (+54)<input type="tel" value={value.customer_phone} onChange={event => onChange({ ...value, customer_phone: event.target.value })} required maxLength={40} autoComplete="shipping tel" placeholder="3547636574" /></label>
+        <label>Teléfono · Argentina (+54)<input type="tel" value={value.customer_phone} onChange={event => onChange({ ...value, customer_phone: event.target.value })} required maxLength={40} autoComplete="shipping tel" placeholder="Código de área + número" /></label>
       </div>
       <p className={styles.help}>Estos datos se usan para este pedido. No cambian tu perfil. Ingresá el teléfono con código de área, sin 0 ni 15.</p>
     </fieldset>

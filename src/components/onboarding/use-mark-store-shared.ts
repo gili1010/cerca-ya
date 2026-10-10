@@ -13,5 +13,5 @@ export function useMarkStoreShared(businessId: string) {
       if (error || !data) throw new Error("unavailable");
       updateSharedAt(businessId, data);
     } catch { return "La acción se realizó, pero no pudimos actualizar el progreso. Volvé a intentar compartir."; }
-  }, [business?.id, business?.store_shared_at, businessId, updateSharedAt]);
+  }, [business, businessId, updateSharedAt]);
 }

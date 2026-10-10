@@ -34,7 +34,7 @@ export function RequestShell({ children, business = false, realRequests = false 
     <MobileNav active="requests" savedCount={favorites.length} onSelect={tab => {
       if (tab === "account") setModal("account");
       else if (tab === "requests") router.push("/pedidos");
-      else { setHomeTab(tab); router.push(tab === "saved" ? "/#catalogo" : "/"); }
+      else { setHomeTab(tab); router.push(tab === "saved" ? "/?view=saved#catalogo" : tab === "search" ? "/?view=search" : "/"); }
     }} />
   </>;
 }

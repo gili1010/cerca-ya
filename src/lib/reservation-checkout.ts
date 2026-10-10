@@ -21,7 +21,7 @@ export function validateReservationCheckout(input: ReservationCheckoutInput, del
     if (input.delivery_reference.trim().length > 500) return "La referencia puede tener hasta 500 caracteres.";
   }
   if (input.customer_notes.trim().length > 1000) return "Las notas pueden tener hasta 1000 caracteres.";
-  if (!(input.payment_method in paymentLabels)) return "Seleccioná una forma de pago.";
+  if (!Object.hasOwn(paymentLabels, input.payment_method)) return "Seleccioná una forma de pago.";
   return null;
 }
 export function normalizeReservationCheckout(input: ReservationCheckoutInput, delivery: DatabaseDeliveryType) {

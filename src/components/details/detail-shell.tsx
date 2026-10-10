@@ -12,7 +12,7 @@ export function DetailShell({ children }: { children: ReactNode }) {
   const { zone, favorites, setModal, setHomeTab } = useDemo();
   const navigateHome = (tab: MobileTab = "home") => {
     setHomeTab(tab);
-    router.push(tab === "saved" ? "/#catalogo" : "/");
+    router.push(tab === "saved" ? "/?view=saved#catalogo" : tab === "search" ? "/?view=search" : "/");
   };
   return <>
     <Header zone={zone} onZone={() => setModal("zone")} onAccount={() => setModal("account")} onExplore={() => navigateHome()} onRequests={() => router.push("/pedidos")} onHow={() => setModal("how")} />

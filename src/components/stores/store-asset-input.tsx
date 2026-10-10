@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { ImagePlus, Store } from "lucide-react";
 import { prepareStoreImage, type StoreImageFit } from "@/lib/store-images";
 import { storeAssetPath, type StoreAssetChange, type StoreAssetKind } from "@/lib/business-assets";
@@ -40,7 +41,7 @@ export function StoreAssetInput({ kind, businessId, initialUrl, change, onChange
   return <section className={styles.assetInput} aria-label={label}>
     <div className={styles.assetInputHeading}><div><h3>{kind === "logo" ? "Logo de tu comercio" : "Portada de tu tienda"}</h3><p>{kind === "logo" ? "Una imagen que tus clientes reconozcan." : "La primera impresión de tu comercio."}</p></div><span>Opcional</span></div>
     <div className={kind === "logo" ? styles.logoPreview : styles.coverPreview}>
-      {displayed ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={displayed} alt={`Vista previa: ${label.toLowerCase()}`} /> : kind === "logo" ? <Store size={38} aria-hidden="true" /> : <ImagePlus size={36} aria-hidden="true" />}
+      {displayed ? <Image src={displayed} alt={`Vista previa: ${label.toLowerCase()}`} width={kind === "logo" ? 256 : 1024} height={256} unoptimized /> : kind === "logo" ? <Store size={38} aria-hidden="true" /> : <ImagePlus size={36} aria-hidden="true" />}
     </div>
     <label className={styles.fileLabel}>{initialUrl || change.kind === "upload" ? `Cambiar ${label.toLowerCase()}` : `Subir ${label.toLowerCase()}`}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy || processing} onChange={event => { const file = event.target.files?.[0]; event.target.value = ""; void select(file, "contain"); }} /></label>
     <small className={styles.recommendation}>{kind === "logo" ? "Recomendado: imagen cuadrada. Se muestra completa, sin recortes." : "Recomendado: imagen horizontal. Por defecto se muestra completa."}</small>

@@ -12,7 +12,14 @@ function loadModule(path) {
   runInNewContext(outputText, { exports });
   return exports;
 }
-const { products, confirmationTime } = loadModule("../src/lib/products.ts");
+const { products: demoProducts, confirmationTime } = loadModule("../src/lib/products.ts");
+// Keep these regression cases independent of additional demo inventory.
+const fixtureIds = ["taladro", "auriculares", "lampara", "tazas", "herramientas", "mochila", "mascotas", "planta", "parlante", "silla"];
+const products = fixtureIds.map(id => {
+  const product = demoProducts.find(product => product.id === id);
+  assert.ok(product, `Missing catalog fixture: ${id}`);
+  return product;
+});
 const { filterProducts } = loadModule("../src/lib/catalog.ts");
 const base = { query: "", category: "Todas", filters: [], favorites: [], favoritesOnly: false, sort: "recommended" };
 const find = (options) => filterProducts(products, { ...base, ...options });

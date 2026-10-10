@@ -18,7 +18,8 @@ export async function POST(request: Request) {
       chunks.push(part.value);
     }
     const body = Buffer.concat(chunks).toString("utf8");
-    const raw: unknown = JSON.parse(body);
+    let raw: unknown;
+    try { raw = JSON.parse(body); } catch { return reply(400); }
     if (!raw || typeof raw !== "object") return reply(400);
     const trap = (raw as Record<string, unknown>).website;
     if (typeof trap !== "string") return reply(400);

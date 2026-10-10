@@ -161,6 +161,15 @@ export type Database = {
       };
       is_my_business_slug_available: { Args: { p_business_id: string; p_slug: string }; Returns: boolean };
       change_my_business_slug: { Args: { p_business_id: string; p_slug: string }; Returns: string };
+      search_public_stores: {
+        Args: { p_query: string; p_with_distance?: boolean };
+        Returns: {
+          id: string; slug: string; name: string; city: string; logo_url: string | null;
+          pickup_enabled: boolean; delivery_enabled: boolean; verified: boolean;
+          latitude: number | null; longitude: number | null;
+          business_categories: { category: { id: string; name: string; slug: string } | null }[];
+        }[];
+      };
       read_marketplace_page: {
         Args: { p_query?: string; p_category?: string; p_filters?: string[]; p_sort?: string; p_home?: boolean; p_favorite_ids?: string[] | null; p_latitude?: number | null; p_longitude?: number | null; p_offset?: number; p_limit?: number };
         Returns: { product_ids: string[]; total: number }[];

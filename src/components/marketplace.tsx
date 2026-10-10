@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { CategoryRow } from "@/types/database";
 import type { QuickFilter, SortOrder } from "@/lib/products";
 import { getPublicCategories } from "@/lib/public-catalog";
@@ -17,31 +17,48 @@ import { MobileNav, type MobileTab } from "./home/mobile-nav";
 import { useDemo } from "./demo-provider";
 import { useUserLocation } from "./location/user-location-provider";
 import { recordSearch } from "@/lib/search-analytics";
+import { readSearchNavigation, writeSearchNavigation, type SearchNavigation } from "@/lib/search-navigation";
 
 export default function Marketplace() {
   const router = useRouter();
   const { coordinates, locality } = useUserLocation();
-  const { favorites, toggleFavorite, zone, setModal, homeTab: activeTab, setHomeTab: setActiveTab } = useDemo();
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("");
+  const { favorites, toggleFavorite, zone, setModal, setHomeTab } = useDemo();
+  const searchParams = useSearchParams();
+  const { query, category, filters, sort, page, view: activeTab } = readSearchNavigation(new URLSearchParams(searchParams.toString()));
+  // URL is the source of navigation state. Restoring it never creates a measurement.
+  const updateNavigation = (patch: Partial<SearchNavigation>) => {
+    const params = new URLSearchParams(window.location.search);
+    const next = writeSearchNavigation(params, { ...readSearchNavigation(params), ...patch });
+    const queryString = next.toString();
+    window.history.replaceState(null, "", `${window.location.pathname}${queryString ? `?${queryString}` : ""}${window.location.hash}`);
+  };
+  const setQuery = (value: string) => updateNavigation({ query: value });
+  const setCategory = (value: string) => updateNavigation({ category: value });
+  const setFilters = (value: QuickFilter[]) => updateNavigation({ filters: value });
+  const setSort = (value: SortOrder) => updateNavigation({ sort: value });
+  const setPage = (value: number) => updateNavigation({ page: value });
+  const setActiveTab = (value: SearchNavigation["view"]) => { setHomeTab(value); updateNavigation({ view: value }); };
   const [categories, setCategories] = useState<CategoryRow[]>([]);
   const [categoryLoading, setCategoryLoading] = useState(true);
   const [categoryError, setCategoryError] = useState("");
   const [categoryAttempt, setCategoryAttempt] = useState(0);
-  const [filters, setFilters] = useState<QuickFilter[]>(activeTab === "home" ? ["today"] : []);
-  const [sort, setSort] = useState<SortOrder>("recommended");
-  const [page, setPage] = useState(0);
   const favoritesOnly = activeTab === "saved";
   const inputRef = useRef<HTMLInputElement>(null);
   const effectiveFilters = coordinates ? filters : filters.filter(filter => filter !== "nearby");
   const effectiveSort = !coordinates && sort === "distance" ? "recommended" : sort;
   // Reset pagination with the location, without ever putting coordinates in a URL.
-  const [pageLocation, setPageLocation] = useState(coordinates);
-  if (pageLocation !== coordinates) {
-    setPageLocation(coordinates); setPage(0);
-    if (!coordinates) { setFilters(effectiveFilters); setSort(effectiveSort); }
-  }
-  const catalog = usePublicCatalog({ query, category, filters: effectiveFilters, sort: effectiveSort, home: activeTab === "home" && !query.trim() && !category && !favoritesOnly, page: pageLocation === coordinates ? page : 0, favoriteIds: favoritesOnly ? favorites : undefined, buyerLocation: coordinates });
+  const pageLocation = useRef(coordinates);
+  useEffect(() => {
+    if (pageLocation.current === coordinates) return;
+    pageLocation.current = coordinates;
+    const params = new URLSearchParams(window.location.search);
+    const current = readSearchNavigation(params);
+    const next = writeSearchNavigation(params, { ...current, page: 0,
+      filters: coordinates ? current.filters : current.filters.filter(filter => filter !== "nearby"),
+      sort: !coordinates && current.sort === "distance" ? "recommended" : current.sort });
+    window.history.replaceState(null, "", `${window.location.pathname}?${next}${window.location.hash}`);
+  }, [coordinates]);
+  const catalog = usePublicCatalog({ query, category, filters: effectiveFilters, sort: effectiveSort, home: activeTab === "home" && !query.trim() && !category && !favoritesOnly, page, favoriteIds: favoritesOnly ? favorites : undefined, buyerLocation: coordinates });
   const storeSearch = usePublicStoreSearch(query, !favoritesOnly, Boolean(coordinates));
   // Sólo se arma una medición con intención explícita, nunca al escribir/renderizar.
   const searchContext = JSON.stringify({ query, category, filters: effectiveFilters, sort: effectiveSort, coordinates, favoritesOnly });
@@ -50,25 +67,27 @@ export default function Marketplace() {
   const consumedMeasurement = useRef<string | null>(null);
   useEffect(() => {
     if (!measurement || consumedMeasurement.current === measurement.id) return;
-    if (measurement.context !== searchContext || catalog.error) { setMeasurement(null); return; }
+    if (measurement.context !== searchContext || catalog.error) { consumedMeasurement.current = measurement.id; return; }
     if (catalog.loading) return;
     consumedMeasurement.current = measurement.id;
-    setMeasurement(null);
     void recordSearch({ ...measurement, resultCount: catalog.total });
   }, [measurement, searchContext, catalog.loading, catalog.error, catalog.total]);
 
   useEffect(() => {
     let live = true;
-    const client = getSupabaseBrowserClient();
-    if (!client) { setCategoryError("No pudimos cargar las categorías."); setCategoryLoading(false); return; }
-    getPublicCategories(client).then(data => { if (live) { setCategories(data); setCategoryError(""); setCategoryLoading(false); } })
+    const load = async () => {
+      const client = getSupabaseBrowserClient();
+      if (!client) throw new Error("catalog_unavailable");
+      return getPublicCategories(client);
+    };
+    load().then(data => { if (live) { setCategories(data); setCategoryError(""); setCategoryLoading(false); } })
       .catch(() => { if (live) { setCategoryError("No pudimos cargar las categorías."); setCategoryLoading(false); } });
     return () => { live = false; };
   }, [categoryAttempt]);
 
   const goToCatalog = () => document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth" });
   const reset = () => { setQuery(""); setCategory(""); setFilters([]); setSort("recommended"); setActiveTab("search"); setPage(0); };
-  const toggleFilter = (filter: QuickFilter) => { if (filter === "nearby" && !coordinates) return; setFilters(current => current.includes(filter) ? current.filter(item => item !== filter) : [...current, filter]); setPage(0); };
+  const toggleFilter = (filter: QuickFilter) => { if (filter === "nearby" && !coordinates) return; setFilters(filters.includes(filter) ? filters.filter(item => item !== filter) : [...filters, filter]); setPage(0); };
   const showSaved = () => { setActiveTab(favoritesOnly ? "home" : "saved"); setQuery(""); setCategory(""); setFilters([]); setPage(0); goToCatalog(); };
   const search = () => {
     const term = query.trim().replace(/\s+/g, " ");

@@ -10,7 +10,9 @@ function load(path) {
   const source = readFileSync(path, "utf8");
   const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } });
   const exports = {};
-  runInNewContext(outputText, { exports, require: name => load(resolve(dirname(path), `${name}.ts`)) });
+  runInNewContext(outputText, { exports, require: name => load(name.startsWith("@/")
+    ? resolve(root, "../src", `${name.slice(2)}.ts`)
+    : resolve(dirname(path), `${name}.ts`)) });
   return exports;
 }
 const root = dirname(fileURLToPath(import.meta.url));
@@ -44,7 +46,7 @@ test("offering updates exactly the correct request and derives its count", () =>
 test("closed and cancelled requests reject offers, including stale form submissions", () => {
   for (const status of ["CLOSED", "CANCELLED"]) {
     const closed = domain.changeRequestStatus(fresh(), "PED-1001", status, buyerId);
-    assert.throws(() => domain.addOffer(closed, "PED-1001", businesses[0], offerInput, now), /abierto/);
+    assert.throws(() => domain.addOffer(closed, "PED-1001", businesses[0], offerInput, now), /cerrado/);
     assert.throws(() => domain.reserveOffer(closed, "OFE-1001", buyerId), /cerrado/);
   }
 });
