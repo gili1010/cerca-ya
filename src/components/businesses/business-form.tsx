@@ -1,4 +1,5 @@
 "use client";
+import { BackLink } from "@/components/navigation/back-link";
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
@@ -22,11 +23,11 @@ export function BusinessForm({ edit = false }: { edit?: boolean }) {
   useEffect(() => {
     if (!locationSaved && !loading && !error && (edit ? !business : business)) router.replace(edit ? "/comercio/crear" : "/comercio/mi-negocio");
   }, [loading, error, business, edit, router, locationSaved]);
-  if (locationSaved) return <section className="panel workflow-narrow"><h1 role="status">✅ Ubicación guardada</h1><p>Los datos de tu comercio se guardaron correctamente.</p><Link className="primary-button" href="/comercio/mi-negocio">Volver a Mi comercio</Link></section>;
+  if (locationSaved) return <section className="panel workflow-narrow"><h1 role="status">✅ Ubicación guardada</h1><p>Los datos de tu comercio se guardaron correctamente.</p><BackLink href="/comercio/mi-negocio">Volver a Mi comercio</BackLink></section>;
   if (loading) return <p className="workflow-loading" role="status">Cargando tu comercio…</p>;
   if (error) return <section className="panel"><FormError message={error} /><button className="outline-button" onClick={() => void refresh().catch(() => {})}>Reintentar</button></section>;
   if (edit ? !business : business) return <p className="workflow-loading" role="status">{business ? "Ya tenés un comercio registrado. Abriendo Mi comercio…" : "Abriendo el formulario de creación…"}</p>;
-  return <><BusinessFormFields key={business?.id ?? "new"} business={business} onLocationSaved={() => setLocationSaved(true)} />{business && <BusinessHoursEditor key={business.id} businessId={business.id} />}</>;
+  return <BusinessFormFields key={business?.id ?? "new"} business={business} onLocationSaved={() => setLocationSaved(true)} />;
 }
 
 function BusinessFormFields({ business, onLocationSaved }: { business: BusinessRow | null; onLocationSaved: () => void }) {
@@ -91,7 +92,7 @@ function BusinessFormFields({ business, onLocationSaved }: { business: BusinessR
     } catch (cause) { setError(businessErrorMessage(cause, Boolean(business))); inFlight.current = false; setBusy(false); }
   }
 
-  return <div className="workflow-narrow"><Link className="secondary-link" href={business ? "/comercio/mi-negocio" : "/cuenta"}>Volver</Link><div className="workflow-heading"><h1>{business ? "Editar comercio" : "Crear mi comercio"}</h1><p>Contanos qué vendés y cómo pueden comprar cerca tuyo.</p></div>
+  return <div className="workflow-narrow"><BackLink href={business ? "/comercio/mi-negocio" : "/cuenta"}>Volver</BackLink><div className="workflow-heading"><h1>{business ? "Editar comercio" : "Crear mi comercio"}</h1><p>Contanos qué vendés y cómo pueden comprar cerca tuyo.</p></div>
     <form className="panel workflow-form" onSubmit={submit}>
       <label>Nombre del comercio<input value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} required maxLength={160} autoComplete="organization" disabled={busy} /></label>
       {business && <p className="info-note">Tu enlace permanente: /tienda/{business.slug}. Se conserva aunque cambies el nombre, la localidad u otros datos del comercio.</p>}
@@ -121,6 +122,7 @@ function BusinessFormFields({ business, onLocationSaved }: { business: BusinessR
       {form.accepts_transfer && <label>Alias para transferencias<input value={form.transfer_alias} onChange={event => setForm({ ...form, transfer_alias: event.target.value })} maxLength={100} placeholder="Opcional" disabled={busy} autoCapitalize="none" spellCheck={false} /><small>Se incluirá en las nuevas reservas con transferencia. CercaYa no procesa ni verifica pagos.</small></label>}
       <p className="info-note">Tus clientes también pueden elegir coordinar el pago con vos.</p>
       {!business && <label className="checkbox-label"><input type="checkbox" required checked={merchantAccepted} onChange={event => setMerchantAccepted(event.target.checked)} disabled={busy} /><span>Declaro que la información de mi comercio es verdadera y acepto las <Link href="/reglas-comercios" target="_blank" rel="noopener noreferrer">Reglas para Comercios</Link>.</span></label>}
+      {business && <BusinessHoursEditor businessId={business.id} disabled={busy || locating} />}
       <FormError message={error} /><button className="primary-button" type="submit" disabled={busy || locating || !ready || !categories.length}>{busy ? business ? "Guardando cambios…" : "Creando comercio…" : business ? "Guardar cambios" : "Crear comercio"}</button>
     </form></div>;
 }

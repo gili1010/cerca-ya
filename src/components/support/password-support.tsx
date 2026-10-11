@@ -1,4 +1,5 @@
 "use client";
+import { BackLink } from "@/components/navigation/back-link";
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -58,6 +59,6 @@ export function PasswordSupport({ reset = false, invalid = false }: { reset?: bo
   if (reset && !valid) return <section className="panel workflow-narrow confirmation"><h1>Este enlace ya no es válido.</h1><Link className="primary-button" href="/recuperar-clave">Solicitar otro enlace</Link></section>;
   return <div className="workflow-narrow auth-page"><div className="workflow-heading"><h1>{reset ? "Nueva contraseña" : "Recuperá tu contraseña"}</h1>{!reset && <p>Ingresá el email de tu cuenta y te enviaremos un enlace para crear una contraseña nueva.</p>}</div><form className="panel workflow-form" onSubmit={submit}>
     {reset ? <><label>Nueva contraseña<input name="password" type="password" autoComplete="new-password" required minLength={6} maxLength={256} /></label><label>Repetir contraseña<input name="repeat" type="password" autoComplete="new-password" required minLength={6} maxLength={256} /></label></> : <label>Email<input name="email" type="email" autoComplete="email" required maxLength={254} /></label>}
-    <FormError message={error} /><button className="primary-button" disabled={busy}>{busy ? "Un momento…" : reset ? "Guardar nueva contraseña" : "Enviar enlace"}</button><Link className="secondary-link" href="/login">Volver a iniciar sesión</Link>
+    <FormError message={error} /><button className="primary-button" disabled={busy}>{busy ? "Un momento…" : reset ? "Guardar nueva contraseña" : "Enviar enlace"}</button><BackLink href="/login">Volver a iniciar sesión</BackLink>
   </form></div>;
 }

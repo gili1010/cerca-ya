@@ -1,4 +1,5 @@
 "use client";
+import { BackLink } from "@/components/navigation/back-link";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -175,13 +176,13 @@ function CartCheckoutSession({ cart, userId, initialName, initialPhone, business
   }
 
   if (recovering) return <p className="workflow-loading" role="status">Comprobando el resultado de tu pedido…</p>;
-  if (differentAccount) return <section className="panel"><h1>Hay un envío pendiente de otra cuenta</h1><p>Ingresá con la cuenta que inició este pedido para comprobar su resultado.</p><Link className="secondary-link" href="/carrito">Volver a mis pedidos en preparación</Link></section>;
-  if (recoveryFailed) return <section className="panel"><h1>Comprobemos tu pedido</h1><p>No pudimos recuperar el resultado anterior. Conservamos tu pedido para evitar enviarlo dos veces.</p><button className="primary-button" type="button" onClick={() => setRecoveryVersion(value => value + 1)}>Comprobar nuevamente</button><Link className="secondary-link" href={backUrl}>Volver a tu pedido</Link></section>;
+  if (differentAccount) return <section className="panel"><h1>Hay un envío pendiente de otra cuenta</h1><p>Ingresá con la cuenta que inició este pedido para comprobar su resultado.</p><BackLink href="/carrito">Volver a mis pedidos en preparación</BackLink></section>;
+  if (recoveryFailed) return <section className="panel"><h1>Comprobemos tu pedido</h1><p>No pudimos recuperar el resultado anterior. Conservamos tu pedido para evitar enviarlo dos veces.</p><button className="primary-button" type="button" onClick={() => setRecoveryVersion(value => value + 1)}>Comprobar nuevamente</button><BackLink href={backUrl}>Volver a tu pedido</BackLink></section>;
   if (!attempt && loading) return <p className="workflow-loading" role="status">Actualizando productos y opciones de entrega…</p>;
-  if (!attempt && (catalogError || !business)) return <section className="panel"><h1>No pudimos preparar el checkout</h1><p>{catalogError || "Este comercio ya no está disponible."}</p><FormError message={error} /><button className="primary-button" type="button" onClick={() => void refresh()}>Actualizar</button><Link className="secondary-link" href={backUrl}>Volver a tu pedido</Link></section>;
+  if (!attempt && (catalogError || !business)) return <section className="panel"><h1>No pudimos preparar el checkout</h1><p>{catalogError || "Este comercio ya no está disponible."}</p><FormError message={error} /><button className="primary-button" type="button" onClick={() => void refresh()}>Actualizar</button><BackLink href={backUrl}>Volver a tu pedido</BackLink></section>;
 
   return <div className="workflow-narrow">
-    <Link className="secondary-link" href={backUrl}>Volver a tu pedido</Link>
+    <BackLink href={backUrl}>Volver a tu pedido</BackLink>
     <div className="workflow-heading"><span className="eyebrow">Un pedido · un comercio</span><h1>Completá tu pedido</h1><p>{businessName} confirma la disponibilidad antes de preparar tus productos.</p></div>
     <form className="panel workflow-form reservation-form" onSubmit={submit} aria-busy={busy}>
       <section aria-label="Productos de tu pedido">

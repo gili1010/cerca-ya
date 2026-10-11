@@ -1,3 +1,4 @@
+import { BackLink } from "@/components/navigation/back-link";
 import Link from "next/link";
 import { readAnalytics, type AnalyticsFilters, type AnalyticsTerm } from "@/lib/admin/analytics";
 import { AdminHeading, adminDate } from "@/components/admin/admin-common";
@@ -22,7 +23,7 @@ function Trends({ rows, total, filters, opportunity = false }: { rows: Analytics
       <tbody>{rows.map(row => <tr key={row.term}><td><strong>{row.display_term}</strong></td><td>{row.total.toLocaleString("es-AR")}</td><td>{row.with_results.toLocaleString("es-AR")}</td><td><span className={`${styles.badge} ${row.without_results > 0 ? styles.blocked : styles.inactive}`}>{row.without_results.toLocaleString("es-AR")}</span></td>{opportunity && <><td>{row.zero_rate.toLocaleString("es-AR")}%</td><td>{adminDate(row.last_search)}</td></>}</tr>)}</tbody>
     </table></div> : <p className={styles.empty}>{total > 0 ? "No hay resultados en esta página. Volvé a la primera página." : "Todavía no hay suficientes búsquedas para mostrar tendencias."}</p>}</div>
     {total > 20 && <nav className={styles.pagination} aria-label={`Páginas de ${opportunity ? "oportunidades" : "lo más buscado"}`}><span>{total} términos · Página {page} de {pages}</span><div>{page > 1 && <Link className={styles.button} href={href(filters, section, page - 1)}>Anterior</Link>}{page < pages && <Link className={styles.button} href={href(filters, section, page + 1)}>Siguiente</Link>}</div></nav>}
-    {page > pages && <Link className={styles.button} href={href(filters, section, 1)}>Volver a la primera página</Link>}
+    {page > pages && <BackLink href={href(filters, section, 1)}>Volver a la primera página</BackLink>}
   </section>;
 }
 export default async function AnalyticsPage({ searchParams }: { searchParams: Promise<Params> }) {

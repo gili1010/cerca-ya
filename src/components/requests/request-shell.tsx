@@ -1,8 +1,9 @@
 "use client";
+import { BackLink } from "@/components/navigation/back-link";
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowLeft, Radio, Store } from "lucide-react";
+import { Radio, Store } from "lucide-react";
 import type { ReactNode } from "react";
 import { useDemo } from "../demo-provider";
 import { Header } from "../home/header";
@@ -17,7 +18,7 @@ export function RequestShell({ children, business = false, realRequests = false 
   return <>
     <Header zone={zone} onZone={() => setModal("zone")} onAccount={() => setModal("account")} onExplore={() => router.push("/")} onRequests={() => router.push("/pedidos")} onHow={() => setModal("how")} />
     <main className={`shell workflow ${business ? "workflow-merchant" : "workflow-buyer"}`}>
-      <div className="workflow-nav"><Link href={business ? "/pedidos" : "/"}><ArrowLeft size={16} />{business ? "Modo comprador" : "Volver a explorar"}</Link><Link href="/comercio"><Store size={16} />Modo comercio</Link></div>
+      <div className="workflow-nav"><BackLink href={business ? "/pedidos" : "/"}>{business ? "Modo comprador" : "Volver a explorar"}</BackLink><Link href="/comercio"><Store size={16} />Modo comercio</Link></div>
       <nav className="workflow-sections" aria-label={business ? "Secciones del comercio" : "Tus pedidos y reservas"}>
         {business ? <>
           <Link href="/comercio" aria-current={pathname === "/comercio" ? "page" : undefined}>Panel</Link>

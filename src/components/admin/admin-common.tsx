@@ -1,3 +1,4 @@
+import { BackLink } from "@/components/navigation/back-link";
 import Link from "next/link";
 import { adminPageHref, adminPageSize, type AdminFilters } from "@/lib/admin/types";
 import styles from "./admin.module.css";
@@ -20,7 +21,7 @@ export function AdminPagination({ path, filters, total }: { path: string; filter
   const pages = Math.max(1, Math.ceil(total / adminPageSize));
   return <nav aria-label="Paginación" className={styles.pagination}>
     <span>{total} resultados · Página {filters.page} de {pages}</span>
-    <div>{filters.page > 1 && <Link className={styles.button} href={adminPageHref(path, filters, filters.page - 1)}>Anterior</Link>}{filters.page < pages && <Link className={styles.button} href={adminPageHref(path, filters, filters.page + 1)}>Siguiente</Link>}{filters.page > pages && <Link className={styles.button} href={adminPageHref(path, filters, 1)}>Volver al inicio</Link>}</div>
+    <div>{filters.page > 1 && <Link className={styles.button} href={adminPageHref(path, filters, filters.page - 1)}>Anterior</Link>}{filters.page < pages && <Link className={styles.button} href={adminPageHref(path, filters, filters.page + 1)}>Siguiente</Link>}{filters.page > pages && <BackLink href={adminPageHref(path, filters, 1)}>Volver al inicio</BackLink>}</div>
   </nav>;
 }
 export function AdminEmpty() { return <p className={styles.empty}>No hay resultados para esta página. Ajustá los filtros o volvé a la primera página.</p>; }

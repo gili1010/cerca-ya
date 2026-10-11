@@ -1,6 +1,6 @@
 "use client";
+import { BackLink } from "@/components/navigation/back-link";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, type FormEvent } from "react";
 import { Minus, Plus, Store, Truck } from "lucide-react";
@@ -64,7 +64,7 @@ function ReservationFields({ product, initialDeliveryType, initialName, initialP
     } catch { setError("No pudimos crear la reserva. Volvé a intentar con los mismos datos."); setBusy(false); submitting.current = false; }
   }
   const locked = busy || attempt.current !== null;
-  return <div className="workflow-narrow"><Link className="secondary-link" href={`/producto/${product.id}`}>Volver al producto</Link><div className="workflow-heading"><span className="eyebrow">Reservá cerca tuyo</span><h1>Reservar producto</h1><p>El comercio confirma la disponibilidad antes de preparar tu pedido.</p></div><form className="panel workflow-form reservation-form" onSubmit={submit}>
+  return <div className="workflow-narrow"><BackLink href={`/producto/${product.id}`}>Volver al producto</BackLink><div className="workflow-heading"><span className="eyebrow">Reservá cerca tuyo</span><h1>Reservar producto</h1><p>El comercio confirma la disponibilidad antes de preparar tu pedido.</p></div><form className="panel workflow-form reservation-form" onSubmit={submit}>
     <ReservationProduct name={product.name} image={product.image} business={product.store} productId={product.id} />
     <p className="offer-stock">{onDemand ? "Se prepara a pedido" : `Stock informado: ${stock} unidades`} · {money(product.price)} c/u</p>
     <div className="reservation-quantity"><span id="quantity-label">Cantidad</span><div role="group" aria-labelledby="quantity-label"><button type="button" aria-label="Restar una unidad" disabled={locked || quantity <= 1 || !available} onClick={() => setQuantity(quantity - 1)}><Minus size={18} /></button><output aria-live="polite">{quantity}</output><button type="button" aria-label="Sumar una unidad" disabled={locked || quantity >= (onDemand ? 2147483647 : stock) || !available} onClick={() => setQuantity(quantity + 1)}><Plus size={18} /></button></div></div>

@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import { BackLink } from "@/components/navigation/back-link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useAuth } from "../auth/auth-provider";
 import { FormError } from "../requests/request-common";
@@ -31,7 +31,7 @@ export function ContactForm() {
     } catch { setError("No pudimos enviar tu consulta. Revisá tu conexión y volvé a intentar."); }
     finally { flight.current = false; setBusy(false); }
   }
-  if (done) return <section className="panel workflow-narrow confirmation"><h1>Recibimos tu consulta</h1><p>Vamos a revisar tu mensaje y contactarte usando los datos que nos dejaste.</p><Link className="primary-button" href="/">Volver a CercaYa</Link></section>;
+  if (done) return <section className="panel workflow-narrow confirmation"><h1>Recibimos tu consulta</h1><p>Vamos a revisar tu mensaje y contactarte usando los datos que nos dejaste.</p><BackLink href="/">Volver a CercaYa</BackLink></section>;
   return <div className="workflow-narrow auth-page"><div className="workflow-heading"><h1>Contactá con CercaYa</h1><p>Contanos qué necesitás y te vamos a contactar.</p></div><form ref={formRef} className="workflow-form panel" onSubmit={submit} onInput={event => { const field = event.target; if (field instanceof HTMLInputElement) touched.current.add(field.name); }}>
     <label>Nombre<input name="name" autoComplete="name" required maxLength={120} /></label>
     <label>Método preferido<select name="preferred_contact" value={preferred} onChange={event => setPreferred(event.target.value)}><option value="PHONE">WhatsApp / teléfono</option><option value="EMAIL">Email</option></select></label>

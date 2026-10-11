@@ -1,4 +1,5 @@
 "use client";
+import { BackLink } from "@/components/navigation/back-link";
 
 import Link from "next/link";
 import { useRef, useState } from "react";
@@ -24,13 +25,13 @@ function LoadOfferForm({ business, requestId, productId }: { business: BusinessR
   if (data.error) return <section className="panel"><FormError message={data.error} /><button className="outline-button" onClick={() => void data.refresh()}>Reintentar</button></section>;
   const request = data.data?.requests[0];
   if (!request || Date.parse(request.expires_at) <= now) return <UnavailableForm message="Este pedido ya no acepta ofertas." />;
-  if (request.my_offer_id) return <section className="empty-state"><h1>✅ Ya enviaste una oferta</h1><p>Ya enviaste una oferta para este pedido.</p><Link className="primary-button" href={`/comercio/oferta-enviada/${request.my_offer_id}`}>Ver mi oferta</Link><Link className="secondary-link" href="/comercio/radar">Volver al Radar</Link></section>;
+  if (request.my_offer_id) return <section className="empty-state"><h1>✅ Ya enviaste una oferta</h1><p>Ya enviaste una oferta para este pedido.</p><Link className="primary-button" href={`/comercio/oferta-enviada/${request.my_offer_id}`}>Ver mi oferta</Link><BackLink href="/comercio/radar">Volver al Radar</BackLink></section>;
   const product = productId ? data.data?.products.find(row => row.id === productId) : undefined;
   if (productId && (!isUuid(productId) || !product || !canOfferProduct(product, business))) return <section className="empty-state"><h1>Este producto no está disponible para ofrecer</h1><p>Revisá el stock y las opciones de entrega de tu catálogo.</p><Link className="primary-button" href={`/comercio/oportunidades/${requestId}/responder`}>Ofrecer otro producto</Link></section>;
   return <><LiveFeedback state={data.live} /><button className="secondary-link" disabled={data.busy} onClick={() => void data.refresh()}>{data.busy ? "Actualizando..." : "Actualizar pedido"}</button><OfferFields key={`${data.userId}:${business.id}:${request.id}:${productId ?? "manual"}`} business={business} request={request} product={product} refresh={data.refresh} /></>;
 }
 function UnavailableForm({ message }: { message: string }) {
-  return <section className="empty-state"><h1>{message}</h1><Link className="primary-button" href="/comercio/radar">Volver al Radar</Link></section>;
+  return <section className="empty-state"><h1>{message}</h1><BackLink href="/comercio/radar">Volver al Radar</BackLink></section>;
 }
 function OfferFields({ business, request, product, refresh }: { business: BusinessRow; request: RadarRequestRow; product?: ProductRow; refresh: () => Promise<unknown> }) {
   const router = useRouter();
@@ -67,7 +68,7 @@ function OfferFields({ business, request, product, refresh }: { business: Busine
       router.push(`/comercio/oferta-enviada/${data}`);
     } catch { setError("No pudimos enviar la oferta."); inFlight.current = false; setSubmitting(false); }
   }
-  return <div className="workflow-narrow"><Link className="secondary-link" href="/comercio/radar">Volver al Radar</Link><div className="workflow-heading"><span className="eyebrow">{business.name}</span><h1>Respondé con una oferta</h1><p>{request.title}</p>{product && <p>Precargamos tu producto. Revisá la compatibilidad, el precio y el tiempo de entrega antes de enviar.</p>}</div>
+  return <div className="workflow-narrow"><BackLink href="/comercio/radar">Volver al Radar</BackLink><div className="workflow-heading"><span className="eyebrow">{business.name}</span><h1>Respondé con una oferta</h1><p>{request.title}</p>{product && <p>Precargamos tu producto. Revisá la compatibilidad, el precio y el tiempo de entrega antes de enviar.</p>}</div>
     <form className="workflow-form panel" onSubmit={event => { event.preventDefault(); void submit(); }}>
       <label htmlFor="offered-product">Producto ofrecido<input id="offered-product" required minLength={3} maxLength={120} disabled={submitting} value={form.product_name} onChange={event => setForm({ ...form, product_name: event.target.value })} /></label>
       <label htmlFor="offered-price">Precio (ARS)<input id="offered-price" type="number" inputMode="decimal" required min="0.01" max="9999999999.99" step="0.01" disabled={submitting} value={form.price || ""} onChange={event => setForm({ ...form, price: Number(event.target.value) })} /></label>

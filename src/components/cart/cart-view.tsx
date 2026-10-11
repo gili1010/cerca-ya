@@ -1,8 +1,9 @@
 "use client";
+import { BackLink } from "@/components/navigation/back-link";
 
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowLeft, ArrowRight, Check, Minus, PackageOpen, Plus, ShoppingBag, Store, Trash2, Truck } from "lucide-react";
+import { ArrowRight, Check, Minus, PackageOpen, Plus, ShoppingBag, Store, Trash2, Truck } from "lucide-react";
 import { money, type Product } from "@/lib/products";
 import { isOnDemand, isProductAvailable } from "@/lib/product-availability";
 import { ProductImage } from "@/components/details/product-image";
@@ -21,7 +22,7 @@ export function CartIndexView() {
   if (!ready) return <div className="panel" role="status">Cargando tus pedidos...</div>;
 
   return <div className={styles.page}>
-    <Link className="secondary-link" href="/"><ArrowLeft size={16} aria-hidden="true" />Seguir explorando</Link>
+    <BackLink href="/">Seguir explorando</BackLink>
     <header className={styles.pageHeading}>
       <span className="eyebrow"><ShoppingBag size={16} aria-hidden="true" />A UN PASO DE PEDIR</span>
       <h1>Tus pedidos en preparación</h1>
@@ -56,7 +57,7 @@ export function CartView({ businessId }: { businessId: string }) {
 
   if (!ready) return <div className="panel" role="status">Cargando tu pedido...</div>;
   if (!cart) return <div className={styles.page}>
-    <Link className="secondary-link" href="/carrito"><ArrowLeft size={16} aria-hidden="true" />Tus pedidos en preparación</Link>
+    <BackLink href="/carrito">Tus pedidos en preparación</BackLink>
     <section className={`panel ${styles.empty}`}>
       <PackageOpen size={36} aria-hidden="true" />
       <h1>Este pedido todavía está vacío</h1>
@@ -99,7 +100,7 @@ export function CartView({ businessId }: { businessId: string }) {
   }
 
   return <div className={styles.page}>
-    <Link className="secondary-link" href="/carrito"><ArrowLeft size={16} aria-hidden="true" />Tus pedidos en preparación</Link>
+    <BackLink href="/carrito">Tus pedidos en preparación</BackLink>
     <header className={styles.orderHeading}>
       <div><span className="eyebrow"><ShoppingBag size={16} aria-hidden="true" />TU PEDIDO</span>
         <h1>{business?.name || cart.businessName}</h1>
@@ -144,7 +145,7 @@ export function CartView({ businessId }: { businessId: string }) {
               </article>;
             })}
           </div>
-          <Link className={styles.continueShopping} href={storeHref}><ArrowLeft size={16} aria-hidden="true" />Seguir comprando en esta tienda</Link>
+          <BackLink href={storeHref}>Seguir comprando en esta tienda</BackLink>
         </section>
 
         {suggestions.length > 0 && <section className={styles.suggestions} aria-labelledby="cart-suggestions-title">

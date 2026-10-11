@@ -1,4 +1,5 @@
 "use client";
+import { BackLink } from "@/components/navigation/back-link";
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
@@ -32,7 +33,7 @@ function ProductFormLoader({ business, productId }: { business: BusinessRow; pro
   }, [business.id, productId, attempt]);
   if (error) return <section className="panel"><FormError message={error} /><button className="outline-button" onClick={() => { setError(""); setAttempt(value => value + 1); }}>Reintentar</button></section>;
   if (!data) return <p className="workflow-loading" role="status">Cargando formulario…</p>;
-  if (productId && !data.product) return <section className="empty-state"><h1>Producto no disponible</h1><p>No encontramos ese producto en tu comercio.</p><Link className="primary-button" href="/comercio/productos">Volver a Mis productos</Link></section>;
+  if (productId && !data.product) return <section className="empty-state"><h1>Producto no disponible</h1><p>No encontramos ese producto en tu comercio.</p><BackLink href="/comercio/productos">Volver a Mis productos</BackLink></section>;
   return <ProductFormFields business={business} product={data.product} initialImage={data.image} categories={data.categories} preferredCategoryIds={data.categoryIds} />;
 }
 
@@ -107,7 +108,7 @@ function ProductFormFields({ business, product, initialImage, categories, prefer
     } finally { inFlight.current = false; setBusy(false); setPhase(""); }
   }
 
-  return <div className="workflow-narrow"><Link className="secondary-link" href="/comercio/productos">Volver a Mis productos</Link>
+  return <div className="workflow-narrow"><BackLink href="/comercio/productos">Volver a Mis productos</BackLink>
     <div className="workflow-heading"><span className="eyebrow">{business.name}</span><h1>{product ? "Editar producto" : "Publicar producto"}</h1><p>Precio, disponibilidad y stock de tu comercio.</p></div>
     <form className="panel workflow-form" onSubmit={submit} aria-busy={busy}>
       <label>Nombre<input required maxLength={160} value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} disabled={busy} /></label>

@@ -1,8 +1,9 @@
 "use client";
+import { BackLink, BackButton } from "@/components/navigation/back-link";
 
 import Link from "next/link";
 import { useRef, useState } from "react";
-import { ArrowLeft, Clock3, ListChecks, Store, Truck } from "lucide-react";
+import { Clock3, ListChecks, Store, Truck } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { reservationError, reservationItems, type ReservationAction } from "@/lib/real-reservations";
 import { Dialog } from "../home/dialog";
@@ -46,7 +47,7 @@ export function ReservationDetail({ id, business = false, confirmation = false }
   if (!row || !display) return data.error ? <section className="panel"><FormError message={data.error} /><button className="outline-button" onClick={() => void data.refresh()}>Reintentar</button></section> : <UnavailableReservation business={business} />;
   return <div className={styles.root}>
     <div className={styles.toolbar}>
-      <Link className="secondary-link" href={business ? "/comercio/reservas" : "/reservas"}><ArrowLeft size={16} aria-hidden="true" />{business ? "Pedidos recibidos" : "Mis pedidos"}</Link>
+      <BackLink href={business ? "/comercio/reservas" : "/reservas"}>{business ? "Pedidos recibidos" : "Mis pedidos"}</BackLink>
       <button className="secondary-link" disabled={data.busy || busy} onClick={() => void data.refresh()}>{data.busy ? "Actualizando..." : "Actualizar"}</button>
     </div>
     <LiveFeedback state={data.live} notice={data.notice} /><FormError message={data.error} />
@@ -95,6 +96,6 @@ export function ReservationDetail({ id, business = false, confirmation = false }
         <details className={styles.identifier}><summary>Ver identificador completo</summary><p>{row.id}</p></details>
       </section>
     </div>
-    {cancelDialog && <Dialog title="Cancelar pedido" onClose={() => { if (!busy) setCancelDialog(false); }}><div className="dialog-body text-dialog"><h2>¿Cancelar este pedido?</h2><p>{onDemand ? "Se cancelará la preparación de este pedido." : display.status === "CONFIRMED" ? "Las unidades descontadas de los productos con stock volverán al stock." : "El pedido dejará de esperar confirmación."}</p><FormError message={error} /><div className="dialog-actions"><button className="danger-button" disabled={busy || !cancellable} onClick={() => void act("cancel")}>{busy ? "Cancelando..." : "Cancelar pedido"}</button><button className="ghost-button" disabled={busy} onClick={() => setCancelDialog(false)}>Volver</button></div>{!cancellable && <p className="info-note">Este pedido ya cambió de estado.</p>}</div></Dialog>}
+    {cancelDialog && <Dialog title="Cancelar pedido" onClose={() => { if (!busy) setCancelDialog(false); }}><div className="dialog-body text-dialog"><h2>¿Cancelar este pedido?</h2><p>{onDemand ? "Se cancelará la preparación de este pedido." : display.status === "CONFIRMED" ? "Las unidades descontadas de los productos con stock volverán al stock." : "El pedido dejará de esperar confirmación."}</p><FormError message={error} /><div className="dialog-actions"><button className="danger-button" disabled={busy || !cancellable} onClick={() => void act("cancel")}>{busy ? "Cancelando..." : "Cancelar pedido"}</button><BackButton  disabled={busy} onClick={() => setCancelDialog(false)}>Volver</BackButton></div>{!cancellable && <p className="info-note">Este pedido ya cambió de estado.</p>}</div></Dialog>}
   </div>;
 }

@@ -139,3 +139,6 @@
   .headerActions .shareButtons { display: grid; grid-template-columns: minmax(0, 1fr); }
   .socialLinks { margin-top: 22px; }
 }
+
+.instagramIcon { color: #c13584; }
+.facebookIcon { color: #1877f2; }

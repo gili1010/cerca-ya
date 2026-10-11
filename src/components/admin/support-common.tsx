@@ -1,3 +1,4 @@
+import { BackLink } from "@/components/navigation/back-link";
 import Link from "next/link";
 import { adminPageSize } from "@/lib/admin/types";
 import { orderStatusLabels, reportStatusLabels, supportHref, type SupportFilters } from "@/lib/admin/phase2-types";
@@ -14,7 +15,7 @@ export function SupportFiltersForm({ filters, section }: { filters: SupportFilte
 }
 export function SupportPagination({ path, filters, total }: { path: string; filters: SupportFilters; total: number }) {
   const pages = Math.max(1, Math.ceil(total / adminPageSize));
-  return <nav aria-label="Paginación" className={styles.pagination}><span>{total} resultados · Página {filters.page} de {pages}</span><div>{filters.page > 1 && <Link className={styles.button} href={supportHref(path, filters, filters.page - 1)}>Anterior</Link>}{filters.page < pages && <Link className={styles.button} href={supportHref(path, filters, filters.page + 1)}>Siguiente</Link>}{filters.page > pages && <Link className={styles.button} href={supportHref(path, filters, 1)}>Volver al inicio</Link>}</div></nav>;
+  return <nav aria-label="Paginación" className={styles.pagination}><span>{total} resultados · Página {filters.page} de {pages}</span><div>{filters.page > 1 && <Link className={styles.button} href={supportHref(path, filters, filters.page - 1)}>Anterior</Link>}{filters.page < pages && <Link className={styles.button} href={supportHref(path, filters, filters.page + 1)}>Siguiente</Link>}{filters.page > pages && <BackLink href={supportHref(path, filters, 1)}>Volver al inicio</BackLink>}</div></nav>;
 }
 export function SupportBadge({ label, warning = false }: { label: string; warning?: boolean }) { return <span className={`${styles.badge} ${warning ? styles.blocked : styles.inactive}`}>{label}</span>; }
 export function PrivateSupportNotice() { return <p className={styles.muted}>Información privada — usar sólo para soporte.</p>; }

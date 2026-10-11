@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { BUSINESS_DAYS, BUSINESS_EDITOR_DAYS, formatBusinessDay, getBusinessHoursState, type BusinessHoursSchedule } from "@/lib/business-hours";
 import { Dialog } from "../home/dialog";
 import styles from "./business-hours.module.css";
@@ -21,8 +22,8 @@ export function BusinessHoursStatus({ schedule }: { schedule: BusinessHoursSched
   return <div className={styles.status}>
     <p className={state.state === "OPEN" ? styles.open : styles.neutral}><span className={styles.dot} aria-hidden="true" />{state.label}</p>
     <div className={styles.today}><span>Hoy · {formatBusinessDay(state.today)}</span><button type="button" onClick={() => setOpen(true)}>Ver horarios</button></div>
-    {open && <Dialog title="Horarios de atención" className={styles.dialog} onClose={() => setOpen(false)}><h2>Horarios de atención</h2><p className={styles.note}>Horario del comercio. No garantiza stock, envío ni confirmación de pedidos.</p><dl className={styles.week}>
+    {open && createPortal(<Dialog title="Horarios de atención" className={styles.dialog} onClose={() => setOpen(false)}><header className={styles.publicHeader}><span className={styles.eyebrow}>PLANIFICÁ TU VISITA</span><h2>Horarios de atención</h2><p className={styles.note}>Horario del comercio. No garantiza stock, envío ni confirmación de pedidos.</p></header><dl className={styles.week}>
       {BUSINESS_EDITOR_DAYS.map(day => <div key={day} className={day === state.weekday ? styles.currentDay : undefined}><dt>{BUSINESS_DAYS[day]}{day === state.weekday && <small>Hoy</small>}</dt><dd>{formatBusinessDay(schedule.periods.filter(p => p.weekday === day))}</dd></div>)}
-    </dl><button className="outline-button" type="button" onClick={() => setOpen(false)}>Cerrar</button></Dialog>}
+    </dl></Dialog>, document.body)}
   </div>;
 }

@@ -1,34 +1,79 @@
-.status { display: grid; gap: 7px; margin-top: 18px; font-size: var(--text-sm); line-height: 1.6; min-width: 0; }
-.status p { display: flex; align-items: baseline; gap: 8px; margin: 0; overflow-wrap: anywhere; font-weight: 600; }
-.open { color: var(--green); }
-.neutral { color: var(--muted); }
-.dot { display: inline-block; width: 7px; height: 7px; flex-shrink: 0; border-radius: 50%; background: currentColor; }
-.today { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 14px; color: var(--muted); font-size: var(--text-xs); }
-.today > span { overflow-wrap: anywhere; }
-.today button,.textButton { min-height: 44px; padding: 6px 0; border: 0; background: transparent; color: var(--green); font: inherit; font-size: var(--text-xs); font-weight: 600; cursor: pointer; text-align: left; }
-.status button:focus-visible,.editor :is(button,input):focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
-.dialog { padding: 28px; width: min(480px,calc(100% - 32px)); }
-.dialog h2 { margin: 0 46px 14px 0; font-size: 23px; }
-.note { color: var(--muted); font-size: var(--text-sm); line-height: 1.7; }
-.week { display: grid; gap: 4px; margin: 20px 0; }
-.week > div { display: grid; grid-template-columns: minmax(90px,1fr) minmax(0,1.7fr); gap: 12px; padding: 10px 12px; border-radius: var(--radius-md); font-size: var(--text-sm); }
-.week dt { text-transform: capitalize; font-weight: 600; }
-.week dd { margin: 0; color: var(--muted); overflow-wrap: anywhere; }
-.week small { display: block; color: var(--green); font-size: 11px; }
-.currentDay { background: var(--success-bg); }
-.dialog > button:last-child { width: 100%; }
-.editor { scroll-margin-top: 24px; margin-block: 32px; padding: 24px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); }
-.editor h2,.summary h2 { margin: 0 0 14px; font-size: var(--text-lg); }
-.days { min-width: 0; padding: 0; border: 0; margin: 22px 0; }
-.day { border-top: 1px solid var(--line); padding: 18px 0; }
-.dayHeading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.dayHeading h3 { text-transform: capitalize; margin: 0; font-size: var(--text-sm); }
-.dayHeading label { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: var(--text-sm); }
-.period { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr) auto; gap: 12px; align-items: end; margin-top: 12px; }
-.period label { display: grid; gap: 8px; font-size: var(--text-xs); }
-.period input { width: 100%; min-width: 0; min-height: 48px; padding: 10px; border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); font: inherit; }
-.dayActions { display: flex; flex-wrap: wrap; gap: 4px 20px; margin-top: 8px; }
-.save { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
-.save p { color: var(--green); font-size: var(--text-sm); }
-.summary { margin-top: 24px; padding: 20px 24px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); }
-@media(max-width:600px) { .editor { padding: 20px; } .period { gap: 8px; grid-template-columns: minmax(0,1fr) minmax(0,1fr); } .period > button { grid-column: 1/-1; justify-self: start; } .today { display: grid; gap: 2px; } .today button { justify-self: start; } .save > button { width: 100%; } .week > div { padding: 9px 6px; } }
+.status { display:grid; gap:7px; margin-top:18px; font-size:var(--text-sm); line-height:1.6; min-width:0; }
+.status p { display:flex; align-items:baseline; gap:8px; margin:0; overflow-wrap:anywhere; font-weight:600; }
+.open { color:var(--green); }
+.neutral { color:var(--muted); }
+.dot { width:7px; height:7px; flex-shrink:0; border-radius:50%; background:currentColor; }
+.today { display:flex; align-items:center; flex-wrap:wrap; gap:8px 14px; color:var(--muted); font-size:var(--text-xs); }
+.today > span { overflow-wrap:anywhere; }
+.today button { min-height:40px; padding:8px 12px; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--green); font:inherit; font-weight:600; cursor:pointer; }
+.summary :is(button,select,input):focus-visible,.editorDialog :is(button,select,input):focus-visible,.dialog button:focus-visible,.status button:focus-visible { outline:3px solid var(--green); outline-offset:3px; }
+.dialog { width:min(520px,calc(100% - 32px)); padding:0; }
+.publicHeader { padding:28px 28px 22px; border-bottom:1px solid var(--line); background:var(--surface-soft); }
+.publicHeader h2,.modalHeader h2 { margin:12px 40px 8px 0; font-size:24px; line-height:1.25; letter-spacing:-.035em; }
+.eyebrow { display:inline-flex; align-items:center; gap:7px; color:var(--green); font-size:10px; font-weight:700; letter-spacing:.1em; }
+.note { margin:0; color:var(--muted); font-size:var(--text-sm); line-height:1.65; }
+.week { display:grid; gap:4px; margin:0; padding:18px; }
+.week > div { display:grid; grid-template-columns:minmax(100px,1fr) minmax(0,1.7fr); align-items:center; gap:14px; padding:13px 14px; border-radius:12px; font-size:var(--text-sm); }
+.week dt { display:flex; flex-wrap:wrap; align-items:center; gap:7px; text-transform:capitalize; font-weight:600; }
+.week dd { margin:0; color:var(--muted); overflow-wrap:anywhere; line-height:1.65; text-align:right; }
+.week small { padding:2px 7px; background:var(--surface); border:1px solid var(--line); border-radius:20px; color:var(--green); font-size:10px; }
+.currentDay { background:var(--success-bg); }
+.summary { margin-block:8px; padding:22px; border:1px solid var(--line); border-radius:var(--radius-lg); background:var(--surface); }
+.cardHeading { display:flex; align-items:flex-start; gap:12px; }
+.clock { display:grid; place-items:center; flex-shrink:0; width:40px; height:40px; border-radius:12px; background:var(--surface-soft); color:var(--green); }
+.summary .cardHeading h2 { margin:0 0 5px; font-size:18px; }
+.cardHeading p { margin:0; color:var(--muted); font-size:12px; line-height:1.6; }
+.scheduleSummary { display:grid; gap:6px; margin:18px 0; font-size:14px; line-height:1.6; }
+.scheduleSummary p { margin:0; }
+.editButton,.copyButton,.discardButton { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:10px 14px; border:1px solid var(--line-strong); border-radius:12px; background:var(--surface); color:var(--green); font:inherit; font-size:13px; font-weight:600; cursor:pointer; }
+.editButton { margin-top:14px; }
+.success { display:flex; align-items:center; gap:7px; margin:14px 0 0; color:var(--green); font-size:13px; line-height:1.6; }
+.editorDialog { width:min(620px,calc(100% - 32px)); max-height:90dvh; padding:0; overflow:hidden; }
+.modalLayout { display:flex; flex-direction:column; height: min(780px,90dvh); max-height:90dvh; margin:0; }
+.modalHeader { flex-shrink:0; padding:24px 28px 20px; border-bottom:1px solid var(--line); background:var(--surface-soft); }
+.modalHeader p { margin:0; color:var(--muted); font-size:14px; line-height:1.6; }
+.modalBody { flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding:22px 28px; }
+.days { min-width:0; padding:0; border:0; margin:18px 0 0; }
+.day { border-top:1px solid var(--line); padding:16px 0 20px; }
+.dayHeading { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.dayHeading h3 { text-transform:capitalize; margin:0; font-size:16px; font-weight:650; }
+.dayHeading label { display:inline-flex; align-items:center; gap:8px; min-height:44px; font-size:13px; color:var(--muted); }
+.dayHeading input { width:20px; height:20px; accent-color:var(--green); }
+.period { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:10px 18px; margin-top:12px; }
+.period + .period { padding-top:14px; border-top:1px dashed var(--line); margin-top:16px; }
+.periodTitle { grid-column:1/-1; font-size:12px; color:var(--muted); }
+.timeField { display:grid; gap:8px; min-width:0; font-size:12px; color:var(--muted); }
+.timeSelect { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; gap:5px; }
+.timeSelect select { width:100%; min-width:0; min-height:50px; padding:10px 8px; border:1px solid var(--line-strong); border-radius:10px; background:var(--surface); color:var(--ink); font:inherit; font-size:17px; font-weight:600; }
+.timeSelect > span { color:var(--ink); font-weight:600; }
+.closedDay { margin:4px 0 0; color:var(--muted); font-size:12px; }
+.overnight { grid-column:1/-1; margin:0; color:var(--green); font-size:12px; }
+.textButton,.removeButton { min-height:44px; padding:8px 0; border:0; background:transparent; color:var(--green); font:inherit; font-size:12px; font-weight:600; cursor:pointer; text-align:left; }
+.removeButton { grid-column:1/-1; justify-self:start; color:var(--muted); }
+.dayActions { display:flex; flex-wrap:wrap; align-items:center; gap:4px 18px; margin-top:8px; }
+.copyButton { font-size:12px; border-color:var(--line); background:var(--surface-soft); }
+.modalFooter { position:sticky; bottom:0; flex-shrink:0; padding:16px 28px 22px; border-top:1px solid var(--line); background:var(--surface); box-shadow:0 -5px 18px #14362906; }
+.footerHint { margin:0 0 12px; color:var(--muted); font-size:11px; line-height:1.6; }
+.footerActions { display:grid; grid-template-columns:1fr 1.5fr; gap:10px; }
+.footerActions button { min-height:48px; padding-inline:12px; font-size:13px; }
+.modalError,.discardNote { margin:0 0 12px; font-size:13px; line-height:1.5; }
+.modalError { color:var(--danger,#9c3434); }
+.discardNote { color:var(--ink); }
+.hint { padding:12px; margin:14px 0; background:var(--surface-soft); border-radius:10px; color:var(--muted); font-size:12px; line-height:1.6; }
+@media(hover:hover) { .editButton:hover,.copyButton:hover,.today button:hover { background:var(--surface-soft); border-color:var(--green); } .textButton:hover,.removeButton:hover { text-decoration:underline; } }
+@media(max-width:600px) {
+  .summary { padding:18px; }
+  .today { display:grid; gap:8px; }
+  .today button { justify-self:start; }
+  .publicHeader { padding:24px 20px 18px; }
+  .publicHeader h2,.modalHeader h2 { font-size:22px; }
+  .week { padding:12px; }
+  .week > div { grid-template-columns:minmax(85px,1fr) minmax(0,1.6fr); gap:10px; padding:12px 10px; }
+  .week dt { display:grid; gap:5px; }
+  .week small { justify-self:start; }
+  .modalHeader { padding:22px 20px 18px; }
+  .modalBody { padding:18px 20px; }
+  .period { gap:10px 12px; }
+  .timeSelect select { padding:10px 5px; font-size:16px; }
+  .modalFooter { padding:14px 18px 18px; }
+}

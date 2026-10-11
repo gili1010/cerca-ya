@@ -1,4 +1,5 @@
 "use client";
+import { BackLink } from "@/components/navigation/back-link";
 
 import Link from "next/link";
 import { useRef, useState } from "react";
@@ -49,7 +50,7 @@ export function RealOfferDetail({ requestId, offerId, seller = false }: { reques
     } catch { setError("No pudimos retirar la oferta. Actualizá para comprobar su estado y volvé a intentar."); }
     finally { inFlight.current = false; setBusy(false); }
   }
-  return <div className="workflow-narrow"><Link className="secondary-link" href={back}>{seller ? "Volver al Radar" : "Volver a mi pedido"}</Link><div className="offers-heading"><h1>{seller ? "Mi oferta" : "Detalle de oferta"}</h1><button className="outline-button" disabled={data.busy || busy} onClick={() => void data.refresh()}>Actualizar</button></div>
+  return <div className="workflow-narrow"><BackLink href={back}>{seller ? "Volver al Radar" : "Volver a mi pedido"}</BackLink><div className="offers-heading"><h1>{seller ? "Mi oferta" : "Detalle de oferta"}</h1><button className="outline-button" disabled={data.busy || busy} onClick={() => void data.refresh()}>Actualizar</button></div>
     <LiveFeedback state={data.live} notice={data.notice} />
     {data.loading && <p className="workflow-loading" role="status">Cargando ofertas...</p>}<FormError message={data.error} />
     {!data.loading && !data.error && !offer && <section className="empty-state"><h2>Esta oferta no está disponible para tu cuenta.</h2><p>Comprobá que ingresaste con la cuenta correspondiente.</p></section>}

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { BackLink } from "@/components/navigation/back-link";
 import { isProductUuid } from "@/lib/public-catalog";
 import { loadPublicProduct } from "@/lib/public-product-server";
 import { RequestShell } from "@/components/requests/request-shell";
@@ -12,5 +12,5 @@ export default async function Page({ params, searchParams }: { params: Promise<{
   const returnTo = `/producto/${encodeURIComponent(id)}/reservar${entrega === "delivery" ? "?entrega=delivery" : ""}`;
   await requireUser(returnTo);
   const result = isProductUuid(id) ? await loadPublicProduct(id) : { product: null, error: false };
-  return <RequestShell realRequests><RequireAuth returnTo={returnTo}>{result.error ? <section className="empty-state"><h1>No pudimos cargar el producto.</h1><a className="primary-button" href={returnTo}>Reintentar</a></section> : !result.product ? <section className="empty-state"><h1>Este producto ya no está disponible.</h1><Link className="primary-button" href="/">Volver a explorar</Link></section> : <ReservationForm product={result.product} initialDeliveryType={entrega === "delivery" ? "delivery" : "pickup"} />}</RequireAuth></RequestShell>;
+  return <RequestShell realRequests><RequireAuth returnTo={returnTo}>{result.error ? <section className="empty-state"><h1>No pudimos cargar el producto.</h1><a className="primary-button" href={returnTo}>Reintentar</a></section> : !result.product ? <section className="empty-state"><h1>Este producto ya no está disponible.</h1><BackLink href="/">Volver a explorar</BackLink></section> : <ReservationForm product={result.product} initialDeliveryType={entrega === "delivery" ? "delivery" : "pickup"} />}</RequireAuth></RequestShell>;
 }

@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { BackLink } from "@/components/navigation/back-link";
 import { notFound } from "next/navigation";
 import { DetailShell } from "@/components/details/detail-shell";
 import { StoreHeader } from "@/components/stores/store-header";
@@ -26,12 +25,12 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     <h1>No pudimos cargar esta tienda.</h1>
     <p>Intentá nuevamente en unos momentos.</p>
     <a className="primary-button" href={`/tienda/${encodeURIComponent(slug)}`}>Reintentar</a>
-    <Link className="secondary-link" href="/">Volver a explorar</Link>
+    <BackLink href="/">Volver a explorar</BackLink>
   </section></DetailShell>;
   if (!store) notFound();
 
   return <DetailShell>
-    <Link className={styles.backLink} href="/"><ArrowLeft size={16} aria-hidden="true" />Explorar productos</Link>
+    <BackLink href="/">Explorar productos</BackLink>
     <StoreHeader business={store.business} categories={store.categories} hours={store.hours} />
     <StoreCatalog products={store.products} />
     <StoreCartBar businessId={store.business.id} products={store.products} />

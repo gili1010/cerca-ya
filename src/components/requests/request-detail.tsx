@@ -1,4 +1,5 @@
 "use client";
+import { BackButton } from "@/components/navigation/back-link";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -23,7 +24,7 @@ export function RequestDetail({ id }: { id: string }) {
     {request.status !== "OPEN" && <p className="info-note">Este pedido está {request.status === "CANCELLED" ? "cancelado" : "cerrado"}. Podés consultar sus ofertas, pero no recibir ni reservar otras.</p>}
     <div className="offer-grid">{offers.map(offer => <OfferCard key={offer.id} offer={offer} />)}</div>
     {!offers.length && <div className="empty-state"><Megaphone size={30} /><h2>{request.status === "OPEN" ? "Estamos buscando comercios" : "Este pedido no recibió ofertas"}</h2><p>{request.status === "OPEN" ? "Probá cómo responde un vendedor desde el modo comercio. La oferta aparecerá acá automáticamente." : "Podés crear un nuevo pedido cuando lo necesites."}</p>{request.status === "OPEN" && <Link className="primary-button" href="/comercio/oportunidades"><Store size={17} />Probar modo comercio</Link>}</div>}
-    {action && <Dialog title={action === "close" ? "Cerrar pedido" : "Cancelar pedido"} onClose={() => setAction(null)}><div className="dialog-body text-dialog"><h2>{action === "close" ? "¿Cerrar este pedido?" : "¿Cancelar este pedido?"}</h2><p>Se conservarán los datos y las ofertas, pero el pedido dejará de recibir respuestas. Podrás crear otro pedido si lo necesitás.</p><FormError message={error} /><div className="dialog-actions"><button className="primary-button" onClick={() => { try { requestActions[action](id); setAction(null); } catch (cause) { setError(cause instanceof Error ? cause.message : "No se pudo actualizar el pedido."); } }}>{action === "close" ? "Cerrar pedido" : "Cancelar pedido"}</button><button onClick={() => setAction(null)}>Volver</button></div></div></Dialog>}
+    {action && <Dialog title={action === "close" ? "Cerrar pedido" : "Cancelar pedido"} onClose={() => setAction(null)}><div className="dialog-body text-dialog"><h2>{action === "close" ? "¿Cerrar este pedido?" : "¿Cancelar este pedido?"}</h2><p>Se conservarán los datos y las ofertas, pero el pedido dejará de recibir respuestas. Podrás crear otro pedido si lo necesitás.</p><FormError message={error} /><div className="dialog-actions"><button className="primary-button" onClick={() => { try { requestActions[action](id); setAction(null); } catch (cause) { setError(cause instanceof Error ? cause.message : "No se pudo actualizar el pedido."); } }}>{action === "close" ? "Cerrar pedido" : "Cancelar pedido"}</button><BackButton onClick={() => setAction(null)}>Volver</BackButton></div></div></Dialog>}
   </>;
 }
 

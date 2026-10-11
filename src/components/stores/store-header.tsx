@@ -33,8 +33,8 @@ export function StoreHeader({ business, categories, hours }: Pick<PublicStore, "
       {business.description.trim() && <p className={styles.description}>{business.description}</p>}
       <div className={styles.headerActions}><a className={`primary-button ${styles.explore}`} href="#productos">Ver productos<ArrowDown size={16} aria-hidden="true" /></a><StoreShare name={business.name} slug={business.slug} /></div>
       {(instagram || facebook) && <nav className={styles.socialLinks} aria-label="Redes sociales del comercio"><span>Seguinos</span><div>
-        {instagram && <a href={instagram} target="_blank" rel="noopener noreferrer"><Instagram size={17} aria-hidden="true" />Instagram</a>}
-        {facebook && <a href={facebook} target="_blank" rel="noopener noreferrer"><Facebook size={17} aria-hidden="true" />Facebook</a>}
+        {instagram && <a href={instagram} target="_blank" rel="noopener noreferrer"><Instagram className={styles.instagramIcon} size={17} aria-hidden="true" />Instagram</a>}
+        {facebook && <a href={facebook} target="_blank" rel="noopener noreferrer"><Facebook className={styles.facebookIcon} size={17} aria-hidden="true" />Facebook</a>}
       </div></nav>}
       <ReportButton entity="business" id={business.id} name={business.name} />
     </div>
