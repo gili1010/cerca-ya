@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { isCoordinates } from "@/lib/location";
 import { Camera, Megaphone } from "lucide-react";
 import type { CategoryRow, Database, DatabaseNeededWhen } from "@/types/database";
 import { requestRadii, requestUrgencies, validateBuyerRequest, type BuyerRequestInput } from "@/lib/buyer-requests";
@@ -23,8 +24,7 @@ function NewRequestFields({ initialTitle }: { initialTitle: string }) {
   const router = useRouter();
   const { user } = useAuth();
   const { coordinates, loading: locating } = useUserLocation();
-  const [includeLocation, setIncludeLocation] = useState(true);
-  const [form, setForm] = useState<BuyerRequestInput>({ title: initialTitle.slice(0, 120), description: "", category_id: "", needed_when: "TODAY", radius_km: 5 });
+  const [form, setForm] = useState<BuyerRequestInput>({ title: (initialTitle ? (/^busco\s/i.test(initialTitle) ? initialTitle : `Busco ${initialTitle}`) : "").slice(0, 120), description: "", category_id: "", needed_when: "TODAY", radius_km: 20 });
   const [categories, setCategories] = useState<CategoryRow[] | null>(null);
   const [categoryError, setCategoryError] = useState("");
   const [attempt, setAttempt] = useState(0);
@@ -46,7 +46,8 @@ function NewRequestFields({ initialTitle }: { initialTitle: string }) {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (inFlight.current || !categories || (!uncertain && includeLocation && locating)) return;
+    if (inFlight.current || !categories || (!uncertain && locating)) return;
+    if (!uncertain && !isCoordinates(coordinates)) { setError("Necesitamos tu ubicación para preguntar a comercios cercanos."); return; }
     const validation = validateBuyerRequest(form, categories);
     if (validation) { setError(validation); return; }
     if (!user) { router.replace(loginUrl(`/pedido/nuevo?q=${encodeURIComponent(form.title)}`)); return; }
@@ -60,8 +61,8 @@ function NewRequestFields({ initialTitle }: { initialTitle: string }) {
       submission.current ??= {
         p_request_id: crypto.randomUUID(), p_title: form.title.trim(), p_description: form.description.trim(),
         p_category_id: form.category_id, p_radius_km: form.radius_km, p_needed_when: form.needed_when,
-        p_latitude: includeLocation ? coordinates?.latitude ?? null : null,
-        p_longitude: includeLocation ? coordinates?.longitude ?? null : null,
+        p_latitude: coordinates?.latitude ?? null,
+        p_longitude: coordinates?.longitude ?? null,
       };
       setSubmittedWithLocation(submission.current.p_latitude != null && submission.current.p_longitude != null);
       const { data: id, error: failure } = await client.rpc("create_my_request", submission.current);
@@ -76,12 +77,13 @@ function NewRequestFields({ initialTitle }: { initialTitle: string }) {
       const pending = submission.current !== null;
       setUncertain(pending);
       const suspended = typeof cause === "object" && cause !== null && "message" in cause && String(cause.message).includes("account_suspended");
-      setError(suspended ? "Tu cuenta está suspendida." : pending ? "No pudimos confirmar si se publicó. Reintentá con los mismos datos y la misma elección de ubicación, o revisá Mis pedidos." : "No pudimos publicar tu pedido. Volvé a intentar.");
+      const locationRequired = typeof cause === "object" && cause !== null && "message" in cause && String(cause.message).includes("request_location");
+      setError(locationRequired ? "Necesitamos tu ubicación para preguntar a comercios cercanos." : suspended ? "Tu cuenta está suspendida." : pending ? "No pudimos confirmar si se publicó. Reintentá con los mismos datos y la misma ubicación, o revisá Mis pedidos." : "No pudimos publicar tu pedido. Volvé a intentar.");
       inFlight.current = false; setSubmitting(false);
     }
   }
 
-  return <div className="workflow-narrow"><div className="workflow-heading"><span className="eyebrow"><Megaphone size={15} />PEDIDO ABIERTO</span><h1>Contanos qué necesitás.</h1><p>Guardá tu búsqueda y seguí su estado desde Mis pedidos.</p></div>
+  return <div className="workflow-narrow"><div className="workflow-heading"><span className="eyebrow"><Megaphone size={15} />PEDIDO ABIERTO</span><h1>Contanos qué necesitás.</h1><p>Preguntale a comercios cercanos y seguí las respuestas desde Mis pedidos.</p></div>
     <form className="workflow-form panel" onSubmit={submit} aria-busy={submitting}>
       <label htmlFor="request-title">¿Qué estás buscando?<input id="request-title" name="title" required minLength={3} maxLength={120} value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Sensor de cigüeñal Ford Ka 2019" disabled={locked} /></label>
       <label htmlFor="request-description">Descripción <small>Opcional</small><textarea id="request-description" name="description" maxLength={1000} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Motor 1.5, necesito retirarlo hoy si es posible." disabled={locked} /></label>
@@ -89,11 +91,11 @@ function NewRequestFields({ initialTitle }: { initialTitle: string }) {
       {!categories && !categoryError && <p role="status">Cargando categorías...</p>}
       <FormError message={categoryError} />{categoryError && <button type="button" className="outline-button" onClick={() => { setCategoryError(""); setAttempt(value => value + 1); }}>Reintentar categorías</button>}
       {categories?.length === 0 && <p className="info-note">No hay categorías disponibles. Cargalas antes de publicar pedidos.</p>}
-      <RequestLocation include={includeLocation} onInclude={setIncludeLocation} disabled={locked} submittedWithLocation={submittedWithLocation} />
-      <label htmlFor="request-radius">¿Hasta qué distancia querés buscar?<select id="request-radius" value={form.radius_km} onChange={e => setForm({ ...form, radius_km: Number(e.target.value) })} disabled={locked}>{requestRadii.map(value => <option key={value} value={value}>{value} km</option>)}</select><small>Con ubicación compartida, sólo los comercios dentro del radio podrán ver este pedido en Radar.</small></label>
+      <RequestLocation disabled={locked} submittedWithLocation={submittedWithLocation} />
+      <label htmlFor="request-radius">¿Hasta qué distancia querés buscar?<select id="request-radius" value={form.radius_km} onChange={e => setForm({ ...form, radius_km: Number(e.target.value) })} disabled={locked}>{requestRadii.map(value => <option key={value} value={value}>{value} km</option>)}</select><small>Sólo los comercios dentro del radio podrán ver este pedido en Radar.</small></label>
       <div className="photo-placeholder"><Camera size={23} /><div><strong>Foto opcional</strong><span>Próximamente vas a poder adjuntar una imagen.</span></div><button type="button" disabled>Próximamente</button></div>
       <p className="info-note">El pedido se guarda en tu cuenta. Los comercios podrán responder con ofertas mientras siga abierto.</p>
-      <FormError message={error} /><button className="primary-button" disabled={!categories?.length || submitting || (!uncertain && includeLocation && locating)} type="submit"><Megaphone size={17} />{submitting ? "Publicando pedido..." : uncertain ? "Reintentar publicación" : "Publicar pedido"}</button>
+      <FormError message={error} /><button className="primary-button" disabled={!categories?.length || submitting || (!uncertain && locating)} type="submit"><Megaphone size={17} />{submitting ? "Publicando pedido..." : uncertain ? "Reintentar publicación" : "Publicar pedido"}</button>
     </form>
   </div>;
 }

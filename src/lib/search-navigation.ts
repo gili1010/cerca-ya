@@ -1,6 +1,8 @@
+import { catalogRadius, defaultRadius, type CatalogRadius } from "./hyperlocal";
 import type { QuickFilter, SortOrder } from "./products";
 
 export interface SearchNavigation {
+  radiusKm: CatalogRadius;
   query: string;
   category: string;
   filters: QuickFilter[];
@@ -17,6 +19,7 @@ export function readSearchNavigation(params: URLSearchParams): SearchNavigation 
   const rawPage = params.get("page") ?? "0";
   const sort = params.get("sort");
   return {
+    radiusKm: catalogRadius(Number(params.get("radius") ?? ((params.get("filters") ?? "").split(",").includes("nearby") ? 5 : defaultRadius))),
     query: (params.get("q") ?? "").slice(0, 160),
     category: (params.get("category") ?? "").slice(0, 160),
     filters: params.has("filters") ? allowedFilters.filter(filter => (params.get("filters") ?? "").split(",").includes(filter)) : mode === "home" ? ["today"] : [],
@@ -28,8 +31,9 @@ export function readSearchNavigation(params: URLSearchParams): SearchNavigation 
 
 export function writeSearchNavigation(params: URLSearchParams, state: SearchNavigation): URLSearchParams {
   const result = new URLSearchParams(params);
-  for (const key of ["q", "category", "filters", "sort", "page", "view"]) result.delete(key);
+  for (const key of ["q", "category", "filters", "sort", "page", "view", "radius"]) result.delete(key);
   if (state.view !== "home") result.set("view", state.view);
+  if (state.radiusKm !== defaultRadius) result.set("radius", String(state.radiusKm));
   if (state.query) result.set("q", state.query);
   if (state.category) result.set("category", state.category);
   const defaultFilters = state.view === "home" ? "today" : "";

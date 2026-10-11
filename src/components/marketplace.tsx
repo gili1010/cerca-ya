@@ -24,7 +24,7 @@ export default function Marketplace() {
   const { coordinates, locality } = useUserLocation();
   const { favorites, toggleFavorite, zone, setModal, setHomeTab } = useDemo();
   const searchParams = useSearchParams();
-  const { query, category, filters, sort, page, view: activeTab } = readSearchNavigation(new URLSearchParams(searchParams.toString()));
+  const { query, category, filters, sort, page, radiusKm, view: activeTab } = readSearchNavigation(new URLSearchParams(searchParams.toString()));
   // URL is the source of navigation state. Restoring it never creates a measurement.
   const updateNavigation = (patch: Partial<SearchNavigation>) => {
     const params = new URLSearchParams(window.location.search);
@@ -44,7 +44,7 @@ export default function Marketplace() {
   const [categoryAttempt, setCategoryAttempt] = useState(0);
   const favoritesOnly = activeTab === "saved";
   const inputRef = useRef<HTMLInputElement>(null);
-  const effectiveFilters = coordinates ? filters : filters.filter(filter => filter !== "nearby");
+  const effectiveFilters = filters.filter(filter => filter !== "nearby" && (coordinates || filter !== "delivery"));
   const effectiveSort = !coordinates && sort === "distance" ? "recommended" : sort;
   // Reset pagination with the location, without ever putting coordinates in a URL.
   const pageLocation = useRef(coordinates);
@@ -54,14 +54,14 @@ export default function Marketplace() {
     const params = new URLSearchParams(window.location.search);
     const current = readSearchNavigation(params);
     const next = writeSearchNavigation(params, { ...current, page: 0,
-      filters: coordinates ? current.filters : current.filters.filter(filter => filter !== "nearby"),
+      filters: coordinates ? current.filters : current.filters.filter(filter => filter !== "nearby" && filter !== "delivery"),
       sort: !coordinates && current.sort === "distance" ? "recommended" : current.sort });
     window.history.replaceState(null, "", `${window.location.pathname}?${next}${window.location.hash}`);
   }, [coordinates]);
-  const catalog = usePublicCatalog({ query, category, filters: effectiveFilters, sort: effectiveSort, home: activeTab === "home" && !query.trim() && !category && !favoritesOnly, page, favoriteIds: favoritesOnly ? favorites : undefined, buyerLocation: coordinates });
-  const storeSearch = usePublicStoreSearch(query, !favoritesOnly, Boolean(coordinates));
+  const catalog = usePublicCatalog({ query, category, filters: effectiveFilters, sort: effectiveSort, home: activeTab === "home" && !query.trim() && !category && !favoritesOnly, page, favoriteIds: favoritesOnly ? favorites : undefined, buyerLocation: coordinates, locality, radiusKm });
+  const storeSearch = usePublicStoreSearch(query, !favoritesOnly, { buyerLocation: coordinates, locality, radiusKm });
   // Sólo se arma una medición con intención explícita, nunca al escribir/renderizar.
-  const searchContext = JSON.stringify({ query, category, filters: effectiveFilters, sort: effectiveSort, coordinates, favoritesOnly });
+  const searchContext = JSON.stringify({ query, category, filters: effectiveFilters, sort: effectiveSort, coordinates, locality, radiusKm, favoritesOnly });
   const [measurement, setMeasurement] = useState<{ id: string; context: string; query: string; categoryId: string | null; locality: string | null } | null>(null);
   const lastSubmit = useRef<{ context: string; at: number } | null>(null);
   const consumedMeasurement = useRef<string | null>(null);
@@ -87,13 +87,13 @@ export default function Marketplace() {
 
   const goToCatalog = () => document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth" });
   const reset = () => { setQuery(""); setCategory(""); setFilters([]); setSort("recommended"); setActiveTab("search"); setPage(0); };
-  const toggleFilter = (filter: QuickFilter) => { if (filter === "nearby" && !coordinates) return; setFilters(filters.includes(filter) ? filters.filter(item => item !== filter) : [...filters, filter]); setPage(0); };
+  const toggleFilter = (filter: QuickFilter) => { if ((filter === "nearby" || filter === "delivery") && !coordinates) return; setFilters(filters.includes(filter) ? filters.filter(item => item !== filter) : [...filters, filter]); setPage(0); };
   const showSaved = () => { setActiveTab(favoritesOnly ? "home" : "saved"); setQuery(""); setCategory(""); setFilters([]); setPage(0); goToCatalog(); };
   const search = () => {
     const term = query.trim().replace(/\s+/g, " ");
     const previous = lastSubmit.current;
     try {
-      if (!favoritesOnly && term.length >= 2 && term.length <= 120 && (!previous || previous.context !== searchContext || Date.now() - previous.at >= 2000)) {
+      if ((coordinates || locality?.trim()) && !favoritesOnly && term.length >= 2 && term.length <= 120 && (!previous || previous.context !== searchContext || Date.now() - previous.at >= 2000)) {
         lastSubmit.current = { context: searchContext, at: Date.now() };
         setMeasurement({ id: crypto.randomUUID(), context: searchContext, query: term, categoryId: categories.find(item => item.slug === category)?.id ?? null, locality });
       }
@@ -115,7 +115,7 @@ export default function Marketplace() {
     <main className="shell">
       <Hero query={query} inputRef={inputRef} onQuery={value => { setQuery(value); setPage(0); if (activeTab !== "search") { setFilters([]); setActiveTab("search"); } }} onSearch={search} onRequest={() => router.push(`/pedido/nuevo?q=${encodeURIComponent(query)}`)} urgent={urgent} onUrgent={() => { setFilters(["today", "confirmed"]); setActiveTab("search"); setSort("recommended"); setPage(0); goToCatalog(); }} />
       <Categories categories={categories} selected={category} loading={categoryLoading} error={categoryError} onRetry={() => { setCategoryLoading(true); setCategoryError(""); setCategoryAttempt(value => value + 1); }} onChange={value => { setCategory(value); setQuery(""); setFilters([]); setActiveTab("search"); setPage(0); goToCatalog(); }} />
-      <Catalog {...catalog} storeSearch={storeSearch} hasLocation={Boolean(coordinates)} onLocation={() => setModal("zone")} onRetry={catalog.retry} page={page} onPage={value => { setPage(value); goToCatalog(); }} filters={effectiveFilters} category={categories.find(item => item.slug === category)?.name ?? category} query={query} favorites={favorites} favoritesOnly={favoritesOnly} sort={effectiveSort} onToggleFilter={toggleFilter} onSort={value => { setSort(value); setPage(0); }} onReset={reset} onSave={id => { toggleFavorite(id); if (favoritesOnly) setPage(0); }} onFavorites={showSaved} />
+      <Catalog {...catalog} storeSearch={storeSearch} radiusKm={radiusKm} locality={locality} onRadius={value => updateNavigation({ radiusKm: value, page: 0, filters: effectiveFilters })} hasLocation={Boolean(coordinates)} onLocation={() => setModal("zone")} onRetry={catalog.retry} page={page} onPage={value => { setPage(value); goToCatalog(); }} filters={effectiveFilters} category={categories.find(item => item.slug === category)?.name ?? category} query={query} favorites={favorites} favoritesOnly={favoritesOnly} sort={effectiveSort} onToggleFilter={toggleFilter} onSort={value => { setSort(value); setPage(0); }} onReset={reset} onSave={id => { toggleFavorite(id); if (favoritesOnly) setPage(0); }} onFavorites={showSaved} />
       <Footer onHow={() => setModal("how")} />
     </main>
     <MobileNav active={activeTab} savedCount={favorites.length} onSelect={selectTab} />

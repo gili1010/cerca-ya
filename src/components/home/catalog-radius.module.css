@@ -1,0 +1,7 @@
+.scope { display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin:20px 0; }
+.scope > span { font-size:.85rem; font-weight:700; color:#153e32; }
+.chips { display:flex; gap:8px; max-width:100%; overflow-x:auto; padding:4px; }
+.chips button { flex-shrink:0; min-height:40px; }
+.chips button:focus-visible { outline:3px solid #248567; outline-offset:3px; }
+.scope small { color:#50665b; font-size:.8rem; }
+@media(max-width:600px) { .scope { gap:6px; } .scope small { flex-basis:100%; } }

@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { CategoryRow, Database, DatabaseNeededWhen, DatabaseRequestStatus, RequestRow } from "@/types/database";
 
 export const requestUrgencies: Record<DatabaseNeededWhen, string> = { TODAY: "Lo necesito hoy", TOMORROW: "Mañana", THIS_WEEK: "Esta semana", FLEXIBLE: "No tengo apuro" };
-export const requestRadii = [5, 10, 20, 30];
+export const requestRadii = [5, 10, 20];
 export const requestsPageSize = 20;
 export type BuyerRequestFilter = "ALL" | DatabaseRequestStatus;
 export type BuyerRequestInput = Pick<RequestRow, "title" | "description" | "category_id" | "radius_km" | "needed_when">;

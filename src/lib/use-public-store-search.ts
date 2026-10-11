@@ -1,5 +1,6 @@
 "use client";
 
+import type { HyperlocalScope } from "./hyperlocal";
 import { useEffect, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { searchPublicStores, type StoreSearchBusiness } from "@/lib/public-store-search";
@@ -11,13 +12,13 @@ export interface PublicStoreSearchState {
   retry: () => void;
 }
 
-export function usePublicStoreSearch(query: string, enabled: boolean, hasLocation: boolean): PublicStoreSearchState {
-  const term = enabled ? query.trim().slice(0, 160) : "";
-  const key = JSON.stringify({ term, hasLocation });
+export function usePublicStoreSearch(query: string, enabled: boolean, scope: HyperlocalScope): PublicStoreSearchState {
+  const term = enabled && (scope.buyerLocation || scope.locality?.trim()) ? query.trim().slice(0, 160) : "";
+  const key = JSON.stringify({ term, scope });
   const [attempt, setAttempt] = useState(0);
   const [snapshot, setSnapshot] = useState<{ key: string; stores: StoreSearchBusiness[]; error: string } | null>(null);
   useEffect(() => {
-    const parsed: { term: string; hasLocation: boolean } = JSON.parse(key);
+    const parsed: { term: string; scope: HyperlocalScope } = JSON.parse(key);
     if (!parsed.term) return;
     let live = true;
     let revision = 0;
@@ -29,7 +30,7 @@ export function usePublicStoreSearch(query: string, enabled: boolean, hasLocatio
       try {
         const client = getSupabaseBrowserClient();
         if (!client) throw new Error("unavailable");
-        const stores = await searchPublicStores(client, parsed.term, parsed.hasLocation, controller.signal);
+        const stores = await searchPublicStores(client, parsed.term, parsed.scope, controller.signal);
         if (live && current === revision) setSnapshot({ key, stores, error: "" });
       } catch {
         if (live && current === revision) setSnapshot({ key, stores: [], error: "No pudimos cargar las tiendas. Volvé a intentar en un momento." });
