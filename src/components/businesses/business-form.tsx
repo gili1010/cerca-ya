@@ -13,6 +13,7 @@ import { FormError } from "../requests/request-common";
 import { useMyBusiness } from "./business-provider";
 import { BusinessLocationControl } from "./business-location-control";
 import { isCoordinates } from "@/lib/location";
+import { BusinessHoursEditor } from "./business-hours-editor";
 
 export function BusinessForm({ edit = false }: { edit?: boolean }) {
   const { business, loading, error, refresh } = useMyBusiness();
@@ -25,7 +26,7 @@ export function BusinessForm({ edit = false }: { edit?: boolean }) {
   if (loading) return <p className="workflow-loading" role="status">Cargando tu comercio…</p>;
   if (error) return <section className="panel"><FormError message={error} /><button className="outline-button" onClick={() => void refresh().catch(() => {})}>Reintentar</button></section>;
   if (edit ? !business : business) return <p className="workflow-loading" role="status">{business ? "Ya tenés un comercio registrado. Abriendo Mi comercio…" : "Abriendo el formulario de creación…"}</p>;
-  return <BusinessFormFields key={business?.id ?? "new"} business={business} onLocationSaved={() => setLocationSaved(true)} />;
+  return <><BusinessFormFields key={business?.id ?? "new"} business={business} onLocationSaved={() => setLocationSaved(true)} />{business && <BusinessHoursEditor key={business.id} businessId={business.id} />}</>;
 }
 
 function BusinessFormFields({ business, onLocationSaved }: { business: BusinessRow | null; onLocationSaved: () => void }) {

@@ -4,12 +4,15 @@ import type { BusinessRow, CategoryRow } from "@/types/database";
 import type { Product } from "@/lib/products";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getPublicStoreProducts } from "@/lib/public-catalog";
+import { readBusinessHours } from "@/lib/business-hours-client";
+import type { BusinessHoursSchedule } from "@/lib/business-hours";
 
 export type PublicStoreBusiness = Pick<BusinessRow,
   "id" | "slug" | "name" | "description" | "city" | "latitude" | "longitude" |
   "whatsapp" | "pickup_enabled" | "delivery_enabled" | "delivery_price" | "logo_url" | "cover_url" | "verified" | "instagram_url" | "facebook_url"
 >;
 export interface PublicStore {
+  hours: BusinessHoursSchedule | null;
   business: PublicStoreBusiness;
   categories: Pick<CategoryRow, "id" | "name" | "slug">[];
   products: Product[];
@@ -44,9 +47,10 @@ export const loadPublicStore = cache(async (slug: string): Promise<{ store: Publ
     if (error) throw error;
     if (!business) return { store: null, error: false };
 
-    const [products, relations] = await Promise.all([
+    const [products, relations, hours] = await Promise.all([
       getPublicStoreProducts(client, business.id),
       client.from("business_categories").select("category:categories!inner(id,name,slug)").eq("business_id", business.id),
+      readBusinessHours(client,business.id).catch(() => null),
     ]);
     if (relations.error) throw relations.error;
     const categories = new Map<string, PublicStore["categories"][number]>();
@@ -55,7 +59,7 @@ export const loadPublicStore = cache(async (slug: string): Promise<{ store: Publ
       const category = product.database?.category;
       if (category) categories.set(category.id, category);
     }
-    return { store: { business, products, categories: [...categories.values()].sort((a, b) => a.name.localeCompare(b.name, "es")) }, error: false };
+    return { store: { business, products, hours, categories: [...categories.values()].sort((a, b) => a.name.localeCompare(b.name, "es")) }, error: false };
   } catch {
     // A failed query must not look like an empty or missing store.
     return { store: null, error: true };

@@ -9,8 +9,9 @@ import { StoreShare } from "./store-share";
 import styles from "./store.module.css";
 import { ReportButton } from "../reports/report-button";
 import { VerificationBadge } from "../businesses/verification-badge";
+import { BusinessHoursStatus } from "../businesses/business-hours-status";
 
-export function StoreHeader({ business, categories }: Pick<PublicStore, "business" | "categories">) {
+export function StoreHeader({ business, categories, hours }: Pick<PublicStore, "business" | "categories" | "hours">) {
   const instagram = normalizeSocialLink(business.instagram_url ?? "", "instagram");
   const facebook = normalizeSocialLink(business.facebook_url ?? "", "facebook");
   const whatsapp = argentinaWhatsAppUrl(business.whatsapp, `Hola, vi la tienda de ${business.name} en CercaYa. Quería consultar por sus productos.`);
@@ -28,6 +29,7 @@ export function StoreHeader({ business, categories }: Pick<PublicStore, "busines
         {business.city && <p><MapPin size={17} aria-hidden="true" />{business.city}</p>}
         <BusinessDistance latitude={business.latitude} longitude={business.longitude} />
       </div>
+      {hours ? <BusinessHoursStatus schedule={hours} /> : <p className={styles.hoursUnavailable}>Horario no disponible</p>}
       {business.description.trim() && <p className={styles.description}>{business.description}</p>}
       <div className={styles.headerActions}><a className={`primary-button ${styles.explore}`} href="#productos">Ver productos<ArrowDown size={16} aria-hidden="true" /></a><StoreShare name={business.name} slug={business.slug} /></div>
       {(instagram || facebook) && <nav className={styles.socialLinks} aria-label="Redes sociales del comercio"><span>Seguinos</span><div>

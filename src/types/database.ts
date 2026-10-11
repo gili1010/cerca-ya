@@ -14,6 +14,7 @@ export type DatabaseRequestStatus = RequestStatus | "EXPIRED";
 export type DatabaseOfferStatus = "PENDING" | "ACTIVE" | "WITHDRAWN" | "ACCEPTED" | "REJECTED" | "EXPIRED";
 export type DatabaseDeliveryType = "PICKUP" | "DELIVERY";
 export type PaymentMethod = "CASH" | "TRANSFER" | "ARRANGE";
+export type BusinessHoursRow = { id: string; business_id: string; weekday: number; period_index: number; opens_at: string; closes_at: string; created_at: string; updated_at: string };
 
 type Timestamps = { created_at: string; updated_at: string };
 export type ProfileRow = Timestamps & { id: string; full_name: string; phone: string | null; avatar_url: string | null; terms_accepted_at?: string | null; privacy_accepted_at?: string | null; merchant_terms_accepted_at?: string | null };
@@ -102,6 +103,7 @@ export type Database = {
   public: {
     Tables: {
       profiles: Table<ProfileRow, "id">;
+      business_hours: Table<BusinessHoursRow, "business_id" | "weekday" | "period_index" | "opens_at" | "closes_at", [FK<"business_hours_business_id_fkey", ["business_id"], "businesses">]>;
       businesses: Table<BusinessRow, "name" | "slug", [FK<"businesses_owner_id_fkey", ["owner_id"], "profiles">]>;
       categories: Table<CategoryRow, "name" | "slug", [FK<"categories_parent_id_fkey", ["parent_id"], "categories">]>;
       business_categories: Table<BusinessCategoryRow, "business_id" | "category_id", [
@@ -139,6 +141,8 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      read_business_hours: { Args: { p_business_id: string }; Returns: Json };
+      set_my_business_hours: { Args: { p_business_id: string; p_schedule: Json }; Returns: undefined };
       admin_set_business_verification: { Args: { p_business_id: string; p_verified: boolean; p_reason?: string; p_note?: string }; Returns: undefined };
       admin_read_business_verification: { Args: { p_business_id: string }; Returns: Json };
       record_search_event: { Args: { p_id: string; p_query: string; p_results_count: number; p_category_id?: string | null; p_locality?: string | null }; Returns: undefined };

@@ -15,6 +15,7 @@ import { MerchantStoreCard } from "../stores/merchant-store-card";
 import { StoreBrandingEditor } from "../stores/store-branding-editor";
 import storeStyles from "../stores/merchant-store.module.css";
 import styles from "./business-details.module.css";
+import { BusinessHoursEditor } from "./business-hours-editor";
 
 export function MyBusiness() {
   const { business, loading, error, refresh } = useMyBusiness();
@@ -89,6 +90,7 @@ function BusinessDetails({ business }: { business: BusinessRow }) {
             : <p className={styles.categoryNote}>Sin categorías asignadas</p>}
         </section>
       </div>
+      <BusinessHoursEditor businessId={business.id} summary />
       <footer className={styles.actions}>
         <Link className="primary-button" href="/comercio/editar"><Pencil size={17} aria-hidden="true" />Editar comercio</Link>
         <div className={styles.secondaryActions}>

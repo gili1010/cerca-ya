@@ -32,7 +32,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
 
   return <DetailShell>
     <Link className={styles.backLink} href="/"><ArrowLeft size={16} aria-hidden="true" />Explorar productos</Link>
-    <StoreHeader business={store.business} categories={store.categories} />
+    <StoreHeader business={store.business} categories={store.categories} hours={store.hours} />
     <StoreCatalog products={store.products} />
     <StoreCartBar businessId={store.business.id} products={store.products} />
   </DetailShell>;
