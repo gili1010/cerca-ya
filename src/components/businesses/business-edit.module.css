@@ -1,0 +1,54 @@
+.edit { max-width: 800px; min-width: 0; }
+.edit > :global(.workflow-heading) { padding-bottom: 0; border: 0; margin-bottom: 26px; }
+.edit > :global(.workflow-heading) h1 { margin-bottom: 10px; }
+.edit > :global(.workflow-heading) p { max-width: 56ch; margin: 0; color: var(--muted); line-height: 1.65; }
+.edit > form { padding: 30px 32px; gap: 0; box-shadow: none; }
+.edit .section { display: grid; gap: 18px; min-width: 0; padding: 26px 0; border: 0; border-top: 1px solid var(--line); }
+.edit .section:first-child { padding-top: 0; border-top: 0; }
+.edit .section h2 { margin: 0 0 2px; font-size: 18px; font-weight: 650; line-height: 1.4; }
+.edit .section fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.edit .section fieldset:global(.workflow-form) { gap: 16px; }
+.edit .section legend { margin-bottom: 16px; padding: 0; font-size: 18px; font-weight: 650; line-height: 1.4; }
+.edit .section label { display: grid; align-content: start; gap: 8px; min-width: 0; font-size: 14px; font-weight: 600; line-height: 1.5; }
+.edit .section :is(input:not([type=checkbox]), select) { height: 48px; min-height: 48px; box-sizing: border-box; margin: 0; padding: 11px 14px; border: 1px solid var(--line-strong); border-radius: var(--radius-md); font-size: 16px; }
+.edit .section textarea { min-height: 120px; padding: 12px 14px; font-size: 16px; line-height: 1.65; }
+.edit .section :is(input,textarea,select):focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.edit .section :is(input,textarea,select):disabled { cursor: not-allowed; }
+.edit .section small,.edit .section :global(.info-note) { margin: 0; padding: 0; border: 0; background: transparent; color: var(--muted); font-size: 12px; font-weight: 400; line-height: 1.65; }
+.edit .section .permanent { display: flex; align-items: flex-start; gap: 9px; padding: 12px 14px; border-radius: 10px; background: var(--surface-soft); overflow-wrap: anywhere; }
+.permanent svg { flex-shrink: 0; margin-top: 2px; color: var(--green); }
+.permanent span { min-width: 0; }
+.edit .section :global(.form-columns) { align-items: start; gap: 18px; }
+.edit .deliveryFields > label { grid-template-rows: auto 48px auto; }
+.edit .section :global(.form-checkboxes) { gap: 10px; }
+.edit .section :global(.form-checkboxes) label { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; padding: 10px 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); font-size: 13px; font-weight: 500; }
+.edit .section :global(.form-checkboxes) label:has(input:checked) { border-color: var(--success-line); background: var(--success-bg); color: var(--deep); }
+.edit .section :global(.form-checkboxes) label:has(input:focus-visible) { outline: 2px solid var(--green); outline-offset: 2px; }
+.edit .section :global(.form-checkboxes) input { width: 18px; height: 18px; }
+.edit .section :global(#business-delivery) legend { font-size: 13px; color: var(--muted); font-weight: 500; margin-bottom: 10px; }
+.location > div { display: grid; justify-items: start; gap: 10px; padding: 14px 0 0; }
+.location p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.65; }
+.location p:global(.form-error) { color: var(--error); }
+.location > div > p:first-child:not(:global(.info-note)):not(:global(.form-error)) { color: var(--green); font-weight: 600; }
+.location button { min-height: 44px; padding: 10px 14px; font-size: 13px; background: var(--surface); }
+.location button:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+.edit :global(#horarios) { margin: 4px 0 24px; padding: 20px; box-shadow: none; background: var(--surface-soft); }
+.edit :global(#horarios) [role=status] { font-size: 12px; }
+.footer { display: grid; justify-items: start; gap: 16px; padding-top: 22px; border-top: 1px solid var(--line); }
+.footer > button { min-height: 50px; min-width: 210px; padding: 13px 24px; }
+.edit :global(.form-error) { margin: 0; line-height: 1.6; }
+@media (hover: hover) {
+  .edit .section :global(.form-checkboxes) label:hover { border-color: var(--line-strong); }
+  .location button:hover:not(:disabled) { background: var(--surface-soft); }
+}
+@media (max-width: 600px) {
+  .edit > form { padding: 22px 18px; }
+  .edit > :global(.workflow-heading) { margin-bottom: 22px; }
+  .edit .section { padding-block: 22px; gap: 16px; }
+  .edit .section :global(.form-columns) { grid-template-columns: minmax(0,1fr); gap: 18px; }
+  .edit .section :global(.form-checkboxes) { gap: 9px; }
+  .edit .section :global(.form-checkboxes) label { max-width: 100%; overflow-wrap: anywhere; }
+  .edit :global(#horarios) { padding: 18px; }
+  .footer { justify-items: stretch; }
+  .footer > button { width: 100%; min-width: 0; }
+}

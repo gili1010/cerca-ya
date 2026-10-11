@@ -2,7 +2,8 @@
 import { BackLink } from "@/components/navigation/back-link";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { Link2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { BusinessRow, CategoryRow } from "@/types/database";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -15,6 +16,7 @@ import { useMyBusiness } from "./business-provider";
 import { BusinessLocationControl } from "./business-location-control";
 import { isCoordinates } from "@/lib/location";
 import { BusinessHoursEditor } from "./business-hours-editor";
+import styles from "./business-edit.module.css";
 
 export function BusinessForm({ edit = false }: { edit?: boolean }) {
   const { business, loading, error, refresh } = useMyBusiness();
@@ -92,11 +94,14 @@ function BusinessFormFields({ business, onLocationSaved }: { business: BusinessR
     } catch (cause) { setError(businessErrorMessage(cause, Boolean(business))); inFlight.current = false; setBusy(false); }
   }
 
-  return <div className="workflow-narrow"><BackLink href={business ? "/comercio/mi-negocio" : "/cuenta"}>Volver</BackLink><div className="workflow-heading"><h1>{business ? "Editar comercio" : "Crear mi comercio"}</h1><p>Contanos qué vendés y cómo pueden comprar cerca tuyo.</p></div>
+  return <div className={`workflow-narrow${business ? ` ${styles.edit}` : ""}`}><BackLink href={business ? "/comercio/mi-negocio" : "/cuenta"}>Volver</BackLink><div className="workflow-heading"><h1>{business ? "Editar comercio" : "Crear mi comercio"}</h1><p>Contanos qué vendés y cómo pueden comprar cerca tuyo.</p></div>
     <form className="panel workflow-form" onSubmit={submit}>
+      <EditFormGroup enabled={Boolean(business)} title="Información del comercio">
       <label>Nombre del comercio<input value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} required maxLength={160} autoComplete="organization" disabled={busy} /></label>
-      {business && <p className="info-note">Tu enlace permanente: /tienda/{business.slug}. Se conserva aunque cambies el nombre, la localidad u otros datos del comercio.</p>}
+      {business && <p className={`info-note ${styles.permanent}`}><Link2 size={16} aria-hidden="true" /><span>Tu enlace permanente: /tienda/{business.slug}. Se conserva aunque cambies el nombre, la localidad u otros datos del comercio.</span></p>}
       <label>Descripción<textarea value={form.description} onChange={event => setForm({ ...form, description: event.target.value })} maxLength={3000} disabled={busy} /></label>
+      </EditFormGroup>
+      <EditFormGroup enabled={Boolean(business)}>
       <fieldset className="workflow-form" disabled={busy}>
         <legend>Redes sociales</legend>
         <p className="info-note">Opcional. Agregá tus redes para que los clientes puedan conocer más sobre tu negocio.</p>
@@ -106,23 +111,39 @@ function BusinessFormFields({ business, onLocationSaved }: { business: BusinessR
         </div>
       </fieldset>
       <label>WhatsApp · Argentina (+54)<input type="tel" value={form.whatsapp} onChange={event => setForm({ ...form, whatsapp: event.target.value })} required maxLength={40} autoComplete="tel" placeholder="Código de área + número" disabled={busy} /><small>Ingresá código de área y número, sin 0 ni 15. Agregamos +54 y el 9 para WhatsApp automáticamente. Si ya escribiste +54 9, no lo duplicamos.</small></label>
-      <section className="workflow-form" aria-labelledby="business-location-title">
+      </EditFormGroup>
+      <section className={`workflow-form${business ? ` ${styles.section}` : ""}`} aria-labelledby="business-location-title">
         <h2 id="business-location-title">Ubicación del comercio</h2>
         <label>Dirección<input value={form.address} onChange={event => setForm({ ...form, address: event.target.value })} required maxLength={240} autoComplete="street-address" disabled={busy} /></label>
         <label>Ciudad / localidad<input value={form.city} onChange={event => setForm({ ...form, city: event.target.value })} required maxLength={120} autoComplete="address-level2" disabled={busy} /></label>
-        <BusinessLocationControl configured={isCoordinates(business)} changed={form.latitude !== undefined} disabled={busy} onLoading={setLocating} onChange={coordinates => setForm(current => ({ ...current, ...coordinates }))} />
+        <EditFormGroup enabled={Boolean(business)} location><BusinessLocationControl configured={isCoordinates(business)} changed={form.latitude !== undefined} disabled={busy} onLoading={setLocating} onChange={coordinates => setForm(current => ({ ...current, ...coordinates }))} /></EditFormGroup>
       </section>
+      <EditFormGroup enabled={Boolean(business)}>
       <fieldset className="form-checkboxes" disabled={busy || !ready}><legend>Categorías que vende tu comercio · elegí al menos una</legend>{categories.map(category => <label key={category.id}><input type="checkbox" checked={selected.includes(category.id)} onChange={event => setSelected(current => event.target.checked ? [...current, category.id] : current.filter(id => id !== category.id))} />{category.name}</label>)}</fieldset>
       {!ready && !loadError && <p role="status">Cargando categorías…</p>}<FormError message={loadError} />{loadError && <button type="button" className="outline-button" onClick={() => { setLoadError(""); setAttempt(value => value + 1); }}>Reintentar categorías</button>}
       {ready && !categories.length && <p className="form-error">No hay categorías disponibles. No se puede crear un comercio hasta que se carguen.</p>}
+      </EditFormGroup>
+      <EditFormGroup enabled={Boolean(business)} title="Entrega">
       <fieldset id="business-delivery" className="form-checkboxes" disabled={busy}><legend>Retiro y envío</legend><label><input type="checkbox" checked={form.pickup_enabled} onChange={event => setForm({ ...form, pickup_enabled: event.target.checked })} />Permite retiro</label><label><input type="checkbox" checked={form.delivery_enabled} onChange={event => setForm({ ...form, delivery_enabled: event.target.checked })} />Realiza envíos</label></fieldset>
-      {form.delivery_enabled && <div className="form-columns"><label>Radio de entrega<select value={form.delivery_radius_km} onChange={event => setForm({ ...form, delivery_radius_km: Number(event.target.value) })} disabled={busy}>{deliveryRadii.map(radius => <option key={radius} value={radius}>{radius} km</option>)}</select></label><label>Costo de envío (ARS)<input type="number" min="0" max="9999999999.99" step="0.01" inputMode="decimal" value={form.delivery_price} onChange={event => setForm({ ...form, delivery_price: Number(event.target.value) })} required disabled={busy} /><small>0 significa envío gratis.</small></label></div>}
+      {form.delivery_enabled && <div className={`form-columns${business ? ` ${styles.deliveryFields}` : ""}`}><label>{business ? <span>Radio de entrega</span> : "Radio de entrega"}<select value={form.delivery_radius_km} onChange={event => setForm({ ...form, delivery_radius_km: Number(event.target.value) })} disabled={busy}>{deliveryRadii.map(radius => <option key={radius} value={radius}>{radius} km</option>)}</select></label><label>{business ? <span>Costo de envío (ARS)</span> : "Costo de envío (ARS)"}<input type="number" min="0" max="9999999999.99" step="0.01" inputMode="decimal" value={form.delivery_price} onChange={event => setForm({ ...form, delivery_price: Number(event.target.value) })} required disabled={busy} /><small>0 significa envío gratis.</small></label></div>}
       <label>Compra mínima (ARS)<input type="number" min="0" max="9999999999.99" step="0.01" inputMode="decimal" value={form.minimum_order || ""} onChange={event => setForm({ ...form, minimum_order: Number(event.target.value) })} placeholder="Sin compra mínima" disabled={busy} /><small>Opcional. Dejá vacío o ingresá 0 si no hay mínimo.</small></label>
+      </EditFormGroup>
+      <EditFormGroup enabled={Boolean(business)}>
       <fieldset id="business-payment" className="form-checkboxes" disabled={busy}><legend>Medios de pago</legend><label><input type="checkbox" checked={form.accepts_cash} onChange={event => setForm({ ...form, accepts_cash: event.target.checked })} />Acepto efectivo</label><label><input type="checkbox" checked={form.accepts_transfer} onChange={event => setForm({ ...form, accepts_transfer: event.target.checked })} />Acepto transferencia</label></fieldset>
       {form.accepts_transfer && <label>Alias para transferencias<input value={form.transfer_alias} onChange={event => setForm({ ...form, transfer_alias: event.target.value })} maxLength={100} placeholder="Opcional" disabled={busy} autoCapitalize="none" spellCheck={false} /><small>Se incluirá en las nuevas reservas con transferencia. CercaYa no procesa ni verifica pagos.</small></label>}
       <p className="info-note">Tus clientes también pueden elegir coordinar el pago con vos.</p>
+      </EditFormGroup>
       {!business && <label className="checkbox-label"><input type="checkbox" required checked={merchantAccepted} onChange={event => setMerchantAccepted(event.target.checked)} disabled={busy} /><span>Declaro que la información de mi comercio es verdadera y acepto las <Link href="/reglas-comercios" target="_blank" rel="noopener noreferrer">Reglas para Comercios</Link>.</span></label>}
       {business && <BusinessHoursEditor businessId={business.id} disabled={busy || locating} />}
-      <FormError message={error} /><button className="primary-button" type="submit" disabled={busy || locating || !ready || !categories.length}>{busy ? business ? "Guardando cambios…" : "Creando comercio…" : business ? "Guardar cambios" : "Crear comercio"}</button>
+      <EditFormGroup enabled={Boolean(business)} footer><FormError message={error} /><button className="primary-button" type="submit" disabled={busy || locating || !ready || !categories.length}>{busy ? business ? "Guardando cambios…" : "Creando comercio…" : business ? "Guardar cambios" : "Crear comercio"}</button></EditFormGroup>
     </form></div>;
+}
+
+// Presentation wrappers disappear entirely from the create-business form.
+function EditFormGroup({ enabled, title, children, location = false, footer = false }: {
+  enabled: boolean; title?: string; children: ReactNode; location?: boolean; footer?: boolean;
+}) {
+  if (!enabled) return <>{children}</>;
+  if (location || footer) return <div className={location ? styles.location : styles.footer}>{children}</div>;
+  return <section className={styles.section}>{title && <h2>{title}</h2>}{children}</section>;
 }
