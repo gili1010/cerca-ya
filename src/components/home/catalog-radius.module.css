@@ -5,3 +5,14 @@
 .chips button:focus-visible { outline:3px solid #248567; outline-offset:3px; }
 .scope small { color:#50665b; font-size:.8rem; }
 @media(max-width:600px) { .scope { gap:6px; } .scope small { flex-basis:100%; } }
+
+.emptyState h3 { margin: 0; }
+.emptyState p { margin: var(--space-3) auto var(--space-5); }
+.emptyActions { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: var(--space-4); }
+.emptyActions:empty { display: none; }
+.emptyActions > a, .emptyActions > button { min-height: 44px; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+.emptyState .emptyReset { margin: var(--space-5) auto 0; }
+@media(max-width:600px) {
+  .emptyActions { flex-direction: column; align-items: stretch; width: 100%; max-width: 360px; margin-inline: auto; }
+  .emptyActions > a, .emptyActions > button { width: 100%; justify-content: center; }
+}

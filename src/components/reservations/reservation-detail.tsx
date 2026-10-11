@@ -45,7 +45,7 @@ export function ReservationDetail({ id, business = false, confirmation = false }
   }
   if (data.loading) return <p className="workflow-loading" role="status">Cargando pedido...</p>;
   if (!row || !display) return data.error ? <section className="panel"><FormError message={data.error} /><button className="outline-button" onClick={() => void data.refresh()}>Reintentar</button></section> : <UnavailableReservation business={business} />;
-  return <div className={styles.root}>
+  return <div className={`${styles.root} ${business ? "" : styles.buyerSpacing}`}>
     <div className={styles.toolbar}>
       <BackLink href={business ? "/comercio/reservas" : "/reservas"}>{business ? "Pedidos recibidos" : "Mis pedidos"}</BackLink>
       <button className="secondary-link" disabled={data.busy || busy} onClick={() => void data.refresh()}>{data.busy ? "Actualizando..." : "Actualizar"}</button>
