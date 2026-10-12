@@ -1,5 +1,6 @@
 import type { BusinessRow } from "@/types/database";
 import { argentinaWhatsAppNumber } from "@/lib/phone";
+import { isCoordinates } from "@/lib/location";
 import { provinceByCode } from "@/lib/argentina-provinces";
 import { normalizeSocialLink } from "./social-links";
 
@@ -20,7 +21,7 @@ export const emptyBusiness: BusinessInput = {
 export function normalizeBusiness(input: BusinessInput): BusinessInput {
   return { ...input, instagram_url: normalizeSocialLink(input.instagram_url, "instagram") ?? "", facebook_url: normalizeSocialLink(input.facebook_url, "facebook") ?? "", name: input.name.trim(), description: input.description.trim(), whatsapp: argentinaWhatsAppNumber(input.whatsapp) ?? "", city: input.city.trim(), address: input.address.trim(), transfer_alias: input.transfer_alias.trim(), delivery_radius_km: input.delivery_enabled ? input.delivery_radius_km : 0, delivery_price: input.delivery_enabled ? input.delivery_price : 0 };
 }
-export function validateBusiness(input: BusinessInput, categoryIds: string[]): string | null {
+export function validateBusiness(input: BusinessInput, categoryIds: string[], existingLocation?: Pick<BusinessRow, "latitude" | "longitude"> | null): string | null {
   if (normalizeSocialLink(input.instagram_url, "instagram") === undefined) return "Revisá el enlace de Instagram.";
   if (normalizeSocialLink(input.facebook_url, "facebook") === undefined) return "Revisá el enlace de Facebook.";
   if (!input.name.trim()) return "El nombre del comercio es obligatorio.";
@@ -29,7 +30,9 @@ export function validateBusiness(input: BusinessInput, categoryIds: string[]): s
   if (!argentinaWhatsAppNumber(input.whatsapp)) return "Ingresá un WhatsApp de Argentina con código de área y número (10 dígitos, sin 0 ni 15), o su formato internacional +54 9.";
   if (!input.city.trim() || input.city.trim().length > 120) return "Ingresá una ciudad o localidad de hasta 120 caracteres.";
   if (input.province_code && (!provinceByCode(input.province_code) || provinceByCode(input.province_code)?.name !== input.province)) return "Seleccioná una provincia válida.";
-  if (!input.address.trim() || input.address.trim().length > 240) return "Ingresá una dirección de hasta 240 caracteres.";
+  const point = input.latitude === undefined && input.longitude === undefined ? existingLocation : input;
+  const gpsConfigured = input.location_precision === "DEVICE" && isCoordinates(point);
+  if ((!input.address.trim() && !gpsConfigured) || input.address.trim().length > 240) return "Ingresá una dirección de hasta 240 caracteres o configurá tu ubicación GPS.";
   if (input.transfer_alias.trim().length > 100) return "El alias puede tener hasta 100 caracteres.";
   if (!categoryIds.length) return "Seleccioná al menos una categoría.";
   if (!input.pickup_enabled && !input.delivery_enabled) return "Habilitá retiro o envío para tu comercio.";
@@ -46,7 +49,7 @@ export function businessErrorMessage(error: unknown, edit: boolean): string {
     AUTH_REQUIRED: "Iniciá sesión para guardar tu comercio.", PROFILE_REQUIRED: "No pudimos cargar tu perfil. Volvé a Mi cuenta e intentá nuevamente.",
     BUSINESS_NOT_OWNED: "No tenés permiso para modificar ese comercio.", BUSINESS_NAME_REQUIRED: "El nombre del comercio es obligatorio.",
     BUSINESS_PHONE_INVALID: "El WhatsApp no es válido.", BUSINESS_CITY_REQUIRED: "Ingresá la ciudad o localidad.",
-    BUSINESS_ADDRESS_REQUIRED: "Ingresá la dirección.", BUSINESS_CATEGORY_REQUIRED: "Seleccioná al menos una categoría.",
+    BUSINESS_ADDRESS_REQUIRED: "Ingresá una dirección o configurá tu ubicación GPS.", BUSINESS_CATEGORY_REQUIRED: "Seleccioná al menos una categoría.",
     BUSINESS_CATEGORY_INVALID: "Alguna categoría ya no está disponible. Recargá el formulario.", BUSINESS_METHOD_REQUIRED: "Habilitá retiro o envío.",
     BUSINESS_RADIUS_INVALID: "Seleccioná un radio de entrega válido.", BUSINESS_PRICE_INVALID: "Revisá los importes ingresados.",
     BUSINESS_PROVINCE_INVALID: "Seleccioná una provincia válida.", BUSINESS_CANONICAL_LOCATION_REQUIRED: "Seleccioná una localidad y provincia válidas.",

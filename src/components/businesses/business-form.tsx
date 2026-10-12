@@ -14,6 +14,8 @@ import { useAuth } from "../auth/auth-provider";
 import { FormError } from "../requests/request-common";
 import { useMyBusiness } from "./business-provider";
 import { BusinessCanonicalLocation } from "./business-canonical-location";
+import { isCoordinates } from "@/lib/location";
+import { Dialog } from "../home/dialog";
 import { BusinessHoursEditor } from "./business-hours-editor";
 import styles from "./business-edit.module.css";
 
@@ -54,6 +56,8 @@ function BusinessFormFields({ business, onLocationSaved }: { business: BusinessR
   const [locationValid, setLocationValid] = useState(Boolean(business));
   const [locating, setLocating] = useState(false);
   const inFlight = useRef(false);
+  const hadConfirmedPoint = useRef(isCoordinates(business));
+  const [confirmWithoutPoint, setConfirmWithoutPoint] = useState(false);
 
   useEffect(() => {
     let live = true;
@@ -68,11 +72,17 @@ function BusinessFormFields({ business, onLocationSaved }: { business: BusinessR
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    await save();
+  }
+
+  async function save(allowWithoutPoint = false) {
     if (inFlight.current || !ready || locating) return;
     if (!business && !merchantAccepted) { setError("Aceptá las Reglas para Comercios antes de crear tu comercio."); return; }
     if (!locationValid) { setError("Seleccioná una localidad válida de la lista de sugerencias."); return; }
-    const validation = validateBusiness(form, selected);
+    const validation = validateBusiness(form, selected, business);
     if (validation) { setError(validation); return; }
+    const point = form.latitude === undefined && form.longitude === undefined ? business : form;
+    if (hadConfirmedPoint.current && !isCoordinates(point) && !allowWithoutPoint) { setError(""); setConfirmWithoutPoint(true); return; }
     if (!user) { router.replace("/login?redirect=" + encodeURIComponent(business ? "/comercio/editar" : "/comercio/crear")); return; }
     inFlight.current = true; setBusy(true); setError("");
     try {
@@ -87,6 +97,7 @@ function BusinessFormFields({ business, onLocationSaved }: { business: BusinessR
         p_input: normalizeBusiness(form), p_category_ids: selected, p_business_id: business?.id ?? null,
       });
       if (failure) throw failure;
+      setConfirmWithoutPoint(false);
       if (form.latitude !== undefined) onLocationSaved();
       // A saved transaction remains successful even if the subsequent read fails.
       await refresh().catch(() => null);
@@ -116,7 +127,7 @@ function BusinessFormFields({ business, onLocationSaved }: { business: BusinessR
       </EditFormGroup>
       <section className={`workflow-form${business ? ` ${styles.section}` : ""}`} aria-labelledby="business-location-title">
         <h2 id="business-location-title">Ubicación del comercio</h2>
-        <BusinessCanonicalLocation business={business} value={form} disabled={busy} onLoading={setLocating} onValidity={setLocationValid} onChange={patch => setForm(current => ({ ...current, ...patch }))} />
+        <BusinessCanonicalLocation business={business} value={form} disabled={busy} onLoading={setLocating} onValidity={setLocationValid} onChange={patch => { if (isCoordinates(patch)) hadConfirmedPoint.current = true; setForm(current => ({ ...current, ...patch })); }} />
       </section>
       <EditFormGroup enabled={Boolean(business)}>
       <fieldset className="form-checkboxes" disabled={busy || !ready}><legend>Categorías que vende tu comercio · elegí al menos una</legend>{categories.map(category => <label key={category.id}><input type="checkbox" checked={selected.includes(category.id)} onChange={event => setSelected(current => event.target.checked ? [...current, category.id] : current.filter(id => id !== category.id))} />{category.name}</label>)}</fieldset>
@@ -136,7 +147,14 @@ function BusinessFormFields({ business, onLocationSaved }: { business: BusinessR
       {!business && <label className="checkbox-label"><input type="checkbox" required checked={merchantAccepted} onChange={event => setMerchantAccepted(event.target.checked)} disabled={busy} /><span>Declaro que la información de mi comercio es verdadera y acepto las <Link href="/reglas-comercios" target="_blank" rel="noopener noreferrer">Reglas para Comercios</Link>.</span></label>}
       {business && <BusinessHoursEditor businessId={business.id} disabled={busy || locating} />}
       <EditFormGroup enabled={Boolean(business)} footer><FormError message={error} /><button className="primary-button" type="submit" disabled={busy || locating || !ready || !categories.length}>{busy ? business ? "Guardando cambios…" : "Creando comercio…" : business ? "Guardar cambios" : "Crear comercio"}</button></EditFormGroup>
-    </form></div>;
+    </form>
+    {confirmWithoutPoint && <Dialog title="Guardar sin ubicación exacta" preventCancel={busy} onClose={() => { if (!busy) setConfirmWithoutPoint(false); }}><div className="dialog-body text-dialog">
+      <h2>Tu comercio quedará sin ubicación exacta y puede dejar de aparecer en búsquedas cercanas.</h2>
+      <p>Podés volver al formulario para seleccionar una dirección o usar tu ubicación actual antes de guardar.</p>
+      <FormError message={error} />
+      <div className="dialog-actions"><button type="button" className="outline-button" disabled={busy} onClick={() => setConfirmWithoutPoint(false)}>Volver a configurar ubicación</button><button type="button" className="primary-button" disabled={busy} onClick={() => void save(true)}>{busy ? "Guardando…" : "Guardar sin ubicación exacta"}</button></div>
+    </div></Dialog>}
+    </div>;
 }
 
 // Presentation wrappers disappear entirely from the create-business form.
