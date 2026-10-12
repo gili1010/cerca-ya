@@ -86,6 +86,7 @@ export type SearchEventRow = {
   id: string; user_id: string | null; query: string; latitude: number | null; longitude: number | null;
   results_count: number; created_at: string;
   normalized_query: string; has_results: boolean; category_id: string | null; locality: string | null;
+  distance_results_count?: number | null; locality_results_count?: number | null;
 };
 
 type Relationship = { foreignKeyName: string; columns: string[]; isOneToOne: boolean; referencedRelation: string; referencedColumns: string[] };
@@ -146,7 +147,7 @@ export type Database = {
       set_my_business_hours: { Args: { p_business_id: string; p_schedule: Json }; Returns: undefined };
       admin_set_business_verification: { Args: { p_business_id: string; p_verified: boolean; p_reason?: string; p_note?: string }; Returns: undefined };
       admin_read_business_verification: { Args: { p_business_id: string }; Returns: Json };
-      record_search_event: { Args: { p_id: string; p_query: string; p_results_count: number; p_category_id?: string | null; p_locality?: string | null; p_province_code?: string | null }; Returns: undefined };
+      record_search_event: { Args: { p_id: string; p_query: string; p_results_count: number; p_category_id?: string | null; p_locality?: string | null; p_distance_count?: number | null; p_locality_count?: number | null }; Returns: undefined };
       admin_search_analytics: { Args: { p_days?: number; p_locality?: string | null; p_province_code?: string | null; p_min_searches?: number; p_opportunity_page?: number; p_top_page?: number }; Returns: Json };
       create_contact_request: { Args: { p_input: Json; p_user_id?: string | null }; Returns: string };
       mark_my_store_shared: { Args: { p_business_id: string }; Returns: string };
@@ -168,7 +169,7 @@ export type Database = {
       is_my_business_slug_available: { Args: { p_business_id: string; p_slug: string }; Returns: boolean };
       change_my_business_slug: { Args: { p_business_id: string; p_slug: string }; Returns: string };
       search_public_stores: {
-        Args: { p_query: string; p_with_distance?: boolean; p_latitude?: number | null; p_longitude?: number | null; p_radius_km?: number; p_locality?: string | null; p_province_code?: string | null };
+        Args: { p_query: string; p_with_distance?: boolean; p_latitude?: number | null; p_longitude?: number | null; p_radius_km?: number; p_locality?: string | null; p_province_code?: string | null; p_group?: "distance" | "locality" };
         Returns: {
           id: string; slug: string; name: string; city: string; logo_url: string | null;
           pickup_enabled: boolean; delivery_enabled: boolean; verified: boolean;
@@ -177,7 +178,7 @@ export type Database = {
         }[];
       };
       read_marketplace_page: {
-        Args: { p_query?: string; p_category?: string; p_filters?: string[]; p_sort?: string; p_home?: boolean; p_favorite_ids?: string[] | null; p_latitude?: number | null; p_longitude?: number | null; p_offset?: number; p_limit?: number; p_radius_km?: number; p_locality?: string | null; p_province_code?: string | null };
+        Args: { p_query?: string; p_category?: string; p_filters?: string[]; p_sort?: string; p_home?: boolean; p_favorite_ids?: string[] | null; p_latitude?: number | null; p_longitude?: number | null; p_offset?: number; p_limit?: number; p_radius_km?: number; p_locality?: string | null; p_province_code?: string | null; p_group?: "distance" | "locality" };
         Returns: { product_ids: string[]; total: number }[];
       };
       save_my_store_branding: {

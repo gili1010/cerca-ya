@@ -7,6 +7,7 @@ import { ProductImage } from "../details/product-image";
 import { StockTime } from "../details/stock-time";
 import { formatDistance } from "@/lib/distance";
 import { isOnDemand, isProductAvailable } from "@/lib/product-availability";
+import localityStyles from "./catalog-locality.module.css";
 
 export function StockConfirmation({ product }: { product: Product }) {
   if (isOnDemand(product)) return <div className={`stock-confirmation ${isProductAvailable(product) ? "" : "unconfirmed"}`}><span>{isProductAvailable(product) ? <Check size={13} aria-hidden="true" /> : <Clock3 size={13} aria-hidden="true" />}Se prepara a pedido</span><small>{isProductAvailable(product) ? "Disponible hoy" : "No disponible hoy"}</small></div>;
@@ -17,9 +18,9 @@ export function StockConfirmation({ product }: { product: Product }) {
   </div>;
 }
 
-interface ProductCardProps { product: Product; saved: boolean; onSave: (id: string) => void }
+interface ProductCardProps { product: Product; saved: boolean; onSave: (id: string) => void; localityMatch?: boolean }
 
-export function ProductCard({ product, saved, onSave }: ProductCardProps) {
+export function ProductCard({ product, saved, onSave, localityMatch = false }: ProductCardProps) {
   const real = product.source === "supabase";
   const available = isProductAvailable(product);
   const href = `/producto/${product.id}`;
@@ -35,9 +36,9 @@ export function ProductCard({ product, saved, onSave }: ProductCardProps) {
       {real && <small className="public-card-category">{product.category}</small>}
       <h3><Link href={href}>{product.name}</Link></h3>
       <strong className="product-price">{money(product.price)}</strong>
-      <div className="product-distance"><MapPin size={13} />{product.distanceKm === null ? product.database?.business.city ? <strong>{product.database.business.city}</strong> : <Link href={`${href}#comercio`}>Ver ubicación</Link> : <><strong>A {real ? formatDistance(product.distanceKm) : distance(product.distanceKm)}</strong><span>de vos</span></>}</div>
+      <div className="product-distance"><MapPin size={13} />{localityMatch ? <strong>{product.database?.business.city ? `En ${product.database.business.city}` : "Distancia no disponible"}</strong> : product.distanceKm === null ? product.database?.business.city ? <strong>{product.database.business.city}</strong> : <Link href={`${href}#comercio`}>Ver ubicación</Link> : <><strong>A {real ? formatDistance(product.distanceKm) : distance(product.distanceKm)}</strong><span>de vos</span></>}</div>
       <StockConfirmation product={product} />
-      {real ? <div className="fulfillment public-fulfillment">{product.pickupToday && <span><Store size={15} />Retiro disponible</span>}{product.deliveryToday && <span><Truck size={15} />Envío disponible</span>}{!product.pickupToday && !product.deliveryToday && <span>Consultá al comercio</span>}</div> : <div className="fulfillment">{product.deliveryToday ? <><Truck size={15} /><strong>Entrega hoy</strong></> : product.pickupToday ? <><Store size={15} /><strong>{product.pickupMinutes !== null && product.pickupMinutes <= 15 ? "Retiro inmediato" : "Retirá hoy"}</strong></> : <><Clock3 size={15} /><strong>Desde mañana</strong></>}{product.deliveryToday && product.pickupToday && <span>o retiro</span>}</div>}
+      {real ? <div className="fulfillment public-fulfillment">{product.pickupToday && <span><Store size={15} />Retiro disponible</span>}{product.deliveryToday && <span className={localityMatch ? localityStyles.shipping : undefined}><Truck size={15} />{localityMatch ? "Este comercio realiza envíos · Consultá cobertura" : "Envío disponible"}</span>}{!product.pickupToday && !product.deliveryToday && <span>Consultá al comercio</span>}</div> : <div className="fulfillment">{product.deliveryToday ? <><Truck size={15} /><strong>Entrega hoy</strong></> : product.pickupToday ? <><Store size={15} /><strong>{product.pickupMinutes !== null && product.pickupMinutes <= 15 ? "Retiro inmediato" : "Retirá hoy"}</strong></> : <><Clock3 size={15} /><strong>Desde mañana</strong></>}{product.deliveryToday && product.pickupToday && <span>o retiro</span>}</div>}
       <div className="product-store"><Store size={14} /><Link href={storeHref} aria-label={real ? `Ver tienda de ${product.store}` : undefined}>{product.store}{real && storeSlug ? " ›" : ""}</Link></div>
     </div>
   </article>;

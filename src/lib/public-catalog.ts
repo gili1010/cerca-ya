@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 import type { Product, QuickFilter, SortOrder } from "@/lib/products";
 import { catalogRadius, type HyperlocalScope } from "./hyperlocal";
+import { provinceByCode } from "./argentina-provinces";
 import { businessDistance } from "@/lib/distance";
 import { isCoordinates, type Coordinates } from "@/lib/location";
 
@@ -44,6 +45,8 @@ export interface PublicCatalogOptions extends HyperlocalScope {
   query: string; category: string; filters: QuickFilter[]; sort: SortOrder; page: number;
   favoriteIds?: string[];
   home?: boolean;
+  group?: "distance" | "locality";
+  enabled?: boolean;
   // Transient read parameters for server pagination; never put in a URL or row.
   buyerLocation?: Coordinates | null;
 }
@@ -56,17 +59,21 @@ export async function getPublicCategories(client: SupabaseClient<Database>) {
 
 export async function getPublicCatalog(client: SupabaseClient<Database>, options: PublicCatalogOptions, signal?: AbortSignal) {
   const buyerLocation = isCoordinates(options.buyerLocation) ? options.buyerLocation : null;
+  const group = options.group ?? "distance";
+  const locality = options.locality?.trim() || null;
+  const provinceCode = provinceByCode(options.provinceCode)?.code ?? null;
   const ids = options.favoriteIds?.filter(isProductUuid);
   const home = options.home === true && !options.query.trim();
   const pageSize = publicCatalogPageSize(home);
-  if (!buyerLocation && (!options.locality?.trim() || !options.provinceCode)) return { products: [], total: 0, pageSize };
+  // Separate server scopes: there is never an unrestricted national request.
+  if (options.enabled === false || (group === "distance" ? !buyerLocation : !locality || !provinceCode)) return { products: [], total: 0, pageSize };
   if (ids && !ids.length) return { products: [], total: 0, pageSize };
   const page = Number.isFinite(options.page) ? Math.max(0, Math.floor(options.page)) : 0;
   let request = client.rpc("read_marketplace_page", {
     p_query: options.query.trim().slice(0, 160), p_category: options.category,
-    p_filters: options.filters, p_sort: options.sort, p_home: home,
+    p_filters: options.filters, p_sort: group === "locality" && options.sort === "distance" ? "recommended" : options.sort, p_home: home,
     p_favorite_ids: ids ?? null, p_latitude: buyerLocation?.latitude ?? null, p_longitude: buyerLocation?.longitude ?? null,
-    p_radius_km: catalogRadius(options.radiusKm ?? 20), p_locality: options.locality?.trim() || null, p_province_code: options.provinceCode ?? null,
+    p_radius_km: group === "locality" ? 20 : catalogRadius(options.radiusKm ?? 20), p_locality: locality, p_province_code: provinceCode, p_group: group,
     p_offset: page * pageSize, p_limit: pageSize,
   });
   if (signal) request = request.abortSignal(signal);
@@ -81,7 +88,7 @@ export async function getPublicCatalog(client: SupabaseClient<Database>, options
   const { data: rows, error: detailError } = await details;
   if (detailError) throw detailError;
   const byId = new Map((rows ?? []).map(row => [row.id, row]));
-  const products = productIds.flatMap(id => { const row = byId.get(id); return row ? [toProduct(row, buyerLocation)] : []; });
+  const products = productIds.flatMap(id => { const row = byId.get(id); return row ? [toProduct(row, group === "locality" ? null : buyerLocation)] : []; });
   return { products, total: selected?.total ?? 0, pageSize };
 }
 

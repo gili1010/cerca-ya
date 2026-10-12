@@ -1,6 +1,6 @@
 "use client";
 import { getSupabaseBrowserClient } from "./supabase/client";
-export interface SearchMeasurement { id: string; query: string; resultCount: number; categoryId: string | null; locality: string | null }
+export interface SearchMeasurement { id: string; query: string; resultCount: number; distanceResultCount?: number; localityResultCount?: number; categoryId: string | null; locality: string | null }
 export async function recordSearch(measurement: SearchMeasurement) {
   try {
     const client = getSupabaseBrowserClient(); if (!client) return;
@@ -8,6 +8,7 @@ export async function recordSearch(measurement: SearchMeasurement) {
     await client.rpc("record_search_event", {
       p_id: measurement.id, p_query: measurement.query, p_results_count: measurement.resultCount,
       p_category_id: measurement.categoryId, p_locality: measurement.locality,
+      p_distance_count: measurement.distanceResultCount ?? null, p_locality_count: measurement.localityResultCount ?? null,
     });
   } catch { /* La analítica nunca interrumpe los resultados ni muestra errores. */ }
 }

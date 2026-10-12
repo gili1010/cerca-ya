@@ -1,6 +1,8 @@
 "use client";
 
 import type { HyperlocalScope } from "./hyperlocal";
+import { provinceByCode } from "./argentina-provinces";
+import { isCoordinates } from "./location";
 import { useEffect, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { searchPublicStores, type StoreSearchBusiness } from "@/lib/public-store-search";
@@ -12,13 +14,15 @@ export interface PublicStoreSearchState {
   retry: () => void;
 }
 
-export function usePublicStoreSearch(query: string, enabled: boolean, scope: HyperlocalScope): PublicStoreSearchState {
-  const term = enabled && (scope.buyerLocation || (scope.locality?.trim() && scope.provinceCode)) ? query.trim().slice(0, 160) : "";
-  const key = JSON.stringify({ term, scope });
+export function usePublicStoreSearch(query: string, enabled: boolean, scope: HyperlocalScope & { group?: "distance" | "locality" }): PublicStoreSearchState {
+  const group = scope.group ?? "distance";
+  const hasScope = group === "distance" ? isCoordinates(scope.buyerLocation) : Boolean(scope.locality?.trim() && provinceByCode(scope.provinceCode));
+  const term = enabled && hasScope ? query.trim().slice(0, 160) : "";
+  const key = JSON.stringify({ term, scope: { ...scope, group, radiusKm: group === "locality" ? 20 : scope.radiusKm } });
   const [attempt, setAttempt] = useState(0);
   const [snapshot, setSnapshot] = useState<{ key: string; stores: StoreSearchBusiness[]; error: string } | null>(null);
   useEffect(() => {
-    const parsed: { term: string; scope: HyperlocalScope } = JSON.parse(key);
+    const parsed: { term: string; scope: HyperlocalScope & { group?: "distance" | "locality" } } = JSON.parse(key);
     if (!parsed.term) return;
     let live = true;
     let revision = 0;

@@ -8,16 +8,18 @@ export interface SearchNavigation {
   filters: QuickFilter[];
   sort: SortOrder;
   page: number;
+  localityPage: number;
   view: "home" | "search" | "saved";
 }
 const allowedFilters: QuickFilter[] = ["today", "nearby", "delivery", "pickup", "confirmed"];
 
 export function readSearchNavigation(params: URLSearchParams): SearchNavigation {
   const view = params.get("view");
-  const searching = ["q", "category", "filters", "sort", "page"].some(key => params.has(key));
+  const searching = ["q", "category", "filters", "sort", "page", "locality_page"].some(key => params.has(key));
   const mode = view === "home" || view === "saved" ? view : view === "search" || searching ? "search" : "home";
   const rawPage = params.get("page") ?? "0";
   const sort = params.get("sort");
+  const rawLocalityPage = params.get("locality_page") ?? "0";
   return {
     radiusKm: catalogRadius(Number(params.get("radius") ?? ((params.get("filters") ?? "").split(",").includes("nearby") ? 5 : defaultRadius))),
     query: (params.get("q") ?? "").slice(0, 160),
@@ -25,13 +27,14 @@ export function readSearchNavigation(params: URLSearchParams): SearchNavigation 
     filters: params.has("filters") ? allowedFilters.filter(filter => (params.get("filters") ?? "").split(",").includes(filter)) : mode === "home" ? ["today"] : [],
     sort: sort === "distance" || sort === "price" ? sort : "recommended",
     page: /^\d+$/.test(rawPage) ? Math.min(Number(rawPage), 100000) : 0,
+    localityPage: /^\d+$/.test(rawLocalityPage) ? Math.min(Number(rawLocalityPage), 100000) : 0,
     view: mode,
   };
 }
 
 export function writeSearchNavigation(params: URLSearchParams, state: SearchNavigation): URLSearchParams {
   const result = new URLSearchParams(params);
-  for (const key of ["q", "category", "filters", "sort", "page", "view", "radius"]) result.delete(key);
+  for (const key of ["q", "category", "filters", "sort", "page", "view", "radius", "locality_page"]) result.delete(key);
   if (state.view !== "home") result.set("view", state.view);
   if (state.radiusKm !== defaultRadius) result.set("radius", String(state.radiusKm));
   if (state.query) result.set("q", state.query);
@@ -40,6 +43,7 @@ export function writeSearchNavigation(params: URLSearchParams, state: SearchNavi
   if (state.filters.join(",") !== defaultFilters) result.set("filters", state.filters.join(","));
   if (state.sort !== "recommended") result.set("sort", state.sort);
   if (state.page) result.set("page", String(state.page));
+  if (state.localityPage) result.set("locality_page", String(state.localityPage));
   if (state.view === "home" && result.size > 0) result.set("view", "home");
   return result;
 }
