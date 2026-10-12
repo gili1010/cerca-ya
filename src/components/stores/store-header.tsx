@@ -26,7 +26,7 @@ export function StoreHeader({ business, categories, hours }: Pick<PublicStore, "
         {categories.map(category => <li key={category.id}>{category.name}</li>)}
       </ul>}
       <div className={styles.location}>
-        {business.city && <p><MapPin size={17} aria-hidden="true" />{business.city}</p>}
+        {business.city && <p><MapPin size={17} aria-hidden="true" />{[business.city, business.province].filter(Boolean).join(", ")}</p>}
         <BusinessDistance latitude={business.latitude} longitude={business.longitude} />
       </div>
       {hours ? <BusinessHoursStatus schedule={hours} /> : <p className={styles.hoursUnavailable}>Horario no disponible</p>}

@@ -8,7 +8,7 @@ import { readBusinessHours } from "@/lib/business-hours-client";
 import type { BusinessHoursSchedule } from "@/lib/business-hours";
 
 export type PublicStoreBusiness = Pick<BusinessRow,
-  "id" | "slug" | "name" | "description" | "city" | "latitude" | "longitude" |
+  "id" | "slug" | "name" | "description" | "city" | "province" | "latitude" | "longitude" |
   "whatsapp" | "pickup_enabled" | "delivery_enabled" | "delivery_price" | "logo_url" | "cover_url" | "verified" | "instagram_url" | "facebook_url"
 >;
 export interface PublicStore {
@@ -26,14 +26,21 @@ export const loadPublicStore = cache(async (slug: string): Promise<{ store: Publ
     const client = await createSupabaseServerClient();
     if (!client) throw new Error("unavailable");
     let { data: business, error } = await client.from("businesses")
-      .select("id,slug,name,description,city,latitude,longitude,whatsapp,pickup_enabled,delivery_enabled,delivery_price,logo_url,cover_url,verified,instagram_url,facebook_url")
+      .select("id,slug,name,description,city,province,latitude,longitude,whatsapp,pickup_enabled,delivery_enabled,delivery_price,logo_url,cover_url,verified,instagram_url,facebook_url")
       .eq("slug", slug).eq("active", true).maybeSingle();
+    // New geographic metadata is optional until the manual delta is applied.
+    if (error && ["42703", "PGRST204"].includes(error.code)) {
+      const previous = await client.from("businesses")
+        .select("id,slug,name,description,city,latitude,longitude,whatsapp,pickup_enabled,delivery_enabled,delivery_price,logo_url,cover_url,verified,instagram_url,facebook_url").eq("slug", slug).eq("active", true).maybeSingle();
+      business = previous.data ? { ...previous.data, province: null } : null;
+      error = previous.error;
+    }
     // Optional social-link delta may not have been applied yet; preserve branding.
     if (error && ["42703", "PGRST204"].includes(error.code)) {
       const previous = await client.from("businesses")
         .select("id,slug,name,description,city,latitude,longitude,whatsapp,pickup_enabled,delivery_enabled,delivery_price,logo_url,cover_url,verified")
         .eq("slug", slug).eq("active", true).maybeSingle();
-      business = previous.data ? { ...previous.data, instagram_url: null, facebook_url: null } : null;
+      business = previous.data ? { ...previous.data, province: null, instagram_url: null, facebook_url: null } : null;
       error = previous.error;
     }
     // Keep the first-stage public store readable until the manual migration runs.
@@ -41,7 +48,7 @@ export const loadPublicStore = cache(async (slug: string): Promise<{ store: Publ
       const legacy = await client.from("businesses")
         .select("id,slug,name,description,city,latitude,longitude,whatsapp,pickup_enabled,delivery_enabled,delivery_price,verified")
         .eq("slug", slug).eq("active", true).maybeSingle();
-      business = legacy.data ? { ...legacy.data, logo_url: null, cover_url: null, instagram_url: null, facebook_url: null } : null;
+      business = legacy.data ? { ...legacy.data, province: null, logo_url: null, cover_url: null, instagram_url: null, facebook_url: null } : null;
       error = legacy.error;
     }
     if (error) throw error;

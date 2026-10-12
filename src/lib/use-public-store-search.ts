@@ -13,7 +13,7 @@ export interface PublicStoreSearchState {
 }
 
 export function usePublicStoreSearch(query: string, enabled: boolean, scope: HyperlocalScope): PublicStoreSearchState {
-  const term = enabled && (scope.buyerLocation || scope.locality?.trim()) ? query.trim().slice(0, 160) : "";
+  const term = enabled && (scope.buyerLocation || (scope.locality?.trim() && scope.provinceCode)) ? query.trim().slice(0, 160) : "";
   const key = JSON.stringify({ term, scope });
   const [attempt, setAttempt] = useState(0);
   const [snapshot, setSnapshot] = useState<{ key: string; stores: StoreSearchBusiness[]; error: string } | null>(null);

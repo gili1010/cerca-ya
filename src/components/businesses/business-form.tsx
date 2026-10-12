@@ -13,8 +13,7 @@ import { ensureProfile } from "@/lib/auth/profile";
 import { useAuth } from "../auth/auth-provider";
 import { FormError } from "../requests/request-common";
 import { useMyBusiness } from "./business-provider";
-import { BusinessLocationControl } from "./business-location-control";
-import { isCoordinates } from "@/lib/location";
+import { BusinessCanonicalLocation } from "./business-canonical-location";
 import { BusinessHoursEditor } from "./business-hours-editor";
 import styles from "./business-edit.module.css";
 
@@ -38,6 +37,7 @@ function BusinessFormFields({ business, onLocationSaved }: { business: BusinessR
   const { refresh } = useMyBusiness();
   const [form, setForm] = useState<BusinessInput>(() => business ? {
     name: business.name, description: business.description, whatsapp: business.whatsapp ?? "", city: business.city ?? "", address: business.address ?? "",
+    province: business.province ?? null, province_code: business.province_code ?? null, country_code: "AR", location_precision: business.location_precision ?? "LEGACY",
     pickup_enabled: business.pickup_enabled, delivery_enabled: business.delivery_enabled,
     delivery_radius_km: business.delivery_radius_km || 5, delivery_price: business.delivery_price, minimum_order: business.minimum_order,
     accepts_cash: business.accepts_cash ?? true, accepts_transfer: business.accepts_transfer ?? false, transfer_alias: business.transfer_alias ?? "",
@@ -51,6 +51,7 @@ function BusinessFormFields({ business, onLocationSaved }: { business: BusinessR
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [merchantAccepted, setMerchantAccepted] = useState(false);
+  const [locationValid, setLocationValid] = useState(Boolean(business));
   const [locating, setLocating] = useState(false);
   const inFlight = useRef(false);
 
@@ -69,6 +70,7 @@ function BusinessFormFields({ business, onLocationSaved }: { business: BusinessR
     event.preventDefault();
     if (inFlight.current || !ready || locating) return;
     if (!business && !merchantAccepted) { setError("Aceptá las Reglas para Comercios antes de crear tu comercio."); return; }
+    if (!locationValid) { setError("Seleccioná una localidad válida de la lista de sugerencias."); return; }
     const validation = validateBusiness(form, selected);
     if (validation) { setError(validation); return; }
     if (!user) { router.replace("/login?redirect=" + encodeURIComponent(business ? "/comercio/editar" : "/comercio/crear")); return; }
@@ -114,9 +116,7 @@ function BusinessFormFields({ business, onLocationSaved }: { business: BusinessR
       </EditFormGroup>
       <section className={`workflow-form${business ? ` ${styles.section}` : ""}`} aria-labelledby="business-location-title">
         <h2 id="business-location-title">Ubicación del comercio</h2>
-        <label>Dirección<input value={form.address} onChange={event => setForm({ ...form, address: event.target.value })} required maxLength={240} autoComplete="street-address" disabled={busy} /></label>
-        <label>Ciudad / localidad<input value={form.city} onChange={event => setForm({ ...form, city: event.target.value })} required maxLength={120} autoComplete="address-level2" disabled={busy} /></label>
-        <EditFormGroup enabled={Boolean(business)} location><BusinessLocationControl configured={isCoordinates(business)} changed={form.latitude !== undefined} disabled={busy} onLoading={setLocating} onChange={coordinates => setForm(current => ({ ...current, ...coordinates }))} /></EditFormGroup>
+        <BusinessCanonicalLocation business={business} value={form} disabled={busy} onLoading={setLocating} onValidity={setLocationValid} onChange={patch => setForm(current => ({ ...current, ...patch }))} />
       </section>
       <EditFormGroup enabled={Boolean(business)}>
       <fieldset className="form-checkboxes" disabled={busy || !ready}><legend>Categorías que vende tu comercio · elegí al menos una</legend>{categories.map(category => <label key={category.id}><input type="checkbox" checked={selected.includes(category.id)} onChange={event => setSelected(current => event.target.checked ? [...current, category.id] : current.filter(id => id !== category.id))} />{category.name}</label>)}</fieldset>

@@ -21,7 +21,7 @@ import { readSearchNavigation, writeSearchNavigation, type SearchNavigation } fr
 
 export default function Marketplace() {
   const router = useRouter();
-  const { coordinates, locality } = useUserLocation();
+  const { coordinates, locality, provinceCode } = useUserLocation();
   const { favorites, toggleFavorite, zone, setModal, setHomeTab } = useDemo();
   const searchParams = useSearchParams();
   const { query, category, filters, sort, page, radiusKm, view: activeTab } = readSearchNavigation(new URLSearchParams(searchParams.toString()));
@@ -58,10 +58,10 @@ export default function Marketplace() {
       sort: !coordinates && current.sort === "distance" ? "recommended" : current.sort });
     window.history.replaceState(null, "", `${window.location.pathname}?${next}${window.location.hash}`);
   }, [coordinates]);
-  const catalog = usePublicCatalog({ query, category, filters: effectiveFilters, sort: effectiveSort, home: activeTab === "home" && !query.trim() && !category && !favoritesOnly, page, favoriteIds: favoritesOnly ? favorites : undefined, buyerLocation: coordinates, locality, radiusKm });
-  const storeSearch = usePublicStoreSearch(query, !favoritesOnly, { buyerLocation: coordinates, locality, radiusKm });
+  const catalog = usePublicCatalog({ query, category, filters: effectiveFilters, sort: effectiveSort, home: activeTab === "home" && !query.trim() && !category && !favoritesOnly, page, favoriteIds: favoritesOnly ? favorites : undefined, buyerLocation: coordinates, locality, provinceCode, radiusKm });
+  const storeSearch = usePublicStoreSearch(query, !favoritesOnly, { buyerLocation: coordinates, locality, provinceCode, radiusKm });
   // Sólo se arma una medición con intención explícita, nunca al escribir/renderizar.
-  const searchContext = JSON.stringify({ query, category, filters: effectiveFilters, sort: effectiveSort, coordinates, locality, radiusKm, favoritesOnly });
+  const searchContext = JSON.stringify({ query, category, filters: effectiveFilters, sort: effectiveSort, coordinates, locality, provinceCode, radiusKm, favoritesOnly });
   const [measurement, setMeasurement] = useState<{ id: string; context: string; query: string; categoryId: string | null; locality: string | null } | null>(null);
   const lastSubmit = useRef<{ context: string; at: number } | null>(null);
   const consumedMeasurement = useRef<string | null>(null);
@@ -93,7 +93,7 @@ export default function Marketplace() {
     const term = query.trim().replace(/\s+/g, " ");
     const previous = lastSubmit.current;
     try {
-      if ((coordinates || locality?.trim()) && !favoritesOnly && term.length >= 2 && term.length <= 120 && (!previous || previous.context !== searchContext || Date.now() - previous.at >= 2000)) {
+      if ((coordinates || (locality?.trim() && provinceCode)) && !favoritesOnly && term.length >= 2 && term.length <= 120 && (!previous || previous.context !== searchContext || Date.now() - previous.at >= 2000)) {
         lastSubmit.current = { context: searchContext, at: Date.now() };
         setMeasurement({ id: crypto.randomUUID(), context: searchContext, query: term, categoryId: categories.find(item => item.slug === category)?.id ?? null, locality });
       }
@@ -115,7 +115,7 @@ export default function Marketplace() {
     <main className="shell">
       <Hero query={query} inputRef={inputRef} onQuery={value => { setQuery(value); setPage(0); if (activeTab !== "search") { setFilters([]); setActiveTab("search"); } }} onSearch={search} onRequest={() => router.push(`/pedido/nuevo?q=${encodeURIComponent(query)}`)} urgent={urgent} onUrgent={() => { setFilters(["today", "confirmed"]); setActiveTab("search"); setSort("recommended"); setPage(0); goToCatalog(); }} />
       <Categories categories={categories} selected={category} loading={categoryLoading} error={categoryError} onRetry={() => { setCategoryLoading(true); setCategoryError(""); setCategoryAttempt(value => value + 1); }} onChange={value => { setCategory(value); setQuery(""); setFilters([]); setActiveTab("search"); setPage(0); goToCatalog(); }} />
-      <Catalog {...catalog} storeSearch={storeSearch} radiusKm={radiusKm} locality={locality} onRadius={value => updateNavigation({ radiusKm: value, page: 0, filters: effectiveFilters })} hasLocation={Boolean(coordinates)} onLocation={() => setModal("zone")} onRetry={catalog.retry} page={page} onPage={value => { setPage(value); goToCatalog(); }} filters={effectiveFilters} category={categories.find(item => item.slug === category)?.name ?? category} query={query} favorites={favorites} favoritesOnly={favoritesOnly} sort={effectiveSort} onToggleFilter={toggleFilter} onSort={value => { setSort(value); setPage(0); }} onReset={reset} onSave={id => { toggleFavorite(id); if (favoritesOnly) setPage(0); }} onFavorites={showSaved} />
+      <Catalog {...catalog} storeSearch={storeSearch} radiusKm={radiusKm} locality={provinceCode ? locality : null} onRadius={value => updateNavigation({ radiusKm: value, page: 0, filters: effectiveFilters })} hasLocation={Boolean(coordinates)} onLocation={() => setModal("zone")} onRetry={catalog.retry} page={page} onPage={value => { setPage(value); goToCatalog(); }} filters={effectiveFilters} category={categories.find(item => item.slug === category)?.name ?? category} query={query} favorites={favorites} favoritesOnly={favoritesOnly} sort={effectiveSort} onToggleFilter={toggleFilter} onSort={value => { setSort(value); setPage(0); }} onReset={reset} onSave={id => { toggleFavorite(id); if (favoritesOnly) setPage(0); }} onFavorites={showSaved} />
       <Footer onHow={() => setModal("how")} />
     </main>
     <MobileNav active={activeTab} savedCount={favorites.length} onSelect={selectTab} />

@@ -1,5 +1,6 @@
 import type { BusinessRow } from "@/types/database";
 import { argentinaWhatsAppNumber } from "@/lib/phone";
+import { provinceByCode } from "@/lib/argentina-provinces";
 import { normalizeSocialLink } from "./social-links";
 
 export const deliveryRadii = [5, 10, 15, 20, 30] as const;
@@ -7,7 +8,8 @@ export type BusinessInput = Pick<BusinessRow, "name" | "description" | "pickup_e
   whatsapp: string; city: string; address: string;
   accepts_cash: boolean; accepts_transfer: boolean; transfer_alias: string;
   instagram_url: string; facebook_url: string;
-  latitude?: number; longitude?: number;
+  latitude?: number | null; longitude?: number | null;
+  province?: string | null; province_code?: string | null; country_code?: "AR"; location_precision?: "LEGACY" | "DEVICE" | "ADDRESS" | "NONE";
 };
 export const emptyBusiness: BusinessInput = {
   name: "", description: "", whatsapp: "", city: "", address: "", pickup_enabled: true, delivery_enabled: false,
@@ -26,6 +28,7 @@ export function validateBusiness(input: BusinessInput, categoryIds: string[]): s
   if (input.description.trim().length > 3000) return "La descripción puede tener hasta 3000 caracteres.";
   if (!argentinaWhatsAppNumber(input.whatsapp)) return "Ingresá un WhatsApp de Argentina con código de área y número (10 dígitos, sin 0 ni 15), o su formato internacional +54 9.";
   if (!input.city.trim() || input.city.trim().length > 120) return "Ingresá una ciudad o localidad de hasta 120 caracteres.";
+  if (input.province_code && (!provinceByCode(input.province_code) || provinceByCode(input.province_code)?.name !== input.province)) return "Seleccioná una provincia válida.";
   if (!input.address.trim() || input.address.trim().length > 240) return "Ingresá una dirección de hasta 240 caracteres.";
   if (input.transfer_alias.trim().length > 100) return "El alias puede tener hasta 100 caracteres.";
   if (!categoryIds.length) return "Seleccioná al menos una categoría.";
@@ -46,6 +49,7 @@ export function businessErrorMessage(error: unknown, edit: boolean): string {
     BUSINESS_ADDRESS_REQUIRED: "Ingresá la dirección.", BUSINESS_CATEGORY_REQUIRED: "Seleccioná al menos una categoría.",
     BUSINESS_CATEGORY_INVALID: "Alguna categoría ya no está disponible. Recargá el formulario.", BUSINESS_METHOD_REQUIRED: "Habilitá retiro o envío.",
     BUSINESS_RADIUS_INVALID: "Seleccioná un radio de entrega válido.", BUSINESS_PRICE_INVALID: "Revisá los importes ingresados.",
+    BUSINESS_PROVINCE_INVALID: "Seleccioná una provincia válida.", BUSINESS_CANONICAL_LOCATION_REQUIRED: "Seleccioná una localidad y provincia válidas.",
     BUSINESS_LOCATION_INVALID: "No pudimos guardar la ubicación. Volvé a obtenerla e intentá nuevamente.",
     BUSINESS_PAYMENT_INVALID: "Revisá los medios de pago y el alias ingresado.",
     BUSINESS_SLUG_IMMUTABLE: "El enlace de tu tienda es permanente y no puede modificarse.",

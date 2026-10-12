@@ -59,14 +59,14 @@ export async function getPublicCatalog(client: SupabaseClient<Database>, options
   const ids = options.favoriteIds?.filter(isProductUuid);
   const home = options.home === true && !options.query.trim();
   const pageSize = publicCatalogPageSize(home);
-  if (!buyerLocation && !options.locality?.trim()) return { products: [], total: 0, pageSize };
+  if (!buyerLocation && (!options.locality?.trim() || !options.provinceCode)) return { products: [], total: 0, pageSize };
   if (ids && !ids.length) return { products: [], total: 0, pageSize };
   const page = Number.isFinite(options.page) ? Math.max(0, Math.floor(options.page)) : 0;
   let request = client.rpc("read_marketplace_page", {
     p_query: options.query.trim().slice(0, 160), p_category: options.category,
     p_filters: options.filters, p_sort: options.sort, p_home: home,
     p_favorite_ids: ids ?? null, p_latitude: buyerLocation?.latitude ?? null, p_longitude: buyerLocation?.longitude ?? null,
-    p_radius_km: catalogRadius(options.radiusKm ?? 20), p_locality: options.locality?.trim() || null,
+    p_radius_km: catalogRadius(options.radiusKm ?? 20), p_locality: options.locality?.trim() || null, p_province_code: options.provinceCode ?? null,
     p_offset: page * pageSize, p_limit: pageSize,
   });
   if (signal) request = request.abortSignal(signal);

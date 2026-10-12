@@ -63,7 +63,7 @@ test("tiendas reciben el mismo radio y ubicación; localidad sólo cuando es con
   await searchPublicStores(client, "panadería", { buyerLocation: coordinates, radiusKm: 50 });
   assert.equal(calls[0].args.p_radius_km, 50);
   assert.equal(calls[0].args.p_latitude, coordinates.latitude);
-  await getPublicCatalog(client, { ...options, locality: "Alta Gracia" });
+  await getPublicCatalog(client, { ...options, locality: "Alta Gracia", provinceCode: "AR-X" });
   assert.equal(calls[1].args.p_locality, "Alta Gracia");
   assert.equal(calls[1].args.p_latitude, null);
 });

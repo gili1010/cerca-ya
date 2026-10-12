@@ -17,10 +17,10 @@ type SearchRow = Omit<StoreSearchBusiness, "categories" | "logo_url" | "latitude
 export async function searchPublicStores(client: SupabaseClient<Database>, query: string, scope: HyperlocalScope, signal?: AbortSignal): Promise<StoreSearchBusiness[]> {
   const term = query.trim().slice(0, 160);
   const coordinates = isCoordinates(scope.buyerLocation) ? scope.buyerLocation : null;
-  if (!term || (!coordinates && !scope.locality?.trim())) return [];
+  if (!term || (!coordinates && (!scope.locality?.trim() || !scope.provinceCode))) return [];
   // Accent-insensitive matching and the eight-result cap stay in PostgreSQL.
   // The RPC returns only the same public fields used by these cards.
-  let request = client.rpc("search_public_stores", { p_query: term, p_with_distance: Boolean(coordinates), p_latitude: coordinates?.latitude ?? null, p_longitude: coordinates?.longitude ?? null, p_radius_km: catalogRadius(scope.radiusKm ?? 20), p_locality: scope.locality?.trim() || null });
+  let request = client.rpc("search_public_stores", { p_query: term, p_with_distance: Boolean(coordinates), p_latitude: coordinates?.latitude ?? null, p_longitude: coordinates?.longitude ?? null, p_radius_km: catalogRadius(scope.radiusKm ?? 20), p_locality: scope.locality?.trim() || null, p_province_code: scope.provinceCode ?? null });
   if (signal) request = request.abortSignal(signal);
   const { data, error } = await request;
   if (error) throw error;

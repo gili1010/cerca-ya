@@ -9,5 +9,6 @@ export function catalogRadius(value: number): CatalogRadius {
 export interface HyperlocalScope {
   buyerLocation?: Coordinates | null;
   locality?: string | null;
+  provinceCode?: string | null;
   radiusKm?: CatalogRadius;
 }
