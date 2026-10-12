@@ -4,6 +4,7 @@ export interface GuideCard {
   title: string;
   description: string;
   icon: LucideIcon;
+  when?: string;
 }
 
 export const guideAnchors = [
@@ -26,31 +27,31 @@ export const merchantSteps: GuideCard[] = [
   { title: "Creá tu tienda", description: "Presentá tu comercio con nombre, ubicación, descripción, logo y portada.", icon: Store },
   { title: "Mostrá lo que vendés", description: "Publicá productos con fotos y precios. Mantené el stock o la disponibilidad de lo que preparás a pedido.", icon: ShoppingBag },
   { title: "Facilitá la compra", description: "Indicá horarios, retiro, envío y medios de pago. Sumá WhatsApp, Instagram y Facebook si los usás.", icon: Clock3 },
-  { title: "Conectá con tu zona", description: "Gestioná pedidos, respondé oportunidades desde Radar y compartí tu tienda con su enlace o QR.", icon: Radio },
+  { title: "Conectá con tu zona", description: "Gestioná pedidos y revisá en Radar lo que buscan clientes de tu zona. Compartí tu tienda por enlace o QR.", icon: Radio },
 ];
 
 export const connectionSteps = [
-  { title: "Contás qué necesitás", description: "Buscás en el catálogo o publicás un Pedido Abierto." },
-  { title: "Encontrás opciones cerca", description: "CercaYa reúne resultados y oportunidades de tu zona." },
-  { title: "El comercio participa", description: "Publica sus productos o responde con una oferta." },
-  { title: "Elegís y coordinás", description: "Reservás, consultás y acordás retiro o envío." },
+  { title: "Buscás un lomito", description: "Escribís “lomito completo” y elegís tu zona." },
+  { title: "Encontrás una opción", description: "Ves una lomitería y revisás su disponibilidad." },
+  { title: "Reservás o consultás", description: "Pedís el producto o hablás por WhatsApp, si está disponible." },
+  { title: "Coordinás con el comercio", description: "Acordás retiro o envío según sus opciones y confirmación." },
 ];
 
 export const waysToBuy: GuideCard[] = [
-  { title: "Reservar / hacer un pedido", description: "Ya encontraste el producto. Elegís cantidad y modalidad, enviás el pedido y esperás la confirmación.", icon: PackageCheck },
-  { title: "Consultar al comercio", description: "Tenés una duda. Usá WhatsApp cuando esté disponible para hablar directamente con el comercio.", icon: MessageCircle },
-  { title: "Publicar un Pedido Abierto", description: "No encontraste una opción. Contás qué buscás y los comercios pueden enviarte ofertas para revisar.", icon: ClipboardList },
+  { title: "Reservar / hacer un pedido", when: "Ya encontraste el producto", description: "Elegís cantidad y modalidad, enviás el pedido y esperás la confirmación del comercio.", icon: PackageCheck },
+  { title: "Consultar al comercio", when: "Tenés una duda", description: "Hablás directamente por WhatsApp cuando el comercio lo tiene disponible.", icon: MessageCircle },
+  { title: "Publicar un Pedido Abierto", when: "Todavía lo estás buscando", description: "Contás qué necesitás y revisás las ofertas que los comercios puedan enviarte.", icon: ClipboardList },
 ];
 
 export const trustCards: GuideCard[] = [
   { title: "Comercios verificados", description: "La insignia identifica comercios cuya existencia y responsable fueron confirmados por CercaYa.", icon: BadgeCheck },
-  { title: "Disponibilidad informada", description: "Mirá cuándo se confirmó el stock o la disponibilidad para elegir mejor. El comercio confirma tu pedido.", icon: PackageCheck },
+  { title: "Disponibilidad informada", description: "Mirá la última confirmación de stock o disponibilidad. Puede cambiar: esperá que el comercio confirme tu pedido.", icon: PackageCheck },
   { title: "Horarios y contacto", description: "Consultá si está abierto según el horario informado y hablá con el comercio para coordinar tu visita.", icon: Clock3 },
 ];
 
 export const accountBenefits = [
-  { title: "Como cliente", icon: Heart, items: ["Consultar tu historial de pedidos y reservas.", "Publicar Pedidos Abiertos.", "Recibir y revisar ofertas de comercios."] },
-  { title: "Como comercio", icon: Store, items: ["Crear tu tienda y publicar tu catálogo.", "Gestionar pedidos y disponibilidad.", "Responder oportunidades y completar tu perfil."] },
+  { title: "Como cliente", icon: Heart, items: ["Tu historial y seguimiento de reservas.", "Tus Pedidos Abiertos y ofertas en un lugar."] },
+  { title: "Como comercio", icon: Store, items: ["Tu tienda y catálogo accesibles para tus clientes.", "Pedidos, Radar y disponibilidad para gestionar."] },
 ];
 
 export const guideFaqs = [
