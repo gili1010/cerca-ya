@@ -21,9 +21,7 @@
 .workspace.workspace :global(.catalog-heading h2) { font-size: 26px; }
 .workspace.workspace :global(.catalog-heading .heading-dot),.workspace.workspace :global(.catalog-eyebrow .live-dot) { display: none; }
 .workspace.workspace :global(.product-card) { box-shadow: none; }
-.workspace.workspace :global(.product-image) { aspect-ratio: 4 / 3; }
 .workspace.workspace :global(.product-image img) { object-fit: contain; }
-.workspace.workspace :global(.product-body h3) { min-height: 0; }
 .workspace.workspace :global(.catalog-toolbar) { margin-top: var(--space-4); }
 .workspace.workspace :global(.quick-filters) { flex-wrap: wrap; }
 .workspace.workspace :global(.filter-chip) { min-height: 44px; white-space: normal; text-align: left; }
