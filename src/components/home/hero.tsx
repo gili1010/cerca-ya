@@ -1,38 +1,44 @@
 import { type RefObject } from "react";
-import { ArrowRight, Camera, CheckCheck, Plus, Search, X, Zap } from "lucide-react";
-import { NeighborhoodMap } from "./neighborhood-map";
-import styles from "./home-upper.module.css";
+import { ArrowRight, Search, X, Zap, MapPin, CheckCircle, MessageSquare } from "lucide-react";
+import { HomeLocality } from "./home-locality";
+import styles from "./home-discovery.module.css";
 
 interface HeroProps {
+  compact?: boolean;
   query: string;
   inputRef: RefObject<HTMLInputElement | null>;
   onQuery: (value: string) => void;
   onSearch: () => void;
-  onRequest: () => void;
   onUrgent: () => void;
   urgent: boolean;
+  locality: string | null;
+  province: string | null;
+  hasCoordinates: boolean;
+  onLocation: () => void;
+  onLocality: (locality: string, province: string) => void;
 }
 
-export function Hero({ query, inputRef, onQuery, onSearch, onRequest, onUrgent, urgent }: HeroProps) {
-  return <section className={`hero ${styles.hero}`} aria-labelledby="hero-title">
-    <div className="hero-main">
-      <span className="eyebrow"><span className="live-dot" /> CERCA TUYO. LISTO PARA HOY.</span>
-      <h1 id="hero-title">¿Qué necesitás <span>hoy?</span></h1>
-      <p className="hero-slogan">Encontralo cerca. Tenelo hoy.</p>
-      <p className="hero-description">Productos en tu barrio, con stock confirmado.<br />Menos esperar. Más resolver.</p>
-      <form className="hero-search" onSubmit={event => { event.preventDefault(); onSearch(); }}>
-        <Search size={23} />
-        <input ref={inputRef} value={query} onChange={event => onQuery(event.target.value)} placeholder="Buscar productos o tiendas cerca tuyo..." aria-label="Buscar productos o tiendas cerca tuyo" />
-        {query && <button type="button" className="clear-query" onClick={() => onQuery("")} aria-label="Borrar búsqueda"><X size={17} /></button>}
-        <button className="search-arrow" type="submit" aria-label="Buscar productos o tiendas"><ArrowRight size={22} /></button>
+export function Hero({ compact = false, query, inputRef, onQuery, onSearch, onUrgent, urgent, locality, province, hasCoordinates, onLocation, onLocality }: HeroProps) {
+  return <section className={`${styles.hero} ${compact ? styles.compactHero : ""}`} aria-labelledby="hero-title">
+    <div className={styles.heroContent}>
+      {!compact && <span className="eyebrow">TU LOCALIDAD. MUCHAS POSIBILIDADES.</span>}
+      <h1 id="hero-title">{compact ? "Encontrá lo que buscás." : <>Lo que necesitás,<br/><span>más cerca.</span></>}</h1>
+      <p className={styles.lead}>{compact ? "Buscá y elegí el tipo de resultados que necesitás." : "Encontrá productos, artículos y servicios en tu zona."}</p>
+      <form className={styles.search} role="search" onSubmit={event => { event.preventDefault(); onSearch(); }}>
+        <Search size={22} aria-hidden="true"/>
+        <input ref={inputRef} value={query} onChange={event => onQuery(event.target.value)} placeholder="¿Qué estás buscando?" aria-label="Buscar productos, artículos y servicios"/>
+        {query && <button type="button" className={styles.clear} onClick={() => onQuery("")} aria-label="Borrar búsqueda"><X size={18} aria-hidden="true"/></button>}
+        <button className={styles.submit} type="submit" aria-label="Buscar"><span>Buscar</span><ArrowRight size={20} aria-hidden="true"/></button>
       </form>
-      <div className="search-shortcuts" aria-label="Formas de buscar">
-        <button className="shortcut-active" onClick={onSearch}><Search size={15} />Buscar</button>
-        <button disabled title="Disponible próximamente"><Camera size={15} /><span>Buscar con foto</span><small>Próximamente</small></button>
-        <button onClick={onRequest}><Plus size={16} /><span>Publicar lo que necesito</span></button>
-      </div>
-      <div className="urgent-row"><button className={`urgent-button ${urgent ? "is-active" : ""}`} aria-pressed={urgent} onClick={onUrgent}><Zap size={18} fill="currentColor" />Lo necesito hoy<ArrowRight size={16} /></button><span><CheckCheck size={16} />Cerca, disponible y confirmado.</span></div>
+      {!compact && <><HomeLocality locality={locality} provinceCode={province} hasCoordinates={hasCoordinates} onLocation={onLocation} onLocality={onLocality}/>
+      <div className={styles.today}><button type="button" aria-pressed={urgent} onClick={onUrgent}><Zap size={16} aria-hidden="true"/>Disponible hoy<ArrowRight size={15} aria-hidden="true"/></button><span>Explorá productos de comercios con los filtros de hoy y stock confirmado.</span></div></>}
     </div>
-    <NeighborhoodMap />
+    {!compact && <aside className={styles.heroAside} aria-label="Qué podés encontrar en CercaYa">
+      <span className={styles.asideLabel}>ENCONTRALO CERCA. TENELO HOY.</span>
+      <h2>Primero tu zona.<br/>Después tus opciones.</h2>
+      <ul><li><MapPin aria-hidden="true"/><span><strong>Elegí dónde buscar</strong><small>Cada sección te muestra su zona de búsqueda.</small></span></li><li><CheckCircle aria-hidden="true"/><span><strong>Revisá antes de decidir</strong><small>Consultá los datos publicados y las condiciones.</small></span></li><li><MessageSquare aria-hidden="true"/><span><strong>Si no está, pedilo</strong><small>Publicá una necesidad de producto o servicio.</small></span></li></ul>
+      <p>Encontrá opciones locales y coordiná con quien las ofrece.</p>
+    </aside>}
   </section>;
 }
+

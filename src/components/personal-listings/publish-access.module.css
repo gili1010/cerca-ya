@@ -1,0 +1,7 @@
+.desktop { gap: 6px; color: var(--green); font-weight: 700; }
+.mobile { display: none; }
+@media (max-width:600px) {
+  .mobile { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); padding-bottom: var(--space-3); }
+  .mobile a { display: inline-flex; gap: var(--space-2); align-items: center; justify-content: center; min-height: 44px; padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); font-size: var(--text-xs); color: var(--green); }
+  .mobile a:first-child { background: var(--surface-soft); border: 1px solid var(--success-line); font-weight: 700; }
+}

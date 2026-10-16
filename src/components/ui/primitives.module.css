@@ -1,0 +1,19 @@
+.heading { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-5); flex-wrap: wrap; }
+.heading :is(h2,h3) { font-size: var(--text-lg); line-height: 1.35; font-weight: 700; letter-spacing: -.025em; margin: 0; }
+.heading p { color: var(--muted); font-size: var(--text-sm); line-height: 1.6; margin: var(--space-2) 0 0; max-width: 60ch; }
+.actions { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+.badge { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-pill); font-size: var(--text-xs); line-height: 1.6; font-weight: 650; }
+.neutral { background: var(--paper); color: var(--muted); }
+.success { background: var(--success-bg); color: var(--success); border-color: var(--success-line); }
+.warning { background: var(--warning-bg); color: var(--warning); border-color: var(--warning-line); }
+.error { background: var(--error-bg); color: var(--error); border-color: var(--error-line); }
+.info { background: var(--info-bg); color: var(--info); border-color: var(--info-line); }
+.state { display: grid; justify-items: center; gap: var(--space-4); padding: var(--space-7) var(--space-5); border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); text-align: center; }
+.state > svg { color: var(--green); padding: var(--space-3); box-sizing: content-box; background: var(--surface-soft); border-radius: var(--radius-md); }
+.feedback { display: flex; align-items: flex-start; gap: var(--space-3); border: 1px solid; border-radius: var(--radius-md); padding: var(--space-4); margin-block: var(--space-4); }
+.feedback p { margin: 0 0 var(--space-3); overflow-wrap: anywhere; line-height: 1.65; }
+.feedback > div { min-width: 0; }
+.loading { display: grid; gap: var(--space-3); margin-block: var(--space-5); padding: var(--space-5); border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius-md); }
+.loadingLabel { color: var(--muted); font-size: var(--text-sm); }
+.loadingLines { width: min(100%,420px); }
+@media(max-width:600px) { .heading { gap: var(--space-3); } .actions { width: 100%; } .actions > :is(a,button) { flex: 1 1 auto; } }

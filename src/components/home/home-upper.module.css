@@ -49,3 +49,4 @@
   .categoryIcon > svg { width: 32px; height: 32px; }
 }
 @media (prefers-reduced-motion: reduce) { .categoryCard:global(.category-card) { transition: none; } }
+.categoryName { font-size: var(--text-sm); line-height: 1.45; }

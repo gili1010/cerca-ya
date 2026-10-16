@@ -1,0 +1,59 @@
+.header { background: var(--surface); border-bottom: 1px solid var(--line); position: relative; z-index: 20; }
+.headerInner { display: flex; align-items: center; gap: var(--space-5); min-height: 88px; padding-block: var(--space-3); }
+.brandBlock { display: grid; flex-shrink: 0; gap: 2px; }
+.brandBlock > small { color: var(--muted); font-size: 11px; letter-spacing: .01em; }
+.header .zone { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-md); min-width: 0; max-width: 210px; min-height: 48px; text-align: left; color: var(--green); }
+.zone > span { min-width: 0; display: grid; gap: 1px; }
+.zone small { color: var(--muted); font-size: 11px; }
+.zone strong { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.desktopNav { display: flex; align-items: center; gap: var(--space-1); margin-left: auto; }
+.topItem { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 44px; padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); color: var(--muted); font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.active { color: var(--green); background: var(--surface-soft); font-weight: 700; }
+.utilities { display: flex; align-items: center; gap: var(--space-2); flex-shrink: 0; }
+.account { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; padding: var(--space-2) var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-md); color: var(--deep); font-size: 13px; font-weight: 650; }
+.account span { max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.menu { position: relative; min-width: 0; }
+.topItem,.account,.menuItem,.helpLink,.closeMenu,.zone { transition: background-color var(--duration) var(--ease), color var(--duration) var(--ease), border-color var(--duration) var(--ease); }
+.menu > summary { list-style: none; }
+.menu > summary::-webkit-details-marker { display: none; }
+.menu[open] > summary { color: var(--green); background: var(--surface-soft); }
+.menuPanel { position: absolute; right: 0; top: calc(100% + var(--space-3)); width: min(420px,calc(100vw - 32px)); max-height: min(76dvh,740px); overflow-y: auto; overscroll-behavior: contain; padding: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow-floating); z-index: 60; }
+.menuIntro { padding: var(--space-2) var(--space-2) var(--space-4); border-bottom: 1px solid var(--line); }
+.menuIntro > strong { font-size: 17px; letter-spacing: -.025em; }
+.menuIntro p { margin: var(--space-2) 0 0; font-size: 13px; color: var(--muted); line-height: 1.6; }
+.menuGroup { display: grid; gap: var(--space-1); padding-top: var(--space-4); }
+.menuGroup h3 { font-size: 12px; color: var(--secondary); letter-spacing: .02em; padding: var(--space-2); font-weight: 700; }
+.menuItem { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) var(--space-2); border-radius: var(--radius-md); text-align: left; width: 100%; min-height: 52px; color: var(--ink); }
+.menuItem[aria-current="page"] { background: var(--surface-soft); }
+.menuItem > span:last-child { display: grid; gap: 3px; min-width: 0; }
+.menuItem strong { font-size: 14px; line-height: 1.4; font-weight: 600; }
+.menuItem small { font-size: 12px; line-height: 1.5; color: var(--muted); }
+.itemIcon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0; background: var(--surface-soft); color: var(--green); }
+.helpLink,.closeMenu { display: flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 44px; width: 100%; margin-top: var(--space-3); color: var(--green); font-size: 13px; border-radius: var(--radius-md); }
+.closeMenu { border: 1px solid var(--line); }
+.bottomNav { display: none; }
+.header :is(a,button,summary):focus-visible,.bottomNav :is(a,button,summary):focus-visible { outline: 3px solid var(--green); outline-offset: 2px; }
+@media(hover:hover) { .topItem:hover,.menuItem:hover,.closeMenu:hover,.helpLink:hover,.account:hover,.header .zone:hover { background: var(--surface-soft); color: var(--green); } }
+@media(max-width:1100px) { .headerInner { flex-wrap: wrap; gap: var(--space-3); } .utilities { margin-left: auto; } .desktopNav { order: 3; flex-basis: 100%; margin-left: 0; padding-top: var(--space-2); border-top: 1px solid var(--line); } .menuPanel { right: auto; left: 0; } }
+@media(max-width:600px) {
+ .headerInner { min-height: 72px; gap: var(--space-2); padding-block: var(--space-3); }
+ .desktopNav { display: none; }
+ .brandBlock > small { display: none; }
+ .header .zone { order: 3; max-width: none; width: 100%; min-height: 44px; border: 0; background: var(--surface-soft); padding: var(--space-2) var(--space-3); }
+ .zone > span { display: flex; align-items: baseline; gap: var(--space-2); flex: 1; }
+ .zone strong { max-width: 200px; }
+ .account { padding: var(--space-2); min-width: 44px; justify-content: center; }
+ .account > span { display: none; }
+ .bottomNav { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); position: fixed; inset: auto 0 0; min-height: calc(76px + env(safe-area-inset-bottom)); padding: var(--space-1) max(var(--space-2),env(safe-area-inset-right)) env(safe-area-inset-bottom) max(var(--space-2),env(safe-area-inset-left)); border-top: 1px solid var(--line); background: var(--surface); box-shadow: 0 -6px 24px -16px #193d2929; z-index: 40; }
+ .bottomItem { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 68px; width: 100%; color: var(--muted); font-size: 11px; font-weight: 600; cursor: pointer; border-radius: var(--radius-md); }
+ .bottomItem.active { color: var(--green); background: transparent; }
+ .navIcon { display: grid; place-items: center; width: 44px; height: 30px; border-radius: var(--radius-pill); }
+ .bottomItem.active .navIcon,.mobileMenu[open] .navIcon { color: var(--green); background: var(--surface-soft); }
+ .mobileMenu > summary { width: 100%; }
+ .mobileMenu .menuPanel { position: fixed; inset: auto 12px calc(88px + env(safe-area-inset-bottom)); width: auto; max-height: min(68dvh,650px); box-shadow: var(--shadow-floating); }
+}
+/* 3.1: readable navigation and metadata; existing layout and actions are unchanged. */
+.brandBlock > small,.zone small,.menuGroup h3 { font-size: 13px; }
+.zone strong,.topItem,.account,.menuIntro p,.menuItem small,.helpLink,.closeMenu { font-size: 14px; }
+@media(max-width:600px) { .bottomItem { font-size: 13px; } }
+

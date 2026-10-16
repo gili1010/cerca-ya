@@ -1,0 +1,8 @@
+.card { min-width: 0; }
+.card h2 { font-size: 18px; overflow-wrap: anywhere; }
+.card a { overflow-wrap: anywhere; }
+.card strong { overflow-wrap: anywhere; }
+.card a:focus-visible { outline: 3px solid var(--green); outline-offset: -3px; border-radius: var(--radius-md); }
+.card > a:first-child { display: block; flex-shrink: 0; }
+.placeholder { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3); padding: var(--space-4); background: var(--surface-soft); color: var(--green); text-align: center; font-size: 13px; overflow-wrap: anywhere; }
+@media (max-width: 600px) { .card h2 { font-size: 16px; } }

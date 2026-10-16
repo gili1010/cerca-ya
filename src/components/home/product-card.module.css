@@ -1,0 +1,14 @@
+.card :global(.product-body) { gap: var(--space-2); }
+.card :global(.product-store) { margin: 0; padding: 0; border: 0; font-size: var(--text-sm); line-height: 1.5; }
+.card :global(.product-store a) { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; display: inline-flex; align-items: center; min-height: 44px; }
+.card :global(.product-distance) { margin: 0 0 var(--space-1); font-size: var(--text-sm); line-height: 1.5; }
+.card :global(.stock-pill) { position: static; align-self: flex-start; max-width: 100%; font-size: var(--text-sm); padding: var(--space-1) var(--space-2); background: var(--surface-soft); }
+.card :global(.stock-confirmation) { border: 0; background: transparent; padding: 0; margin-top: 0; gap: 2px; }
+.card :global(.stock-confirmation > span),.card :global(.stock-confirmation small) { font-size: var(--text-sm); line-height: 1.5; }
+.card :global(.stock-confirmation > span) { color: var(--ink); }
+.card :global(.stock-confirmation.unconfirmed > span) { color: var(--warning); }
+.card :global(.fulfillment) { font-size: var(--text-sm); padding-top: var(--space-1); line-height: 1.5; }
+.card :global(.public-card-category) { font-size: var(--text-sm); color: var(--muted); }
+.card :global(.product-body h3) { font-size: var(--text-base); line-height: 1.45; min-height: 0; }
+.card :global(.product-price) { line-height: 1.25; margin-bottom: var(--space-1); }
+.card :global(.product-price) { white-space: normal; overflow-wrap: anywhere; }

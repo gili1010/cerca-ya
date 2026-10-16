@@ -4,6 +4,9 @@
  */
 import type { ReservationStatus } from "./reservations";
 import type { RequestStatus } from "./requests";
+import type { PersonalListingRow, PersonalListingImageRow } from "./personal-listings";
+import type { ServiceProviderRow, ServiceCategoryRow, ServiceListingRow, ServiceListingImageRow, ServiceAreaRow } from "./services";
+import type { ServiceRequestRow, ServiceRequestOfferRow } from "./service-radar";
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 export type StockStatus = "IN_STOCK" | "LOW_STOCK" | "OUT_OF_STOCK" | "UNCONFIRMED";
@@ -104,6 +107,24 @@ type Table<Row, Required extends keyof Row, Relations extends Relationship[] = [
 export type Database = {
   public: {
     Tables: {
+      service_requests: Table<ServiceRequestRow, "id" | "requester_id" | "category_id" | "title" | "description" | "city" | "province_code", [], "city_normalized">;
+      service_request_offers: Table<ServiceRequestOfferRow, "id" | "request_id" | "provider_id" | "service_listing_id" | "message" | "pricing_mode">;
+      service_providers: Table<ServiceProviderRow, "owner_id" | "display_name", [FK<"service_providers_owner_id_fkey", ["owner_id"], "profiles">], "search_document">;
+      service_categories: Table<ServiceCategoryRow, "name" | "slug", [FK<"service_categories_parent_id_fkey", ["parent_id"], "service_categories">]>;
+      service_listings: Table<ServiceListingRow, "provider_id" | "category_id" | "title" | "service_mode" | "pricing_mode", [
+        FK<"service_listings_provider_id_fkey", ["provider_id"], "service_providers">,
+        FK<"service_listings_category_id_fkey", ["category_id"], "service_categories">
+      ], "search_document">;
+      service_listing_images: Table<ServiceListingImageRow, "listing_id" | "object_path" | "position", [FK<"service_listing_images_listing_id_fkey", ["listing_id"], "service_listings">]>;
+      service_areas: Table<ServiceAreaRow, "provider_id" | "city" | "province_code" | "province", [FK<"service_areas_provider_id_fkey", ["provider_id"], "service_providers">], "city_normalized">;
+      // Storage contracts only. No client DML grants; mutations use the new RPCs.
+      personal_listings: Table<PersonalListingRow, "owner_id" | "category_id" | "title" | "price" | "item_condition", [
+        FK<"personal_listings_owner_id_fkey", ["owner_id"], "profiles">,
+        FK<"personal_listings_category_id_fkey", ["category_id"], "categories">
+      ], "search_document">;
+      personal_listing_images: Table<PersonalListingImageRow, "listing_id" | "object_path" | "position", [
+        FK<"personal_listing_images_listing_id_fkey", ["listing_id"], "personal_listings">
+      ]>;
       profiles: Table<ProfileRow, "id">;
       business_hours: Table<BusinessHoursRow, "business_id" | "weekday" | "period_index" | "opens_at" | "closes_at", [FK<"business_hours_business_id_fkey", ["business_id"], "businesses">]>;
       businesses: Table<BusinessRow, "name" | "slug", [FK<"businesses_owner_id_fkey", ["owner_id"], "profiles">]>;
@@ -143,6 +164,50 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      save_my_service_provider: { Args: { p_input: Json; p_provider_id: string; p_expected_revision?: number | null }; Returns: string };
+      set_my_service_areas: { Args: { p_provider_id: string; p_areas: Json; p_expected_revision: number }; Returns: string };
+      save_my_service_listing: { Args: { p_provider_id: string; p_listing_id: string; p_input: Json; p_expected_revision?: number | null }; Returns: string };
+      manage_my_service_listing: { Args: { p_listing_id: string; p_action: string; p_expected_revision: number }; Returns: string };
+      set_my_service_listing_images: { Args: { p_listing_id: string; p_paths: string[]; p_expected_revision: number }; Returns: string };
+      set_my_service_provider_avatar: { Args: { p_provider_id: string; p_path: string | null; p_expected_revision: number }; Returns: string };
+      read_my_service_provider: { Args: Record<string, never>; Returns: Json };
+      read_public_service_provider: { Args: { p_provider_id: string }; Returns: Json };
+      read_public_service_listing: { Args: { p_listing_id: string }; Returns: Json };
+      save_my_service_request: { Args: { p_request_id: string; p_input: Json; p_expected_revision?: number | null }; Returns: string };
+      read_my_service_requests: { Args: { p_request_id?: string | null; p_offset?: number; p_limit?: number }; Returns: Json };
+      read_service_radar: { Args: { p_request_id?: string | null; p_category_id?: string | null; p_offset?: number; p_limit?: number }; Returns: Json };
+      save_my_service_request_offer: { Args: { p_offer_id: string; p_request_id: string; p_service_listing_id: string; p_input: Json; p_expected_revision?: number | null }; Returns: string };
+      read_service_request_offers: { Args: { p_seller?: boolean; p_request_id?: string | null; p_offer_id?: string | null; p_offset?: number; p_limit?: number }; Returns: Json };
+      manage_my_service_request: { Args: { p_request_id: string; p_action: string; p_expected_revision: number }; Returns: string };
+      manage_my_service_request_offer: { Args: { p_offer_id: string; p_action: string; p_expected_revision: number; p_request_expected_revision?: number | null }; Returns: string };
+      report_service_radar: { Args: { p_entity: string; p_id: string; p_reason: string; p_details?: string }; Returns: string };
+      admin_set_service_radar_block: { Args: { p_entity: string; p_id: string; p_blocked: boolean; p_expected_revision: number; p_reason?: string; p_note?: string }; Returns: undefined };
+      admin_resolve_service_radar_report: { Args: { p_report_id: string; p_status: string; p_expected_revision: number; p_note?: string }; Returns: undefined };
+      admin_read_service_radar: { Args: { p_section: string; p_request_id?: string | null; p_offer_id?: string | null; p_status?: string | null; p_offset?: number; p_limit?: number }; Returns: Json };
+      read_service_categories: { Args: Record<string, never>; Returns: Json };
+      read_my_service_listings: { Args: { p_listing_id?: string | null; p_status?: string | null; p_offset?: number; p_limit?: number }; Returns: Json };
+      read_service_listings_page: { Args: { p_locality: string; p_province_code: string; p_query?: string; p_category_id?: string | null; p_provider_id?: string | null; p_offset?: number; p_limit?: number }; Returns: Json };
+      read_service_providers_page: { Args: { p_locality: string; p_province_code: string; p_query?: string; p_category_id?: string | null; p_offset?: number; p_limit?: number }; Returns: Json };
+      report_service: { Args: { p_entity: string; p_id: string; p_reason: string; p_details?: string }; Returns: string };
+      admin_set_service_block: { Args: { p_entity: string; p_id: string; p_blocked: boolean; p_expected_revision: number; p_reason?: string; p_note?: string }; Returns: undefined };
+      admin_resolve_service_report: { Args: { p_report_id: string; p_status: string; p_expected_revision: number; p_note?: string }; Returns: undefined };
+      admin_read_services: { Args: { p_section: string; p_provider_id?: string | null; p_listing_id?: string | null; p_status?: string | null; p_offset?: number; p_limit?: number }; Returns: Json };
+      save_my_personal_listing: { Args: { p_input: Json; p_listing_id?: string | null; p_expected_revision?: number | null }; Returns: string };
+      manage_my_personal_listing: { Args: { p_listing_id: string; p_action: string; p_expected_revision: number }; Returns: string };
+      set_my_personal_listing_images: { Args: { p_listing_id: string; p_paths: string[]; p_expected_revision: number }; Returns: string };
+      read_my_personal_listings: {
+        Args: { p_listing_id?: string | null; p_status?: string | null; p_query?: string; p_category_id?: string | null; p_locality?: string | null; p_province_code?: string | null; p_from?: string | null; p_until?: string | null; p_offset?: number; p_limit?: number };
+        Returns: Json;
+      };
+      read_public_personal_listing: { Args: { p_listing_id: string }; Returns: Json };
+      read_personal_listings_page: {
+        Args: { p_locality: string; p_province_code: string; p_query?: string; p_category_id?: string | null; p_condition?: string | null; p_status?: string; p_from?: string | null; p_until?: string | null; p_sort?: string; p_offset?: number; p_limit?: number };
+        Returns: Json;
+      };
+      report_personal_listing: { Args: { p_listing_id: string; p_reason: string; p_details?: string }; Returns: string };
+      admin_set_personal_listing_block: { Args: { p_listing_id: string; p_blocked: boolean; p_reason?: string; p_note?: string }; Returns: undefined };
+      admin_resolve_personal_listing_report: { Args: { p_report_id: string; p_status: string; p_note?: string }; Returns: undefined };
+      admin_read_personal_listings: { Args: { p_section: string; p_listing_id?: string | null; p_status?: string | null; p_offset?: number; p_limit?: number }; Returns: Json };
       read_business_hours: { Args: { p_business_id: string }; Returns: Json };
       set_my_business_hours: { Args: { p_business_id: string; p_schedule: Json }; Returns: undefined };
       admin_set_business_verification: { Args: { p_business_id: string; p_verified: boolean; p_reason?: string; p_note?: string }; Returns: undefined };

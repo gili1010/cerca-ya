@@ -1,0 +1,25 @@
+.nav { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-6); }
+.nav a { border: 1px solid var(--line); border-radius: var(--radius-pill); padding: var(--space-3) var(--space-4); color: var(--green); text-decoration: none; font-size: 14px; min-height: 44px; }
+.nav a[aria-current="page"] { background: var(--surface-soft); border-color: var(--green); }
+.panel, .card { padding: var(--space-5); border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); display: grid; gap: var(--space-4); min-width: 0; }
+.stack { display: grid; gap: var(--space-5); margin-block: var(--space-5); }
+.grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: var(--space-5); margin-block: var(--space-5); }
+.card h2, .card h3, .panel h2 { margin: 0; font-size: 20px; }
+.card p, .panel p { margin: 0; overflow-wrap: anywhere; }
+.title { margin-block: var(--space-5); }
+.title h1 { font-size: clamp(1.8rem,4vw,2.6rem); letter-spacing: -.035em; }
+.field { display: grid; gap: var(--space-2); font-size: 14px; font-weight: 600; min-width: 0; }
+.field :is(input,select,textarea) { width: 100%; min-width: 0; min-height: 48px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); padding: var(--space-3); font: inherit; }
+.field textarea { resize: vertical; min-height: 140px; }
+.actions { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-3); margin-block: var(--space-4); }
+.actions > :is(a,button) { min-height: 44px; }
+.meta { color: var(--muted); font-size: 14px; }
+.badge { color: var(--green); background: var(--surface-soft); border-radius: var(--radius-pill); padding: var(--space-2) var(--space-3); justify-self: start; font-size: 13px; }
+.notice { background: var(--surface-soft); padding: var(--space-4); border-radius: var(--radius-md); margin-block: var(--space-4); display: grid; gap: var(--space-3); }
+.description { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.7; }
+.price { font-size: 26px; font-weight: 750; color: var(--deep); overflow-wrap: anywhere; }
+.modal { padding: var(--space-7) var(--space-5) var(--space-5); display: grid; gap: var(--space-4); overflow-wrap: anywhere; }
+.actions > :is(a,button), .panel > button, .notice > button, .stack > button { white-space: normal; max-width: 100%; text-align: center; }
+.selected { border-color: var(--green); }
+.nav a:focus-visible, .field :is(input,select,textarea):focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+@media(max-width:640px) { .grid { grid-template-columns: 1fr; } .panel,.card { padding: var(--space-4); } .nav a { flex: 1 1 40%; text-align: center; } .actions > :is(a,button) { flex: 1 1 100%; } .modal { padding-inline: var(--space-4); } }

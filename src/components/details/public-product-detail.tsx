@@ -12,13 +12,13 @@ import { isOnDemand, isProductAvailable } from "@/lib/product-availability";
 import { AddToOrder } from "../cart/add-to-order";
 import { ReportButton } from "../reports/report-button";
 
-export function PublicProductDetail({ product }: { product: Product }) {
+export function PublicProductDetail({ product, returnTo = "/" }: { product: Product; returnTo?: string }) {
   if (!product.database) return null;
   const { product: row, business, category } = product.database;
   const onDemand = isOnDemand(product);
   const available = isProductAvailable(product);
   const whatsapp = argentinaWhatsAppUrl(business.whatsapp, `Hola, vi ${product.name} en CercaYa. ¿Lo tenés disponible?`);
-  return <><BackLink href="/">Volver a explorar</BackLink>
+  return <><BackLink href={returnTo}>Volver a explorar</BackLink>
     <div className="product-detail-grid"><div className="product-detail-photo"><ProductImage src={product.image} alt={product.name} className="public-detail-image" /></div>
       <section className="panel product-detail-info"><span className="eyebrow">{category.name}</span><h1>{product.name}</h1><strong className="offer-price">{money(product.price)}</strong><p>{product.description || "Sin descripción."}</p>
         {onDemand ? <div className="product-stock-summary"><strong className={`request-status ${available ? "open" : "closed"}`}>Se prepara a pedido</strong><span>{available ? "Disponible hoy" : "No disponible hoy"}</span></div> : <><div className="product-stock-summary"><strong className={`request-status ${product.stock > 0 ? "open" : "closed"}`}>{product.stock > 0 ? <PackageCheck size={16} aria-hidden="true" /> : <PackageX size={16} aria-hidden="true" />}{product.stock > 0 ? "En stock" : "Sin stock"}</strong><span>{product.stock} unidades</span></div><div className={`stock-confirmation ${row.stock_confirmed_at ? "" : "unconfirmed"}`}><span>{row.stock_confirmed_at ? <Check size={14} aria-hidden="true" /> : <Clock3 size={14} aria-hidden="true" />}<StockTime date={row.stock_confirmed_at} /></span></div></>}

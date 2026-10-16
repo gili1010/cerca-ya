@@ -1,0 +1,48 @@
+"use client";
+import Link from "next/link";
+import {useEffect,useRef,useState} from "react";
+import {Dialog} from "@/components/home/dialog";
+import {BackLink} from "@/components/navigation/back-link";
+import {FormError} from "@/components/requests/request-common";
+import {getSupabaseBrowserClient} from "@/lib/supabase/client";
+import {readMyServiceListings,readMyServiceListing,manageServiceListing,readPublicServiceListing} from "@/lib/services/client";
+import {serviceStatusLabels,serviceUiError,providerPublishProblem} from "@/lib/services/frontend";
+import type {OwnedServiceListing,ServicePage,ServiceStatus,ServiceAction} from "@/types/services";
+import {useServiceWorkspace} from "./use-service-workspace";
+import {useSignedServicePhotos} from "./use-signed-service-photos";
+import {ServiceCard} from "./service-card";
+import {ServicePresentation} from "./service-presentation";
+import styles from "@/components/personal-listings/personal-listings.module.css";
+export function MyServices({listingId}:{listingId?:string}){
+ const ws=useServiceWorkspace(),[status,setStatus]=useState<ServiceStatus|null>(null),[page,setPage]=useState(0),[attempt,setAttempt]=useState(0);
+ const [data,setData]=useState<ServicePage<OwnedServiceListing>|null>(null),[loading,setLoading]=useState(true),[error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false),[frozen,setFrozen]=useState(false);
+ const [confirmation,setConfirmation]=useState<{row:OwnedServiceListing;action:ServiceAction}|null>(null),lock=useRef(false),live=useRef(true);
+ useEffect(()=>{live.current=true;return()=>{live.current=false;};},[]);
+ useEffect(()=>{let active=true;const controller=new AbortController();setLoading(true);setData(null);async function load(){try{const client=getSupabaseBrowserClient();if(!client)throw new Error();const result=await readMyServiceListings(client,{listingId,status:listingId?null:status,page:listingId?0:page,pageSize:listingId?1:24},controller.signal);if(active){if(!listingId&&page>Math.max(0,Math.ceil(result.total/24)-1)){setPage(Math.max(0,Math.ceil(result.total/24)-1));return;}setData(result);setError("");}}catch(cause){if(active)setError(serviceUiError(cause));}finally{if(active)setLoading(false);}}void load();return()=>{active=false;controller.abort();};},[listingId,status,page,attempt]);
+ const signed=useSignedServicePhotos(data?.items.flatMap(row=>listingId?[...row.images.map(image=>image.object_path),...(row.provider.avatar_path?[row.provider.avatar_path]:[])]:row.images[0]?[row.images[0].object_path]:[])??[]);
+ const disabled=busy||frozen||ws.loading||!!ws.error||ws.suspended;
+ function reload(){setConfirmation(null);setFrozen(false);setNotice("");setAttempt(value=>value+1);ws.reload();}
+ function choose(row:OwnedServiceListing,action:ServiceAction){setError("");setNotice("");if(action==="publish"){const problem=providerPublishProblem(row.provider);if(problem){setError(problem);return;}}setConfirmation({row,action});}
+ async function confirm(){
+  if(!confirmation||lock.current||disabled)return;lock.current=true;setBusy(true);setError("");
+  const {row,action}=confirmation;
+  try{const client=getSupabaseBrowserClient();if(!client)throw new Error();await manageServiceListing(client,row.id,row.revision,action);const current=await readMyServiceListing(client,row.id),expected=action==="publish"?"PUBLISHED":action==="pause"?"PAUSED":"WITHDRAWN";
+   if(!current||current.status!==expected||current.revision!==row.revision+1)throw new Error("La información cambió. Volvé a cargar antes de guardar.");
+   if(action==="publish"&&!await readPublicServiceListing(client,row.id))throw new Error("No pudimos confirmar que el servicio siga disponible.");
+   if(live.current){setConfirmation(null);setNotice(action==="withdraw"?"Servicio retirado. Liberó un cupo y sigue disponible como registro de sólo lectura.":"Estado actualizado.");setAttempt(value=>value+1);}
+  }catch(cause){if(live.current){setError(serviceUiError(cause));setFrozen(true);setConfirmation(null);}}
+  finally{lock.current=false;if(live.current)setBusy(false);}
+ }
+ function actions(row:OwnedServiceListing){
+  const locked=disabled||row.admin_blocked||row.provider.admin_blocked,withdrawn=row.status==="WITHDRAWN";
+  return <>{(row.admin_blocked||row.provider.admin_blocked)&&<p className="form-error">Bloqueado por administración. {row.admin_block_reason??row.provider.admin_block_reason}</p>}<div className={styles.cardActions}>{!withdrawn&&<Link className="outline-button" href={`/mis-servicios/${row.id}/editar`}>{row.status==="DRAFT"?"Continuar edición":"Editar"}</Link>}{row.status==="PUBLISHED"&&row.provider.active&&!locked&&<Link className="outline-button" href={`/servicio/${row.id}`}>Ver detalle público</Link>}{(row.status==="DRAFT"||row.status==="PAUSED")&&<button className="primary-button" disabled={locked||!!providerPublishProblem(row.provider)} onClick={()=>choose(row,"publish")}>{row.status==="PAUSED"?"Reactivar":"Publicar"}</button>}{row.status==="PUBLISHED"&&<button className="outline-button" disabled={locked} onClick={()=>choose(row,"pause")}>Pausar</button>}{!withdrawn&&<button className="outline-button" disabled={locked} onClick={()=>choose(row,"withdraw")}>Retirar</button>}{withdrawn&&<Link className="outline-button" href={`/mis-servicios/${row.id}`}>Ver registro propio</Link>}</div>{!withdrawn&&providerPublishProblem(row.provider)&&<p className={styles.hint}>{providerPublishProblem(row.provider)} <Link className="secondary-link" href="/mi-perfil-profesional">Mi perfil profesional</Link></p>}</>;
+ }
+ return <><BackLink href={listingId?"/mis-servicios":"/cuenta"}>{listingId?"Mis servicios":"Mi cuenta"}</BackLink><div className={styles.heading}><h1>{listingId?"Mi servicio":"Mis servicios"}</h1><p>Podés tener hasta 20 servicios no retirados. Los borradores y pausados consumen cupo; retirar libera un lugar.</p><div className={styles.actions}><Link className="primary-button" href="/publicar/servicio">Ofrecer un servicio</Link><Link className="outline-button" href="/mi-perfil-profesional">Mi perfil profesional</Link></div></div>
+ {!ws.loading&&!ws.error&&ws.suspended&&<p className="form-error">Tu cuenta está suspendida. Podés leer tus servicios, pero no modificarlos.</p>}<FormError message={error||ws.error}/>{notice&&<p className={styles.notice} role="status">{notice}</p>}{frozen&&<p className={styles.notice}>La operación no está confirmada o cambió la revisión. <button className="outline-button" disabled={busy} onClick={reload}>Recargar estado guardado</button></p>}
+ {!listingId&&<label className={styles.field}>Estado<select value={status??""} disabled={busy} onChange={event=>{const value=event.target.value;setStatus(value==="DRAFT"||value==="PUBLISHED"||value==="PAUSED"||value==="WITHDRAWN"?value:null);setPage(0);}}><option value="">Todos los estados</option>{Object.entries(serviceStatusLabels).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>}
+ {loading?<p role="status">Cargando servicios…</p>:error&&!data?<button className="outline-button" onClick={reload}>Reintentar</button>:data?.items.length?listingId?<><p className={styles.notice}>{serviceStatusLabels[data.items[0].status]}{data.items[0].status==="WITHDRAWN"?" · sólo lectura, no se puede reactivar":""}</p><ServicePresentation listing={data.items[0]} urls={signed.urls} privateView/>{actions(data.items[0])}</>:<><p className={styles.hint} style={{marginBlock:"var(--space-5)"}} role="status">{data.total} servicios</p><div className={styles.listingGrid}>{data.items.map(row=><ServiceCard key={row.id} listing={row} urls={signed.urls} owned>{actions(row)}</ServiceCard>)}</div></>:<section className={`panel ${styles.empty}`}><h2>{listingId?"Este servicio no está disponible para tu cuenta.":"Todavía no hay servicios con este estado."}</h2><Link href="/publicar/servicio">Ofrecer un servicio</Link></section>}
+ {signed.error&&<p className={styles.hint}>{signed.error}<button className="secondary-link" onClick={signed.refresh}>Reintentar fotos</button></p>}{!listingId&&data&&data.total>24&&<nav className={styles.pagination} aria-label="Páginas de Mis servicios"><button className="outline-button" disabled={loading||busy||page===0} onClick={()=>setPage(value=>value-1)}>Anterior</button><span>{page+1} / {Math.ceil(data.total/24)}</span><button className="outline-button" disabled={loading||busy||(page+1)*24>=data.total} onClick={()=>setPage(value=>value+1)}>Siguiente</button></nav>}
+ {confirmation&&<Dialog title={confirmation.action==="withdraw"?"Retirar servicio":confirmation.action==="pause"?"Pausar servicio":"Publicar servicio"} onClose={()=>{if(!busy)setConfirmation(null);}} preventCancel><div className={styles.modal}><h2>{confirmation.action==="withdraw"?"¿Retirar este servicio?":confirmation.action==="pause"?"¿Pausar este servicio?":"¿Publicar este servicio?"}</h2><p><strong>{confirmation.row.title}</strong></p><p>{confirmation.action==="withdraw"?"No podrá reactivarse ni editarse. Conservás el registro propio y liberás un cupo.":confirmation.action==="pause"?"Dejará de verse públicamente. Podés reactivarlo después.":"Se mostrará con el contacto autorizado cuando acepte consultas."}</p><div className={styles.actions}><button className="outline-button" disabled={busy} onClick={()=>setConfirmation(null)}>Cancelar</button><button className={confirmation.action==="withdraw"?"danger-button":"primary-button"} disabled={busy} onClick={()=>void confirm()}>{busy?"Guardando…":"Confirmar"}</button></div></div></Dialog>}
+ </>;
+}
+
