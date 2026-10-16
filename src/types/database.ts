@@ -97,7 +97,9 @@ type FK<Name extends string, Columns extends string[], Relation extends string, 
   foreignKeyName: Name; columns: Columns; isOneToOne: false; referencedRelation: Relation; referencedColumns: References;
 };
 type Table<Row, Required extends keyof Row, Relations extends Relationship[] = [], Generated extends keyof Row = never> = {
-  Row: Row;
+  // Materialize interfaces as object types compatible with Supabase's GenericTable.
+  // Keep the exact keys and property types; do not add an unrestricted index signature.
+  Row: { [Key in keyof Row]: Row[Key] };
   Insert: Pick<Row, Required> & Partial<Omit<Row, Required | Generated>>;
   Update: Partial<Omit<Row, Generated>>;
   Relationships: Relations;
