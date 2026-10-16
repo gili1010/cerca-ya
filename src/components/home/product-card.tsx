@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import cardStyles from "./product-card.module.css";
 import Link from "next/link";
@@ -23,14 +26,22 @@ export function StockConfirmation({ product }: { product: Product }) {
 interface ProductCardProps { product: Product; saved: boolean; onSave: (id: string) => void; localityMatch?: boolean; returnTo?: string }
 
 export function ProductCard({ product, saved, onSave, localityMatch = false, returnTo }: ProductCardProps) {
+  const [imageShape, setImageShape] = useState<{ src: string; ratio: number } | null>(null);
+  const imageRatio = imageShape?.src === product.image ? imageShape.ratio : 1;
   const real = product.source === "supabase";
   const available = isProductAvailable(product);
   const href = `/producto/${product.id}${returnTo ? `?returnTo=${encodeURIComponent(personalSearchReturnTo(returnTo))}` : ""}`;
   const storeSlug = product.database?.business.slug;
   const storeHref = real ? storeSlug ? `/tienda/${encodeURIComponent(storeSlug)}` : `${href}#comercio` : `/demo/comercios/${product.storeId}`;
   return <article className={`product-card ${cardStyles.card}`}>
-    <div className="product-image">
-      <Link className="product-image-link" href={href} aria-label={`Ver ${product.name}`}>{real ? <ProductImage src={product.image} alt={product.name} className="public-card-image" /> : <Image src={photo(product.image)} alt={product.name} fill sizes="(max-width: 600px) 50vw, (max-width: 1000px) 33vw, 25vw" />}</Link>
+    <div className={`product-image ${cardStyles.imageFrame}`} style={{ aspectRatio: imageRatio }}>
+      <Link className="product-image-link" href={href} aria-label={`Ver ${product.name}`}>{real ? <ProductImage src={product.image} alt={product.name} className="public-card-image" onLoad={event => {
+        const image = event.currentTarget;
+        if (!image.naturalWidth || !image.naturalHeight) return;
+        // Dimensions describe framing, not whether the image is a flyer or a photo.
+        const ratio = Math.min(1.5, Math.max(0.75, image.naturalWidth / image.naturalHeight));
+        setImageShape({ src: product.image, ratio });
+      }}/> : <Image src={photo(product.image)} alt={product.name} fill sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw" />}</Link>
       <button className={`save-button ${saved ? "saved" : ""}`} aria-label={`${saved ? "Quitar de" : "Agregar a"} guardados: ${product.name}`} aria-pressed={saved} onClick={() => onSave(product.id)}><Heart size={18} fill={saved ? "currentColor" : "none"} /></button>
     </div>
     <div className="product-body">

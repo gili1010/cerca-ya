@@ -7,6 +7,7 @@ import { type Product, type QuickFilter, type SortOrder } from "@/lib/products";
 import { catalogRadii, type CatalogRadius } from "@/lib/hyperlocal";
 import type { PublicStoreSearchState } from "@/lib/use-public-store-search";
 import { ProductCard } from "./product-card";
+import cardStyles from "./product-card.module.css";
 import { QuickFilters } from "./quick-filters";
 import { ProductSkeletonGrid } from "../ui/product-skeleton-grid";
 import { StoreSearchResults } from "./store-search-results";
@@ -91,7 +92,7 @@ export function Catalog(props: CatalogProps) {
       <div className={localityStyles.groupHeading}><div><h3 id="geographic-products-title"><MapPin size={18} aria-hidden="true" />Cerca tuyo · Hasta {props.radiusKm} km</h3></div><span className={localityStyles.count} role="status">{props.loading ? "Cargando productos..." : props.error ? "Productos no disponibles en este momento" : `${props.total} ${props.total === 1 ? "producto" : "productos"} dentro de ${props.radiusKm} km`}</span></div>
       {props.error && <div className={localityStyles.notice}><p role="alert">{props.error}</p><button className="secondary-link" onClick={props.onRetry}>Reintentar productos cercanos</button></div>}
       {props.loading && <ProductSkeletonGrid />}
-      {!props.loading && !props.error && props.products.length > 0 && <div className="product-grid">{props.products.map(product => <ProductCard returnTo={props.searchReturnTo} key={product.id} product={product} saved={props.favorites.includes(product.id)} onSave={props.onSave} />)}</div>}
+      {!props.loading && !props.error && props.products.length > 0 && <div className={`product-grid ${cardStyles.catalogGrid}`}>{props.products.map(product => <ProductCard returnTo={props.searchReturnTo} key={product.id} product={product} saved={props.favorites.includes(product.id)} onSave={props.onSave} />)}</div>}
       {!props.loading && !props.error && props.total === 0 && !globallyEmpty && <div className={localityStyles.notice}><p>{localityTotal > 0 ? `No encontramos productos con distancia verificada dentro de ${props.radiusKm} km, pero sí hay comercios de tu localidad.` : `No encontramos productos con distancia verificada dentro de ${props.radiusKm} km.`}</p>{!props.favoritesOnly && <Link className="secondary-link" href={requestHref}>Crear Pedido Abierto</Link>}</div>}
       {!props.loading && !props.error && <CatalogPagination total={props.total} pageSize={props.pageSize} page={props.page} onPage={props.onPage} label="Páginas de productos dentro del radio" />}
     </section>}
@@ -100,7 +101,7 @@ export function Catalog(props: CatalogProps) {
       <div className={localityStyles.groupHeading}><div><h3 id="locality-products-title"><Store size={18} aria-hidden="true" />{props.hasLocation ? `También en ${props.locality}` : `Productos en ${props.locality}`}</h3><p className={localityStyles.description}>{props.hasLocation ? "Comercios de tu localidad que todavía no tienen distancia verificada." : "Explorás por localidad y provincia. Estos resultados no están comprobados dentro del radio seleccionado."}</p></div><span className={localityStyles.count} role="status">{local.loading ? "Cargando productos de tu localidad..." : local.error ? "Productos de tu localidad no disponibles" : `${local.total} ${local.total === 1 ? "producto" : "productos"}${props.hasLocation ? local.total === 1 ? " adicional" : " adicionales" : ""} en ${props.locality}${props.hasLocation ? " sin distancia verificada" : ""}`}</span></div>
       {local.error && <div className={localityStyles.notice}><p role="alert">{local.error}</p><button className="secondary-link" onClick={local.retry}>Reintentar productos de tu localidad</button></div>}
       {local.loading && <ProductSkeletonGrid />}
-      {!local.loading && !local.error && local.products.length > 0 && <div className="product-grid">{local.products.map(product => <ProductCard returnTo={props.searchReturnTo} key={product.id} product={product} saved={props.favorites.includes(product.id)} onSave={props.onSave} localityMatch />)}</div>}
+      {!local.loading && !local.error && local.products.length > 0 && <div className={`product-grid ${cardStyles.catalogGrid}`}>{local.products.map(product => <ProductCard returnTo={props.searchReturnTo} key={product.id} product={product} saved={props.favorites.includes(product.id)} onSave={props.onSave} localityMatch />)}</div>}
       {!local.loading && !local.error && local.total === 0 && <p className={localityStyles.notice}>No encontramos productos en tu localidad con estos filtros.</p>}
       {!local.loading && !local.error && <CatalogPagination total={local.total} pageSize={local.pageSize} page={props.localityPage} onPage={props.onLocalityPage} label="Páginas de productos de tu localidad" />}
     </section>}
@@ -109,6 +110,7 @@ export function Catalog(props: CatalogProps) {
     <p className="demo-note">Disponibilidad informada por cada comercio. Consultá antes de acercarte. Distancias aproximadas en línea recta; los resultados por localidad no garantizan distancia ni cobertura de envío.</p>
   </section>;
 }
+
 
 
 

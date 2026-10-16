@@ -46,7 +46,7 @@
  .workspace.workspace :global(.sort-select) { width: 100%; }
  .workspace.workspace :global(.sort-select select) { width: 100%; }
  .workspace.workspace :global(.catalog-location-prompt) { flex-wrap: wrap; }
- .workspace.workspace :global(.product-grid) { grid-template-columns: 1fr; }
+
  .workspace.workspace :global(.empty-state) { padding: var(--space-5) var(--space-4); }
 }
 .workspace.workspace :global(#servicios) article { display: flex; flex-direction: column; min-width: 0; overflow: hidden; border: 1px solid var(--line); background: var(--surface); }
@@ -112,3 +112,4 @@
 .workspace.workspace :global(.catalog) .filters > :global(.catalog-primary-filters) { margin-top: 0; }
 .workspace.workspace :global(.catalog) .filters > :is(details,p) { grid-column: 1 / -1; }
 @media(max-width:800px) { .workspace.workspace :global(.catalog) .filters { grid-template-columns: 1fr; } }
+
