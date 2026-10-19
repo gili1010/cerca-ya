@@ -1,3 +1,4 @@
+import detailStyles from "@/components/details/public-details.module.css";
 import { BackLink } from "@/components/navigation/back-link";
 import { DetailShell } from "@/components/details/detail-shell";
 import { PublicProductDetail } from "@/components/details/public-product-detail";
@@ -14,6 +15,6 @@ export default async function Page({ params, searchParams }: { params: Promise<{
   const rawReturn = (await searchParams).returnTo;
   const returnTo = personalSearchReturnTo(typeof rawReturn === "string" ? rawReturn : null);
   const { product, error } = await loadPublicProduct(id);
-  return <DetailShell>{error ? <section className="empty-state"><h1>No pudimos cargar el producto en este momento.</h1><a className="primary-button" href={`/producto/${encodeURIComponent(id)}?returnTo=${encodeURIComponent(returnTo)}`}>Reintentar</a></section> : !product ? <section className="empty-state"><h1>Producto no disponible.</h1><BackLink href={returnTo}>Volver a explorar</BackLink></section> : <PublicProductDetail product={product} returnTo={returnTo} />}</DetailShell>;
+  return <DetailShell>{error ? <section className={`${detailStyles.page} ${detailStyles.summary}`}><h1>No pudimos cargar el producto en este momento.</h1><a className="primary-button" href={`/producto/${encodeURIComponent(id)}?returnTo=${encodeURIComponent(returnTo)}`}>Reintentar</a><BackLink href={returnTo}>Volver a resultados</BackLink></section> : !product ? <section className={`${detailStyles.page} ${detailStyles.summary}`}><h1>Producto no disponible.</h1><BackLink href={returnTo}>Volver a resultados</BackLink></section> : <PublicProductDetail product={product} returnTo={returnTo} />}</DetailShell>;
 }
 

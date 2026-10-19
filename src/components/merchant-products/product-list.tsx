@@ -1,5 +1,6 @@
 "use client";
 
+import {LoadingState} from "@/components/ui/primitives";
 import Link from "next/link";
 import { BadgeCheck, Info, Package, Pencil, Plus, Store, Truck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -60,7 +61,7 @@ function BusinessProducts({ business }: { business: BusinessRow }) {
     <div className={`workflow-heading with-action ${styles.header}`}><div><span className="eyebrow">{business.name}</span><h1>Mis productos</h1><p>Administrá tu catálogo y mantené la disponibilidad al día.</p></div><Link className="primary-button" href="/comercio/productos/nuevo"><Plus size={18} aria-hidden="true" />Publicar producto</Link></div>
     <p className={styles.hint}><Info size={16} aria-hidden="true" />Podés desactivar productos sin borrarlos y reactivarlos cuando quieras.</p>
     <FormError message={error} />{error && <button className="outline-button" onClick={() => { setError(""); setAttempt(value => value + 1); }}>Reintentar</button>}
-    {!data && !error && <p className="workflow-loading" role="status">Cargando tus productos…</p>}
+    {!data && !error && <LoadingState label="Cargando tus productos…"/>}
     <FormError message={actionError} />{notice && <p className="info-note" role="status">{notice}</p>}
     {data && !error && (data.total === 0 ? <section className="empty-state"><h2>Tu comercio todavía no tiene productos.</h2><Link className="primary-button" href="/comercio/productos/nuevo">Publicar primer producto</Link></section> : <>
       <div className={styles.catalogHeading}><span className={styles.count}><Package size={16} aria-hidden="true" />{data.total} {data.total === 1 ? "producto" : "productos"}</span></div>
@@ -72,7 +73,7 @@ function BusinessProducts({ business }: { business: BusinessRow }) {
           <div className={styles.overview}>
             <div className={styles.photo}><ProductImage src={imageUrl && validImageUrl(imageUrl) ? imageUrl : placeholderImage} alt={`Foto de ${product.name}`} className={styles.image} /></div>
             <div className={styles.summary}>
-              <div className={styles.titleRow}><h2 className={styles.name} title={product.name}>{product.name}</h2><span className={`${styles.status} ${product.active ? styles.active : styles.inactive}`}>{product.active ? "Activo" : "Inactivo"}</span></div>
+              <div className={styles.titleRow}><h2 className={styles.name} title={product.name}>{product.name}</h2><span className={`${styles.status} ${product.active ? styles.active : styles.inactive}`}>{product.active ? "Publicado" : "Despublicado"}</span></div>
               <p className={styles.price}>{currency.format(product.price)}</p>
               <p className={styles.category}>{data.categories.find(category => category.id === product.category_id)?.name ?? "Categoría no disponible"}</p>
             </div>
@@ -80,14 +81,14 @@ function BusinessProducts({ business }: { business: BusinessRow }) {
           <div className={styles.inventory}>
             <span className={styles.mode}>{onDemand ? "A pedido" : "Con stock"}</span>
             <span className={`${styles.availability} ${unavailable ? styles.unavailable : styles.available}`}>
-              {onDemand ? product.available_today ? "Disponible hoy" : "No disponible hoy" : <>Stock: {product.stock_quantity} unidades <span className={styles.stockState}>· {stockLabels[product.stock_status]}</span></>}
+              {onDemand ? product.available_today ? "Preparación hoy: sí, según lo informado" : "Preparación hoy: no disponible" : <>Stock: {product.stock_quantity} unidades <span className={styles.stockState}>· {stockLabels[product.stock_status]}</span></>}
             </span>
           </div>
           {product.admin_blocked_at && <p className="info-note">Este producto fue desactivado por administración.</p>}
           <div className={styles.delivery}><span><Store size={14} aria-hidden="true" />{product.pickup_enabled ? "Retiro" : "Sin retiro"}</span><span><Truck size={14} aria-hidden="true" />{product.delivery_enabled ? "Envío" : "Sin envío"}</span></div>
           <StockConfirmation compact date={onDemand ? product.availability_confirmed_at : product.stock_confirmed_at} label={onDemand ? "Disponibilidad" : "Stock"} />
           <div className={styles.actions}>
-            <div className={styles.primaryActions}><Link className="outline-button" href={`/comercio/productos/${product.id}/editar`} aria-disabled={Boolean(busy)} onClick={event => { if (busy) event.preventDefault(); }}><Pencil size={15} aria-hidden="true" />Editar</Link><button className="primary-button" disabled={Boolean(busy)} onClick={() => void manage(product.id, "confirm_stock")}><BadgeCheck size={16} aria-hidden="true" />{busy?.id === product.id && busy.action === "confirm_stock" ? "Confirmando..." : product.inventory_mode === "ON_DEMAND" ? "Confirmar disponibilidad" : "Confirmar stock"}</button></div>
+            <div className={styles.primaryActions}><Link className="outline-button" href={`/comercio/productos/${product.id}/editar`} aria-disabled={Boolean(busy)} onClick={event => { if (busy) event.preventDefault(); }}><Pencil size={15} aria-hidden="true" />Editar producto</Link><button className="primary-button" disabled={Boolean(busy)} onClick={() => void manage(product.id, "confirm_stock")}><BadgeCheck size={16} aria-hidden="true" />{busy?.id === product.id && busy.action === "confirm_stock" ? "Confirmando..." : product.inventory_mode === "ON_DEMAND" ? "Confirmar disponibilidad" : "Confirmar stock"}</button></div>
             <button className={styles.toggle} disabled={Boolean(busy) || Boolean(product.admin_blocked_at)} onClick={() => void manage(product.id, product.active ? "deactivate" : "activate")}>{busy?.id === product.id && busy.action !== "confirm_stock" ? "Guardando..." : product.admin_blocked_at ? "Desactivado por administración" : product.active ? "Desactivar producto" : "Reactivar producto"}</button>
           </div>
         </article>;

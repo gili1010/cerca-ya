@@ -30,7 +30,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   const [modal, setDialogModal] = useState<HomeModal>(null);
   const setModal: Dispatch<SetStateAction<HomeModal>> = next => {
     const value = typeof next === "function" ? next(modal) : next;
-    if (value === "account") { router.push(user ? "/cuenta" : "/login"); return; }
+    if (value === "account") { router.push(user ? "/cuenta" : loginUrl("/cuenta")); return; }
     setDialogModal(value);
   };
   const [homeTab, setHomeTab] = useState<MobileTab>("home");

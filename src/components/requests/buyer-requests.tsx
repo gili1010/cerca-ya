@@ -1,4 +1,6 @@
 "use client";
+import experience from "@/components/radar/radar-experience.module.css";
+import flow from "@/components/publish/publish-flow.module.css";
 import { BackLink, BackButton } from "@/components/navigation/back-link";
 
 import Link from "next/link";
@@ -19,7 +21,7 @@ export function BuyerRequestList() {
   const data = useBuyerRequests(filter, page);
   const now = useRequestClock();
   const filters: [BuyerRequestFilter, string][] = [["ALL", "Todos"], ["OPEN", "Abiertos"], ["CLOSED", "Cerrados"], ["CANCELLED", "Cancelados"], ["EXPIRED", "Expirados"]];
-  return <><div className="workflow-heading with-action"><div><span className="eyebrow">LO QUE NECESITÁS, EN UN LUGAR</span><h1>Mis pedidos</h1><p>Consultá los pedidos de tu cuenta y su estado.</p></div><Link className="primary-button" href="/pedido/nuevo"><Plus size={16} />Nuevo pedido</Link></div>
+  return <div className={experience.page}><div className="workflow-heading with-action"><div><span className="eyebrow">LO QUE NECESITÁS, EN UN LUGAR</span><h1>Mis pedidos de productos</h1><p>Seguí lo que buscás y las respuestas de los comercios.</p></div><Link className="primary-button" href="/pedido/nuevo"><Plus size={16} />Nuevo pedido</Link></div>
     <LiveFeedback state={data.live} notice={data.notice} /><button className="secondary-link" onClick={() => void data.refresh()}>Actualizar</button>
     <div className="request-tabs" role="group" aria-label="Filtrar pedidos">{filters.map(([value, label]) => <button className={`filter-chip ${filter === value ? "selected" : ""}`} key={value} aria-pressed={filter === value} onClick={() => { setFilter(value); setPage(0); }}>{label}</button>)}</div>
     {data.loading && <p className="workflow-loading" role="status">Cargando pedidos...</p>}
@@ -28,7 +30,7 @@ export function BuyerRequestList() {
       {data.total === 0 && <div className="empty-state"><Megaphone size={28} /><h2>No hay pedidos en esta lista</h2><p>Publicá lo que necesitás para guardarlo en tu cuenta.</p><Link className="primary-button" href="/pedido/nuevo">Crear pedido</Link></div>}
       {data.total > requestsPageSize && <nav className="merchant-product-pagination" aria-label="Páginas de pedidos"><button className="outline-button" disabled={page === 0} onClick={() => setPage(value => value - 1)}>Anterior</button><span>{page + 1} / {Math.ceil(data.total / requestsPageSize)}</span><button className="outline-button" disabled={(page + 1) * requestsPageSize >= data.total} onClick={() => setPage(value => value + 1)}>Siguiente</button></nav>}
     </>}
-  </>;
+  </div>;
 }
 
 export function BuyerRequestDetail({ id, confirmation = false }: { id: string; confirmation?: boolean }) {
@@ -56,13 +58,13 @@ export function BuyerRequestDetail({ id, confirmation = false }: { id: string; c
   if (data.loading) return <p className="workflow-loading" role="status">Cargando pedidos...</p>;
   if (data.error) return <section className="panel"><FormError message={data.error} /><button className="outline-button" onClick={() => void data.refresh()}>Reintentar</button></section>;
   if (!request || !status) return <UnavailableBuyerRequest />;
-  if (confirmation) return <section className="workflow-narrow confirmation panel"><span className="confirmation-icon"><Check size={32} /></span><h1>¡Pedido publicado!</h1><p>Tu pedido quedó guardado en tu cuenta.</p><small>Los comercios pueden responder mientras tu pedido esté abierto. Las ofertas aparecen automáticamente en el detalle.</small><div className="confirmation-summary"><span className="eyebrow buyer-request-id">{request.id}</span><h2>{request.title}</h2><BuyerRequestFacts request={request} /><BuyerRequestBadge status={status} /></div><Link className="primary-button" href={`/pedido/${id}`}>Ver mi pedido</Link><Link className="secondary-link" href="/pedidos">Ir a Mis pedidos</Link></section>;
-  return <><BackLink href="/pedidos">Volver a Mis pedidos</BackLink><LiveFeedback state={data.live} notice={data.notice} /><button className="secondary-link" onClick={() => void data.refresh()}>Actualizar pedido</button><section className="panel request-overview"><div className="card-topline"><span className="buyer-request-id">{request.id}</span><BuyerRequestBadge status={status} /></div><h1>{request.title}</h1><RelativeDate date={request.created_at} /><p className="request-description">{request.description || "No agregaste una descripción."}</p><BuyerRequestFacts request={request} />
+  if (confirmation) return <section className={`confirmation ${flow.success}`}><span className="confirmation-icon"><Check size={32} /></span><h1>¡Pedido publicado!</h1><p>Tu pedido quedó guardado en tu cuenta.</p><small>Los comercios pueden responder mientras tu pedido esté abierto. Las ofertas aparecen automáticamente en el detalle.</small><div className="confirmation-summary"><span className="eyebrow buyer-request-id">{request.id}</span><h2>{request.title}</h2><BuyerRequestFacts request={request} /><BuyerRequestBadge status={status} /></div><Link className="primary-button" href={`/pedido/${id}`}>Ver mi pedido</Link><Link className="secondary-link" href="/pedidos">Ir a Mis pedidos</Link></section>;
+  return <div className={experience.page}><BackLink href="/pedidos">Volver a Mis pedidos</BackLink><LiveFeedback state={data.live} notice={data.notice} /><button className="secondary-link" onClick={() => void data.refresh()}>Actualizar pedido</button><section className="panel request-overview"><div className="card-topline"><span className="buyer-request-id">{request.id}</span><BuyerRequestBadge status={status} /></div><span className={experience.context}>PRODUCTO QUE NECESITÁS</span><h1>{request.title}</h1><RelativeDate date={request.created_at} /><p className="request-description">{request.description || "No agregaste una descripción."}</p><BuyerRequestFacts request={request} />
     {status === "EXPIRED" && <p className="info-note">Este pedido expiró. Podés crear uno nuevo si todavía lo necesitás.</p>}
     {status === "OPEN" && <div className="request-actions"><button disabled={busy} onClick={() => { setError(""); setAction("CLOSED"); }}>Cerrar pedido</button><button disabled={busy} onClick={() => { setError(""); setAction("CANCELLED"); }}>Cancelar pedido</button></div>}
     </section><BuyerOfferList key={`${data.userId}:${id}`} requestId={id} />
-    {action && <Dialog title={action === "CLOSED" ? "Cerrar pedido" : "Cancelar pedido"} onClose={() => { if (!busy) setAction(null); }}><div className="dialog-body text-dialog"><h2>{action === "CLOSED" ? "¿Cerrar este pedido?" : "¿Cancelar este pedido?"}</h2><p>Se conservará en Mis pedidos. Podés crear otro cuando lo necesites.</p>{status !== "OPEN" && <p className="info-note">Este pedido ya no está abierto.</p>}<FormError message={error} /><div className="dialog-actions"><button className="primary-button" disabled={busy || status !== "OPEN"} onClick={() => void finish()}>{busy ? "Guardando..." : action === "CLOSED" ? "Cerrar pedido" : "Cancelar pedido"}</button><BackButton disabled={busy} onClick={() => setAction(null)}>Volver</BackButton></div></div></Dialog>}
-  </>;
+    {action && <Dialog title={action === "CLOSED" ? "Cerrar pedido" : "Cancelar pedido"} onClose={() => { if (!busy) setAction(null); }}><div className="dialog-body text-dialog"><h2>{action === "CLOSED" ? "¿Cerrar este pedido?" : "¿Cancelar este pedido?"}</h2><p>{action==="CLOSED"?"El pedido dejará de aceptar nuevas ofertas. Su historial se conserva en Mis pedidos.":"El pedido se cancelará y dejará de aceptar ofertas. Su historial se conserva."} No se puede reabrir; podés crear otro cuando lo necesites.</p>{status !== "OPEN" && <p className="info-note">Este pedido ya no está abierto.</p>}<FormError message={error} /><div className="dialog-actions"><button className="primary-button" disabled={busy || status !== "OPEN"} onClick={() => void finish()}>{busy ? "Guardando..." : action === "CLOSED" ? "Cerrar pedido" : "Cancelar pedido"}</button><BackButton disabled={busy} onClick={() => setAction(null)}>Volver</BackButton></div></div></Dialog>}
+  </div>;
 }
 
 

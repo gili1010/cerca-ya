@@ -8,6 +8,7 @@ import { BackLink } from "@/components/navigation/back-link";
 import { FormError } from "@/components/requests/request-common";
 import { ArticlePresentation } from "./article-presentation";
 import { useSignedPersonalPhotos } from "./use-signed-photos";
+import detailStyles from "@/components/details/public-details.module.css";
 import styles from "./personal-listings.module.css";
 
 export function PublicArticle({ initial, returnTo = "/" }: { initial: PublicPersonalListing; returnTo?: string }) {
@@ -39,9 +40,9 @@ export function PublicArticle({ initial, returnTo = "/" }: { initial: PublicPers
     return () => clearTimeout(timer);
   }, [listing?.expires_at, refresh]);
   const signed = useSignedPersonalPhotos(listing?.images.map(photo => photo.object_path) ?? []);
-  return <><BackLink href={returnTo}>{returnTo === "/" ? "Volver a CercaYa" : "Volver a los resultados"}</BackLink><p className={styles.metadata} style={{ marginBlock: "var(--space-5)" }}>ARTÍCULO PARTICULAR · {listing?.category_name ?? "CercaYa"}</p><FormError message={error} />
-    {!listing ? <section className={`panel ${styles.empty}`}><h1>{error ? "Revisemos este artículo" : "Este artículo ya no está disponible."}</h1><p>Puede haber sido vendido, pausado o retirado por su vendedor.</p><button className="outline-button" disabled={checking} onClick={() => void refresh()}>{checking ? "Comprobando…" : "Volver a comprobar"}</button></section>
-      : <><ArticlePresentation listing={listing} photoUrls={signed.urls} /><p className={styles.metadata} style={{ marginTop: "var(--space-5)" }}><time dateTime={listing.published_at}>Publicado el {new Date(listing.published_at).toLocaleDateString("es-AR")}</time></p>
+  return <><BackLink href={returnTo}>Volver a resultados</BackLink><p className={styles.metadata} style={{ marginBlock: "var(--space-5)" }}>ARTÍCULO PARTICULAR · {listing?.category_name ?? "CercaYa"}</p><FormError message={error} />
+    {!listing ? <section className={`${detailStyles.page} ${detailStyles.summary} ${styles.empty}`}><h1>{error ? "Revisemos este artículo" : "Este artículo ya no está disponible."}</h1><p>Puede haber sido vendido, pausado o retirado por su vendedor.</p><button className="outline-button" disabled={checking} onClick={() => void refresh()}>{checking ? "Comprobando…" : "Volver a comprobar"}</button></section>
+      : <><ArticlePresentation listing={listing} photoUrls={signed.urls} publicDetail /><p className={styles.metadata} style={{ marginTop: "var(--space-5)" }}><time dateTime={listing.published_at}>Publicado el {new Date(listing.published_at).toLocaleDateString("es-AR")}</time></p>
         {signed.error && <p className={styles.hint}>{signed.error} <button className="secondary-link" onClick={() => { signed.refresh(); void refresh(); }}>Volver a cargar</button></p>}</>}
   </>;
 }

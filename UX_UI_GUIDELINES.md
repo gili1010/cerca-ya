@@ -220,3 +220,13 @@ Rediseño profundo de Home utilizando estos tokens y navegación. Mantener esta 
 - Usar disclosures nativos para filtros secundarios; mantener principales, alcance y chips activos visibles. En Todo se pueden plegar los filtros de cada dominio; sus pestañas individuales conservan acceso completo.
 - Un estado de stock, su fecha de confirmación y las opciones de retiro/envío son información distinta. No presentar datos declarados como garantía ni repetir el mismo estado en varias etiquetas.
 - Una distancia calculada no implica precisión métrica: las cards reales usan una representación aproximada sin cambiar cálculos o filtros.
+
+
+## UX/UI 6 — Actividad y Cuenta
+
+- Actividad es el panel compartido de navegación hacia operaciones existentes; no se crea un dashboard o listado paralelo. Orden: Mis compras y pedidos, Trabajos que necesito, Lo que publico, Oportunidades y respuestas.
+- Cuenta muestra datos propios, ubicación del navegador, configuración profesional/comercial y sesión. Los historiales se encuentran en Actividad. El acceso al mismo panel desde Cuenta evita duplicar su catálogo de enlaces.
+- Reutilizar contextos autorizados ya cargados para personalizar. Sin dato fiable, utilizar acceso neutral; no consultar cada dominio para contar o decidir si existe actividad.
+- Reservas no equivale a pago confirmado; solicitudes recibidas y propuestas enviadas son recorridos distintos. No inventar una bandeja comercial si no hay una ruta real para ella.
+- El panel conserva Escape/cierre accesible, sólo una instancia abierta y foco en el disparador al cerrar. Los grupos plegables están dentro del mismo panel, sin menús flotantes anidados. No agregar otra barra fija móvil.
+- Detalles, rutas auditadas, limitaciones y revisión manual en UX_UI_ACTIVITY_ACCOUNT.md. Esta etapa no rediseña los módulos internos.

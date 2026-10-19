@@ -10,6 +10,8 @@ import { money } from "@/lib/products";
 import { formatArgentinaPhone } from "@/lib/phone";
 import { useLiveOffers } from "./use-live-offers";
 import { LiveFeedback } from "./use-live-changes";
+import styles from "@/components/radar/radar-experience.module.css";
+import {Dialog} from "../home/dialog";
 import { FormError } from "./request-common";
 
 function OfferFacts({ offer }: { offer: PublicOfferRow }) {
@@ -24,7 +26,7 @@ function OfferFacts({ offer }: { offer: PublicOfferRow }) {
 }
 export function BuyerOfferList({ requestId }: { requestId: string }) {
   const data = useLiveOffers(requestId);
-  return <section><div className="offers-heading"><h2>Ofertas recibidas{data.data ? ` (${data.data.length})` : ""}</h2><button className="outline-button" disabled={data.busy} onClick={() => void data.refresh()}>{data.busy ? "Actualizando..." : "Actualizar"}</button></div>
+  return <section className={styles.page}><div className="offers-heading"><h2>Ofertas recibidas{data.data ? ` (${data.data.length})` : ""}</h2><button className="outline-button" disabled={data.busy} onClick={() => void data.refresh()}>{data.busy ? "Actualizando..." : "Actualizar"}</button></div>
     <LiveFeedback state={data.live} notice={data.notice} />
     {data.loading && <p className="workflow-loading" role="status">Cargando ofertas...</p>}<FormError message={data.error} />
     {data.data && (data.data.length ? <div className="offer-grid">{data.data.map(offer => <article className="panel offer-card" key={offer.id}><h3>{offer.product_name}</h3><OfferFacts offer={offer} /><Link className="offer-link" href={`/pedido/${requestId}/oferta/${offer.id}`}>Ver oferta</Link></article>)}</div> : <div className="empty-state"><h2>Todavía no hay ofertas.</h2><p>Las respuestas aparecen automáticamente. También podés usar Actualizar.</p></div>)}
@@ -34,6 +36,7 @@ export function RealOfferDetail({ requestId, offerId, seller = false }: { reques
   const data = useLiveOffers(requestId, offerId, seller);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [confirmWithdraw,setConfirmWithdraw]=useState(false);
   const inFlight = useRef(false);
   const offer = data.data?.[0];
   const whatsapp = offer ? offerWhatsApp(offer) : null;
@@ -50,14 +53,15 @@ export function RealOfferDetail({ requestId, offerId, seller = false }: { reques
     } catch { setError("No pudimos retirar la oferta. Actualizá para comprobar su estado y volvé a intentar."); }
     finally { inFlight.current = false; setBusy(false); }
   }
-  return <div className="workflow-narrow"><BackLink href={back}>{seller ? "Volver al Radar" : "Volver a mi pedido"}</BackLink><div className="offers-heading"><h1>{seller ? "Mi oferta" : "Detalle de oferta"}</h1><button className="outline-button" disabled={data.busy || busy} onClick={() => void data.refresh()}>Actualizar</button></div>
+  return <div className={`workflow-narrow ${styles.page}`}><BackLink href={back}>{seller ? "Volver al Radar" : "Volver a mi pedido"}</BackLink><div className="offers-heading"><h1>{seller ? "Mi oferta" : "Detalle de oferta"}</h1><button className="outline-button" disabled={data.busy || busy} onClick={() => void data.refresh()}>Actualizar</button></div>
     <LiveFeedback state={data.live} notice={data.notice} />
     {data.loading && <p className="workflow-loading" role="status">Cargando ofertas...</p>}<FormError message={data.error} />
     {!data.loading && !data.error && !offer && <section className="empty-state"><h2>Esta oferta no está disponible para tu cuenta.</h2><p>Comprobá que ingresaste con la cuenta correspondiente.</p></section>}
     {offer && <article className="panel offer-detail"><span className="eyebrow">{seller ? "OFERTA GUARDADA EN TU COMERCIO" : "OFERTA RECIBIDA"}</span><h2>{offer.product_name}</h2><OfferFacts offer={offer} /><FormError message={error} />
-      <div className="offer-detail-actions">{seller && offer.status === "PENDING" && <button className="outline-button" disabled={busy} onClick={() => void withdraw()}>{busy ? "Retirando oferta..." : "Retirar oferta"}</button>}
+      <div className="offer-detail-actions">{seller && offer.status === "PENDING" && <button className="outline-button" disabled={busy} onClick={() => setConfirmWithdraw(true)}>{busy ? "Retirando oferta..." : "Retirar oferta"}</button>}
       {!seller && whatsapp && offer.status === "PENDING" && <a className="primary-button" href={whatsapp} target="_blank" rel="noopener noreferrer">Hablar por WhatsApp</a>}</div>
       {!seller && !whatsapp && <p className="info-note">Este comercio no tiene un WhatsApp disponible.</p>}
+      {seller&&confirmWithdraw&&offer.status==="PENDING"&&<Dialog title="Retirar oferta comercial" preventCancel onClose={()=>{if(!busy)setConfirmWithdraw(false);}}><div className="dialog-body text-dialog"><h2>¿Retirar esta oferta?</h2><p>La oferta dejará de estar activa para el comprador. Su información se conservará en el historial.</p><strong>{offer.product_name}</strong><FormError message={error}/><div className="dialog-actions"><button type="button" className="outline-button" disabled={busy} onClick={()=>setConfirmWithdraw(false)}>Volver</button><button type="button" className="danger-button" disabled={busy} onClick={()=>void withdraw()}>{busy?"Retirando…":"Retirar oferta"}</button></div></div></Dialog>}
     </article>}
   </div>;
 }

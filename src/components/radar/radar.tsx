@@ -10,6 +10,7 @@ import { MerchantBusinessGate } from "../merchant-products/business-gate";
 import { useLiveRadar } from "./use-live-radar";
 import { LiveFeedback, useLiveNotice } from "../requests/use-live-changes";
 import { useRequestClock } from "../requests/buyer-request-common";
+import experience from "./radar-experience.module.css";
 import { FormError } from "../requests/request-common";
 import { OpportunityCard } from "./opportunity-card";
 
@@ -47,7 +48,7 @@ function BusinessRadar({ business }: { business: BusinessRow }) {
   }
   const filters: [RealRadarFilter, string][] = [["all", "Todos"], ["today", "Necesita hoy"], ["catalog", "Coincide con mi catálogo"]];
   const distanceFilters: [RealRadarDistanceFilter, string][] = [["all", "Cualquier distancia"], ["5", "Menos de 5 km"], ["10", "Menos de 10 km"], ["radius", "Dentro del radio solicitado"]];
-  return <><div className="workflow-heading with-action"><div><span className="eyebrow">{business.name}</span><h1><Radio className="radar-heading-icon" size={30} aria-hidden="true" />Radar CercaYa</h1><p>Pedidos abiertos que podrías resolver con tu comercio.</p></div><button className="outline-button" disabled={data.busy} onClick={() => void data.refresh()}>{data.busy ? "Actualizando..." : "Actualizar"}</button></div>
+  return <div className={experience.page}><div className="workflow-heading with-action"><div><span className="eyebrow">{business.name}</span><h1><Radio className="radar-heading-icon" size={30} aria-hidden="true" />Oportunidades de tu comercio</h1><p>Encontrá pedidos de productos que tu negocio puede responder.</p></div><button className="outline-button" disabled={data.busy} onClick={() => void data.refresh()}>{data.busy ? "Actualizando..." : "Actualizar"}</button></div>
     <p className="info-note">Los pedidos con ubicación sólo aparecen si tu comercio está dentro del radio solicitado. Los pedidos sin ubicación se muestran por categoría, sin afirmar cercanía. Las distancias son aproximadas, en línea recta; no compartimos coordenadas del comprador.</p>
     {!hasLocation && <section className="panel"><p>Configurá la ubicación de tu comercio para ver oportunidades según cercanía.</p><Link className="outline-button" href="/comercio/editar">Configurar ubicación</Link></section>}
     <LiveFeedback state={data.live} notice={notice} />
@@ -61,7 +62,7 @@ function BusinessRadar({ business }: { business: BusinessRow }) {
     <div className="request-list-grid">{visible.map(opportunity => <OpportunityCard key={opportunity.request.id} opportunity={opportunity} />)}</div>
     {!visible.length && <section className="empty-state"><Radio size={30} /><h2>{opportunities.length ? "No hay oportunidades con este filtro" : "Todavía no hay oportunidades disponibles"}</h2><p>Los nuevos pedidos aparecen automáticamente. También podés usar Actualizar.</p>{(filter !== "all" || activeDistanceFilter !== "all") && <button className="outline-button" onClick={() => { setFilter("all"); setDistanceFilter("all"); }}>Ver todos</button>}</section>}
     <section className="panel radar-demand"><h2>Qué están buscando</h2><p className="info-note">Oportunidades permitidas para tu comercio, agrupadas por categoría. Incluye pedidos sin ubicación.</p>{demand.size ? <ul>{[...demand.entries()].sort((a, b) => b[1].count - a[1].count).map(([id, item]) => <li key={id}><strong>{item.name}</strong><span>{item.count} {item.count === 1 ? "búsqueda" : "búsquedas"}</span></li>)}</ul> : <p className="info-note">Todavía no hay búsquedas abiertas para agrupar.</p>}</section></>}
-  </>;
+  </div>;
 }
 
 

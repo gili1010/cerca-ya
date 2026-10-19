@@ -1,0 +1,81 @@
+/* Scoped to owner management screens; public cards and shared galleries are untouched. */
+.page { min-width: 0; color: var(--ink); }
+.page h1 { font-size: var(--text-title); line-height: 1.2; letter-spacing: -.035em; overflow-wrap: anywhere; }
+.page h2 { overflow-wrap: anywhere; }
+.page :is(a,button,input,select,textarea):focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+.page :is(button,a) { overflow-wrap: anywhere; }
+.page :global(.workflow-heading) { gap: var(--space-4); margin-bottom: var(--space-5); }
+.page :global(.workflow-heading) p { color: var(--muted); font-size: var(--text-base); line-height: 1.6; }
+.page :global(.opportunity-count) { margin-block: var(--space-5); font-size: var(--text-sm); color: var(--muted); }
+.meta { font-size: var(--text-sm); color: var(--muted); line-height: 1.6; margin: 0; overflow-wrap: anywhere; }
+.subheading { margin: var(--space-4) 0 0; font-size: var(--text-lg); font-weight: 700; line-height: 1.4; }
+.page .records { grid-template-columns: repeat(2,minmax(0,1fr)); gap: var(--space-5); align-items: stretch; }
+.records > article { display: flex; flex-direction: column; min-width: 0; box-shadow: none; border-radius: var(--radius-lg); }
+.records > article > .thumbnail { height: 160px; aspect-ratio: auto; flex-shrink: 0; background: var(--surface-soft); }
+.records > article > :first-child img { width: 100%; height: 100%; object-fit: contain; }
+.records > article > div:last-child { flex: 1; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4); }
+.records > article > div:last-child > div:last-child { margin-top: auto; padding-top: var(--space-4); border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.records :is(p,small) { font-size: var(--text-sm); line-height: 1.6; }
+.records :is(a,button) { min-width: 0; }
+.records :is(button,a):is(:global(.outline-button),:global(.primary-button),:global(.ghost-button)) { min-height: 44px; font-size: var(--text-sm); }
+.page .orders { grid-template-columns: repeat(2,minmax(0,1fr)); gap: var(--space-4); }
+.orders > article { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; padding: var(--space-5); box-shadow: none; }
+.orders :global(.card-topline) { flex-wrap: wrap; gap: var(--space-2); }
+.orders :global(.buyer-request-id) { color: var(--muted); font-size: var(--text-sm); }
+.orders :global(.reservation-card-meta) { flex-wrap: wrap; gap: var(--space-3); font-size: var(--text-sm); }
+.orders :global(.reservation-card-meta) strong { font-size: var(--text-lg); }
+.orders :global(.request-card-bottom) { margin-top: auto; padding-top: var(--space-3); border-top: 1px solid var(--line); }
+.orders :global(.request-card-bottom) a { display: inline-flex; align-items: center; min-height: 44px; }
+.orders img { object-fit: contain; }
+.page .shortcuts { margin-block: var(--space-5) var(--space-6); grid-template-columns: repeat(2,minmax(0,1fr)); }
+.shortcuts > a { min-width: 0; box-shadow: none; padding: var(--space-5); gap: var(--space-3); }
+.shortcuts > a span:last-child { font-size: var(--text-sm); color: var(--muted); line-height: 1.6; }
+.productForm { display: grid; gap: var(--space-5); padding: var(--space-5); box-shadow: none; }
+.productForm label { min-width: 0; font-size: var(--text-sm); line-height: 1.5; }
+.productForm :is(input,select,textarea) { max-width: 100%; font-size: var(--text-base); }
+.productForm fieldset { min-width: 0; border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--space-4); }
+.productForm legend { font-size: var(--text-base); font-weight: 650; padding-inline: var(--space-2); }
+.productForm small { color: var(--muted); font-size: var(--text-sm); line-height: 1.6; }
+.productForm :global(.product-photo-input) { display: grid; gap: var(--space-3); padding: var(--space-4); border: 1px dashed var(--line-strong); border-radius: var(--radius-md); background: var(--paper); }
+.productForm :global(.product-photo-preview) { width: min(100%,280px); height: 200px; object-fit: contain; background: var(--surface); border-radius: var(--radius-md); }
+.productForm :global(.product-photo-input) button { justify-self: start; min-height: 44px; }
+@media (max-width: 760px) {
+ .page .records, .page .orders { grid-template-columns: minmax(0,1fr); }
+}
+@media (max-width: 600px) {
+ .page > :global(.workflow-heading), .page > header { flex-wrap: wrap; }
+ .page :global(.heading-row), .page :global(.form-columns) { grid-template-columns: minmax(0,1fr); }
+ .records > article > div:last-child > div:last-child > :is(a,button) { flex: 1 1 100%; width: 100%; white-space: normal; }
+ .page .shortcuts { grid-template-columns: minmax(0,1fr); }
+ .productForm { padding: var(--space-4); }
+ .productForm > button[type=submit] { width: 100%; white-space: normal; }
+ .page :global(.reservation-filters) select { width: 100%; max-width: 100%; }
+ .page :global(.reservation-filters) label { min-width: 0; width: 100%; }
+}
+
+.headingRow { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-5); }
+.page > label { display: grid; gap: var(--space-2); max-width: 360px; margin-block: var(--space-5); }
+.page > label select { width: 100%; min-width: 0; }
+.page p { overflow-wrap: anywhere; }
+.profile :is(p,small) { font-size: var(--text-sm); line-height: 1.65; }
+.profile > section, .profile > details { scroll-margin-top: var(--space-6); }
+.profile :global(.secondary-link) { min-height: 44px; display: inline-flex; align-items: center; }
+@media (max-width: 600px) {
+ .headingRow { flex-direction: column; gap: var(--space-4); margin-bottom: var(--space-5); }
+ .headingRow > a { width: 100%; }
+ .page > label { max-width: none; }
+ .profile :is(button,a):is(:global(.primary-button),:global(.outline-button)) { white-space: normal; max-width: 100%; }
+}
+
+.thumbnail { min-width: 0; }
+
+.contextNav { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); padding-top: var(--space-4); margin-top: var(--space-4); border-top: 1px solid var(--line); }
+.contextNav a { display: inline-flex; align-items: center; min-height: 44px; color: var(--green); font-size: var(--text-sm); text-decoration: underline; text-underline-offset: 4px; }
+.orderDetail { padding-top: var(--space-5); }
+.orderDetail > div:first-child { margin-bottom: var(--space-5); }
+.orderDetail :is(p,small,time) { font-size: var(--text-sm); line-height: 1.6; }
+.orderDetail :is(button,a):is(:global(.primary-button),:global(.danger-button)) { min-height: 48px; white-space: normal; }
+.shortcuts > section { min-width: 0; box-shadow: none; padding: var(--space-5); }
+.shortcuts > section > a { display: inline-flex; align-items: center; min-height: 44px; color: var(--green); text-decoration: underline; text-underline-offset: 4px; }
+.shortcuts > section span:last-child { font-size: var(--text-sm); color: var(--muted); }
+@media (max-width: 600px) { .page :global(.form-columns) { display: grid; } .contextNav { flex-direction: column; align-items: flex-start; } }

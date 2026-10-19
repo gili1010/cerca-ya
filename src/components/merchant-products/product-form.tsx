@@ -1,4 +1,5 @@
 "use client";
+import management from "@/components/management/management.module.css";
 import { BackLink } from "@/components/navigation/back-link";
 
 import Link from "next/link";
@@ -108,30 +109,30 @@ function ProductFormFields({ business, product, initialImage, categories, prefer
     } finally { inFlight.current = false; setBusy(false); setPhase(""); }
   }
 
-  return <div className="workflow-narrow"><BackLink href="/comercio/productos">Volver a Mis productos</BackLink>
+  return <div className={`workflow-narrow ${management.page}`}><BackLink href="/comercio/productos">Volver a Mis productos</BackLink>
     <div className="workflow-heading"><span className="eyebrow">{business.name}</span><h1>{product ? "Editar producto" : "Publicar producto"}</h1><p>Precio, disponibilidad y stock de tu comercio.</p></div>
-    <form className="panel workflow-form" onSubmit={submit} aria-busy={busy}>
-      <label>Nombre<input required maxLength={160} value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} disabled={busy} /></label>
-      <label>Descripción<textarea maxLength={5000} value={form.description} onChange={event => setForm({ ...form, description: event.target.value })} disabled={busy} /></label>
-      <label>Categoría<select required value={form.category_id} onChange={event => setForm({ ...form, category_id: event.target.value })} disabled={busy || !categories.length}>
+    <form className={`panel workflow-form ${management.productForm}`} onSubmit={submit} aria-busy={busy}>
+      <label>Nombre (obligatorio)<input required maxLength={160} value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} disabled={busy} /></label>
+      <label>Descripción (opcional)<textarea maxLength={5000} value={form.description} onChange={event => setForm({ ...form, description: event.target.value })} disabled={busy} /></label>
+      <label>Categoría (obligatoria)<select required value={form.category_id} onChange={event => setForm({ ...form, category_id: event.target.value })} disabled={busy || !categories.length}>
         <option value="">Seleccioná una categoría</option>
         {preferred.length > 0 && <optgroup label="Categorías de tu comercio">{preferred.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}</optgroup>}
         {other.length > 0 && <optgroup label="Otras categorías">{other.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}</optgroup>}
       </select><small>Podés elegir cualquier categoría del catálogo.</small></label>
       {!categories.length && <FormError message="No hay categorías disponibles en este momento. Volvé a intentar más tarde." />}
-      <div className="form-columns"><label>Marca<input maxLength={160} value={form.brand ?? ""} onChange={event => setForm({ ...form, brand: event.target.value })} disabled={busy} /></label><label>Modelo<input maxLength={160} value={form.model ?? ""} onChange={event => setForm({ ...form, model: event.target.value })} disabled={busy} /></label></div>
-      <label>SKU<input maxLength={100} value={form.sku ?? ""} onChange={event => setForm({ ...form, sku: event.target.value })} disabled={busy} /><small>Opcional. Debe ser único dentro de tu comercio.</small></label>
+      <div className="form-columns"><label>Marca (opcional)<input maxLength={160} value={form.brand ?? ""} onChange={event => setForm({ ...form, brand: event.target.value })} disabled={busy} /></label><label>Modelo (opcional)<input maxLength={160} value={form.model ?? ""} onChange={event => setForm({ ...form, model: event.target.value })} disabled={busy} /></label></div>
+      <label>SKU (opcional)<input maxLength={100} value={form.sku ?? ""} onChange={event => setForm({ ...form, sku: event.target.value })} disabled={busy} /><small>Opcional. Debe ser único dentro de tu comercio.</small></label>
       <fieldset className="form-checkboxes" disabled={busy}><legend>¿Cómo ofrecés este producto?</legend>
         <label><input type="radio" name="inventory-mode" checked={form.inventory_mode === "STOCKED"} onChange={() => setForm({ ...form, inventory_mode: "STOCKED" })} />Tengo unidades en stock</label>
         <label><input type="radio" name="inventory-mode" checked={form.inventory_mode === "ON_DEMAND"} onChange={() => setForm({ ...form, inventory_mode: "ON_DEMAND" })} />Lo preparo / produzco a pedido</label>
       </fieldset>
-      <div className="form-columns"><label>Precio (ARS)<input type="number" inputMode="decimal" required min="0" max="9999999999.99" step="0.01" value={form.price} onChange={event => setForm({ ...form, price: event.target.value })} disabled={busy} /></label>{form.inventory_mode === "STOCKED" ? <label>Stock<input type="number" inputMode="numeric" required min="0" max="2147483647" step="1" value={form.stock_quantity} onChange={event => setForm({ ...form, stock_quantity: event.target.value })} disabled={busy} /></label> : <label>Disponible hoy<select value={form.available_today ? "yes" : "no"} onChange={event => setForm({ ...form, available_today: event.target.value === "yes" })} disabled={busy}><option value="yes">Sí</option><option value="no">No</option></select></label>}</div>
+      <div className="form-columns"><label>Precio (ARS, obligatorio)<input type="number" inputMode="decimal" required min="0" max="9999999999.99" step="0.01" value={form.price} onChange={event => setForm({ ...form, price: event.target.value })} disabled={busy} /></label>{form.inventory_mode === "STOCKED" ? <label>Stock (obligatorio)<input type="number" inputMode="numeric" required min="0" max="2147483647" step="1" value={form.stock_quantity} onChange={event => setForm({ ...form, stock_quantity: event.target.value })} disabled={busy} /></label> : <label>Disponible hoy<select value={form.available_today ? "yes" : "no"} onChange={event => setForm({ ...form, available_today: event.target.value === "yes" })} disabled={busy}><option value="yes">Sí</option><option value="no">No</option></select></label>}</div>
       <p className="info-note">{form.inventory_mode === "ON_DEMAND" ? "Se prepara a pedido, sin cantidad de stock. Al guardar, confirmás si está disponible hoy." : "Al publicar o cambiar la cantidad, se confirma el stock con la hora actual. Con 0 unidades, el producto queda sin stock."}</p>
       {product && form.inventory_mode === "STOCKED" && <StockConfirmation date={product.stock_confirmed_at} />}
       <fieldset className="form-checkboxes" disabled={busy}><legend>Opciones de entrega</legend><label><input type="checkbox" checked={form.pickup_enabled} onChange={event => setForm({ ...form, pickup_enabled: event.target.checked })} />Permite retiro</label><label><input type="checkbox" checked={form.delivery_enabled} onChange={event => setForm({ ...form, delivery_enabled: event.target.checked })} />Permite envío</label></fieldset>
       {product?.admin_blocked_at && <p className="info-note">Este producto fue desactivado por administración.</p>}
       {product && <label className="checkbox-label"><input type="checkbox" checked={form.active} onChange={event => setForm({ ...form, active: event.target.checked })} disabled={busy || Boolean(product.admin_blocked_at)} />Producto activo</label>}
-      <ProductPhotoInput initialImage={photo} change={photoChange} onChange={setPhotoChange} busy={busy} processing={processing} onProcessing={setProcessing} />
+      <h2 className={management.subheading}>Fotografía principal · opcional</h2><ProductPhotoInput initialImage={photo} change={photoChange} onChange={setPhotoChange} busy={busy} processing={processing} onProcessing={setProcessing} />
       {notice && <p className="info-note" role="status">{notice}</p>}
       {savedId && notice && <Link className="secondary-link" href={`/comercio/productos/${savedId}/editar`}>Abrir Editar producto</Link>}
       {cleanupPaths.length > 0 && <div><p className="info-note">Hay archivos sin usar pendientes de limpieza.</p><button type="button" className="outline-button" disabled={busy || processing} onClick={() => void retryCleanup()}>Reintentar limpieza</button></div>}

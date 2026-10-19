@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { ArrowUpRight, ClipboardList, Heart, LogOut, PackageCheck, Store, UserRound, Plus, Package } from "lucide-react";
+import { LogOut, MapPin, Store, UserRound, Wrench, Settings2 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "./auth-provider";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -9,6 +8,11 @@ import { authErrorMessage } from "@/lib/auth/errors";
 import { formatArgentinaPhone } from "@/lib/phone";
 import { FormError } from "../requests/request-common";
 import { useMyBusiness } from "../businesses/business-provider";
+import { BuyerLocationControls } from "../location/buyer-location-controls";
+import { ActivityMenu } from "../navigation/activity-menu";
+import { NavigationItem } from "../navigation/navigation-item";
+import { BackLink } from "../navigation/back-link";
+import styles from "./account.module.css";
 
 export function Account() {
   const { user, profile, profileLoading, profileError, retryProfile } = useAuth();
@@ -26,14 +30,27 @@ export function Account() {
       window.location.assign("/");
     } catch (cause) { setError(authErrorMessage(cause, "logout")); setBusy(false); }
   }
-  return <div className="workflow-narrow"><div className="workflow-heading"><span className="eyebrow">TU ESPACIO EN CERCAYA</span><h1>Mi cuenta</h1></div><section className="panel">
-    <div className="account-profile-title"><UserRound size={22} aria-hidden="true" /><h2>Tu perfil</h2></div>
-    {profileLoading ? <p role="status">Cargando tu perfil…</p> : <><FormError message={profileError} />{profileError && <button className="outline-button" onClick={retryProfile}>Reintentar perfil</button>}<dl className="request-facts"><div><dt>Nombre</dt><dd>{profile?.full_name || "Sin nombre registrado"}</dd></div><div><dt>Email</dt><dd className="auth-email">{user?.email}</dd></div><div><dt>Teléfono</dt><dd>{profile?.phone ? formatArgentinaPhone(profile.phone) : "Sin teléfono registrado"}</dd></div></dl></>}
-    <div className="account-links"><Link href="/pedidos"><span><ClipboardList size={20} aria-hidden="true" />Mis pedidos</span><ArrowUpRight size={18} aria-hidden="true" /></Link><Link href="/reservas"><span><PackageCheck size={20} aria-hidden="true" />Mis reservas</span><ArrowUpRight size={18} aria-hidden="true" /></Link><Link href="/guardados"><span><Heart size={20} aria-hidden="true" />Guardados</span><ArrowUpRight size={18} aria-hidden="true" /></Link>{businessLoading ? <p role="status">Consultando tu comercio…</p> : businessError ? <div><FormError message={businessError} /><button className="outline-button" onClick={() => void refresh().catch(() => {})}>Reintentar comercio</button></div> : <Link href={business ? "/comercio/mi-negocio" : "/comercio/crear"}><span><Store size={20} aria-hidden="true" />{business ? <span>Mi comercio<small>{business.name}</small></span> : "Vender en CercaYa"}</span><ArrowUpRight size={18} aria-hidden="true" /></Link>}</div>
-    <div className="account-links"><Link href="/publicar"><span><Plus size={20} aria-hidden="true" />Publicar</span><ArrowUpRight size={18} aria-hidden="true" /></Link><Link href="/mis-publicaciones"><span><Package size={20} aria-hidden="true" />Mis publicaciones</span><ArrowUpRight size={18} aria-hidden="true" /></Link></div>
-    <div className="account-links"><Link href="/mis-servicios"><span><ClipboardList size={20} aria-hidden="true" />Mis servicios</span><ArrowUpRight size={18} aria-hidden="true" /></Link><Link href="/mi-perfil-profesional"><span><UserRound size={20} aria-hidden="true" />Mi perfil profesional</span><ArrowUpRight size={18} aria-hidden="true" /></Link></div>
-    <div className="account-links"><Link href="/necesito-un-servicio"><span><ClipboardList size={20} aria-hidden="true" />Necesito un servicio</span><ArrowUpRight size={18} aria-hidden="true" /></Link><Link href="/mis-solicitudes-servicio"><span><ClipboardList size={20} aria-hidden="true" />Mis solicitudes de servicios</span><ArrowUpRight size={18} aria-hidden="true" /></Link><Link href="/radar-servicios"><span><ClipboardList size={20} aria-hidden="true" />Radar de servicios</span><ArrowUpRight size={18} aria-hidden="true" /></Link><Link href="/mis-propuestas-servicio"><span><ClipboardList size={20} aria-hidden="true" />Mis propuestas</span><ArrowUpRight size={18} aria-hidden="true" /></Link></div>
-    <div className="account-session-actions"><FormError message={error} /><button className="outline-button account-signout" disabled={busy} onClick={signOut}><LogOut size={17} aria-hidden="true" />{busy ? "Cerrando sesión…" : "Cerrar sesión"}</button></div>
-  </section></div>;
+  return <div className={styles.page}>
+    <BackLink href="/">Volver a CercaYa</BackLink>
+    <header className={styles.heading}><div><span className="eyebrow">UNA CUENTA, MUCHAS FORMAS DE PARTICIPAR</span><h1>Mi cuenta</h1><p>Tus datos personales y la configuración que usás en CercaYa.</p></div></header>
+    <section className={styles.activityAccess} aria-label="Acceso a Mi actividad"><div><strong>¿Querés continuar donde quedaste?</strong><p>Reservas, publicaciones, solicitudes y oportunidades están en Mi actividad.</p></div><ActivityMenu entry/></section>
+    <div className={styles.columns}>
+      <div className={styles.stack}>
+        <section className={styles.panel} aria-labelledby="account-personal-title">
+          <div className={styles.identity}><span className={styles.avatar}><UserRound size={28} aria-hidden="true"/></span><div><span className={styles.kicker}>TU PERFIL</span><h2 id="account-personal-title">{profileLoading ? "Datos personales" : profile?.full_name || "Datos personales"}</h2></div></div>
+          {profileLoading ? <p role="status">Cargando tu perfil…</p> : <><FormError message={profileError}/>{profileError && <button type="button" className="outline-button" onClick={retryProfile}>Reintentar perfil</button>}
+          <dl className={styles.facts}><div><dt>Nombre</dt><dd>{profileError ? "No disponible en este momento" : profile?.full_name || "Sin nombre registrado"}</dd></div><div><dt>Email de tu cuenta</dt><dd>{user?.email || "Sin email disponible"}</dd></div><div><dt>Teléfono de tu perfil</dt><dd>{profileError ? "No disponible en este momento" : profile?.phone ? formatArgentinaPhone(profile.phone) : "Sin teléfono registrado"}</dd></div></dl></>}
+          <p className={styles.hint}>Estos datos pertenecen a tu cuenta. El contacto público de tus artículos y servicios se configura por separado al publicar.</p>
+        </section>
+        <section className={styles.panel} aria-labelledby="account-location-title"><div className={styles.sectionTitle}><MapPin size={21} aria-hidden="true"/><h2 id="account-location-title">Ubicación para explorar</h2></div><div className={styles.location}><BuyerLocationControls/></div></section>
+      </div>
+      <div className={styles.stack}>
+        <details className={`${styles.panel} ${styles.settings}`}><summary><Settings2 size={21} aria-hidden="true"/><span>Perfil profesional y comercio</span></summary><p className={styles.hint}>Configurá cómo te presentás y dónde trabajás. No necesitás cambiar de cuenta.</p>
+          <NavigationItem href="/mi-perfil-profesional" label="Mi perfil profesional" description="Presentación, contacto autorizado y localidades donde trabajás" icon={Wrench}/>
+          {businessLoading ? <p role="status">Consultando tu comercio…</p> : businessError ? <div><FormError message={businessError}/><button type="button" className="outline-button" onClick={() => void refresh().catch(() => {})}>Reintentar comercio</button></div> : <NavigationItem href={business ? "/comercio/mi-negocio" : "/comercio/crear"} label={business ? "Configuración de mi comercio" : "Crear mi tienda"} description={business ? business.name : "Empezá a vender desde un comercio"} icon={Store}/>}
+        </details>
+        <section className={styles.panel} aria-labelledby="account-session-title"><div className={styles.sectionTitle}><LogOut size={21} aria-hidden="true"/><h2 id="account-session-title">Tu sesión</h2></div><p className={styles.hint}>Podés cerrar sesión en este navegador cuando termines.</p><FormError message={error}/><button type="button" className={`outline-button ${styles.signout}`} disabled={busy} onClick={signOut}><LogOut size={18} aria-hidden="true"/>{busy ? "Cerrando sesión…" : "Cerrar sesión"}</button></section>
+      </div>
+    </div>
+  </div>;
 }
-

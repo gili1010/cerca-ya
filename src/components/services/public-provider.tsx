@@ -1,4 +1,6 @@
 "use client";
+import detailStyles from "@/components/details/public-details.module.css";
+import {LoadingState} from "@/components/ui/primitives";
 import Link from "next/link";
 import {useSearchParams} from "next/navigation";
 import {readServiceSearchContext,servicePublicHref} from "@/lib/services/search-navigation";
@@ -20,7 +22,7 @@ export function PublicProvider({initial}:{initial:PublicServiceProvider}){
  const params=useSearchParams(),context=readServiceSearchContext(new URLSearchParams(params.toString()));
  const resource=usePublicServiceRecord(initial,initial.id,readPublicServiceProvider),provider=resource.data;
  const signed=useSignedServicePhotos(provider?.avatar_path?[provider.avatar_path]:[]);
- return <><BackLink href={context.returnTo}>Volver a los resultados</BackLink>{resource.checking?<p role="status">Comprobando disponibilidad…</p>:provider?<><div className={styles.heading}><h1>{provider.display_name}</h1></div><ProviderPresentation provider={provider} urls={signed.urls} contactEnabled={!(context.locality||context.province)||provider.areas.some(area=>area.province_code===context.province&&normalizePlace(area.city)===normalizePlace(context.locality))}/>{signed.error&&<p className={styles.hint}>{signed.error}<button className="secondary-link" onClick={signed.refresh}>Reintentar foto</button></p>}<ProviderServices provider={provider}/><ServiceReport entity="provider" id={provider.id}/></>:<section className="panel"><h1>Prestador no disponible.</h1><p>{resource.error||"Este perfil no está disponible públicamente."}</p><button className="outline-button" onClick={()=>void resource.refresh()}>Volver a comprobar</button><Link className="secondary-link" href="/">Volver a CercaYa</Link></section>}</>;
+ return <><BackLink href={context.returnTo}>Volver a resultados</BackLink>{resource.checking?<LoadingState label="Comprobando disponibilidad…"/>:provider?<><ProviderPresentation publicDetail provider={provider} urls={signed.urls} contactEnabled={!(context.locality||context.province)||provider.areas.some(area=>area.province_code===context.province&&normalizePlace(area.city)===normalizePlace(context.locality))}/>{signed.error&&<p className={styles.hint}>{signed.error}<button className="secondary-link" onClick={signed.refresh}>Reintentar foto</button></p>}<ProviderServices provider={provider}/><ServiceReport entity="provider" id={provider.id}/></>:<section className={`${detailStyles.page} ${detailStyles.summary}`}><h1>Prestador no disponible.</h1><p>{resource.error||"Este perfil no está disponible públicamente."}</p><button className="outline-button" onClick={()=>void resource.refresh()}>Volver a comprobar</button><Link className="secondary-link" href="/">Volver a CercaYa</Link></section>}</>;
 }
 function ProviderServices({provider}:{provider:PublicServiceProvider}){
  const params=useSearchParams(),context=readServiceSearchContext(new URLSearchParams(params.toString()));

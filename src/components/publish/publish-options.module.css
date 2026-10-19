@@ -1,0 +1,22 @@
+.page { max-width: 1080px; margin-inline: auto; }
+.heading { max-width: 720px; margin-bottom: var(--space-6); }
+.heading h1 { font-size: var(--text-title); font-weight: 750; line-height: 1.2; letter-spacing: -.035em; margin-block: var(--space-3); }
+.heading p, .groupHeading p { font-size: var(--text-base); color: var(--muted); line-height: 1.65; }
+.group { margin-top: var(--space-6); }
+.groupHeading { display: grid; gap: var(--space-2); margin-bottom: var(--space-4); }
+.groupHeading h2 { margin: 0; font-size: 1.35rem; font-weight: 700; color: var(--deep); }
+.groupHeading p { margin: 0; }
+.options { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: var(--space-4); }
+.options[data-group=need] { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.option { min-width: 0; display: grid; grid-template-columns: 48px minmax(0,1fr); gap: var(--space-3) var(--space-4); align-content: start; padding: var(--space-5); border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); transition: border-color var(--duration), background var(--duration), box-shadow var(--duration); }
+.symbol { width: 48px; height: 48px; display: grid; place-items: center; background: var(--surface-soft); color: var(--green); border-radius: var(--radius-md); }
+.option h3 { margin: 0; align-self: center; font-size: var(--text-lg); font-weight: 700; line-height: 1.35; overflow-wrap: anywhere; }
+.option p { grid-column: 1/-1; margin: 0; font-size: var(--text-sm); color: var(--muted); line-height: 1.65; }
+.action { grid-column: 1/-1; display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); margin-top: var(--space-2); color: var(--green); font-size: var(--text-sm); font-weight: 650; }
+.action svg { flex-shrink: 0; }
+.option:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+.footer { margin-top: var(--space-6); padding-top: var(--space-5); border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); justify-content: space-between; font-size: var(--text-sm); color: var(--secondary); }
+.footer p { display: flex; align-items: center; gap: var(--space-2); margin: 0; }
+@media (hover:hover) { .option:hover { border-color: var(--green); background: var(--paper); box-shadow: var(--shadow-sm); } }
+@media (max-width:900px) { .options { grid-template-columns: 1fr; } }
+@media (max-width:600px) { .options[data-group=need] { grid-template-columns: 1fr; } .option { padding: var(--space-4); } .group { margin-top: var(--space-5); } }

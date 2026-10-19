@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { isCoordinates } from "@/lib/location";
-import { Camera, Megaphone } from "lucide-react";
+import { Megaphone } from "lucide-react";
 import type { CategoryRow, Database, DatabaseNeededWhen } from "@/types/database";
 import { requestRadii, requestUrgencies, validateBuyerRequest, type BuyerRequestInput } from "@/lib/buyer-requests";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -12,6 +12,8 @@ import { ensureProfile } from "@/lib/auth/profile";
 import { loginUrl } from "@/lib/auth/redirect";
 import { useAuth } from "../auth/auth-provider";
 import { FormError } from "./request-common";
+import flow from "@/components/publish/publish-flow.module.css";
+import { BackLink } from "@/components/navigation/back-link";
 import { RequestLocation } from "./request-location";
 import { useUserLocation } from "../location/user-location-provider";
 
@@ -83,19 +85,21 @@ function NewRequestFields({ initialTitle }: { initialTitle: string }) {
     }
   }
 
-  return <div className="workflow-narrow"><div className="workflow-heading"><span className="eyebrow"><Megaphone size={15} />PEDIDO ABIERTO</span><h1>Contanos qué necesitás.</h1><p>Preguntale a comercios cercanos y seguí las respuestas desde Mis pedidos.</p></div>
-    <form className="workflow-form panel" onSubmit={submit} aria-busy={submitting}>
-      <label htmlFor="request-title">¿Qué estás buscando?<input id="request-title" name="title" required minLength={3} maxLength={120} value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Sensor de cigüeñal Ford Ka 2019" disabled={locked} /></label>
+  return <div className={`workflow-narrow ${flow.flow}`}><BackLink href="/publicar">Opciones para publicar</BackLink><div className="workflow-heading"><span className="eyebrow"><Megaphone size={15} aria-hidden="true" />PEDIDO ABIERTO</span><h1>¿Qué producto necesitás?</h1><p>Contanos qué buscás para que los comercios cercanos puedan encontrar tu pedido.</p></div>
+    <p className={flow.status}>Completá este formulario y publicá tu pedido. No es una publicación de venta ni una compra automática.</p>
+    <form className="workflow-form panel" onSubmit={submit} aria-busy={submitting} aria-describedby={error?"product-request-feedback":undefined}>
+      <h2>1. Qué estás buscando</h2><label htmlFor="request-title">¿Qué estás buscando?<input id="request-title" aria-describedby={error?"product-request-feedback":undefined} name="title" required minLength={3} maxLength={120} value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Sensor de cigüeñal Ford Ka 2019" disabled={locked} /></label>
       <label htmlFor="request-description">Descripción <small>Opcional</small><textarea id="request-description" name="description" maxLength={1000} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Motor 1.5, necesito retirarlo hoy si es posible." disabled={locked} /></label>
-      <div className="form-columns"><label htmlFor="request-category">Categoría<select id="request-category" required value={form.category_id} onChange={e => setForm({ ...form, category_id: e.target.value })} disabled={locked || !categories?.length}><option value="">Elegí una categoría</option>{categories?.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label><label htmlFor="request-urgency">¿Cuándo lo necesitás?<select id="request-urgency" value={form.needed_when} onChange={e => setForm({ ...form, needed_when: e.target.value as DatabaseNeededWhen })} disabled={locked}>{Object.entries(requestUrgencies).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label></div>
+      <label htmlFor="request-category">Categoría<select id="request-category" required value={form.category_id} onChange={e => setForm({ ...form, category_id: e.target.value })} disabled={locked || !categories?.length}><option value="">Elegí una categoría</option>{categories?.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
       {!categories && !categoryError && <p role="status">Cargando categorías...</p>}
       <FormError message={categoryError} />{categoryError && <button type="button" className="outline-button" onClick={() => { setCategoryError(""); setAttempt(value => value + 1); }}>Reintentar categorías</button>}
       {categories?.length === 0 && <p className="info-note">No hay categorías disponibles. Cargalas antes de publicar pedidos.</p>}
-      <RequestLocation disabled={locked} submittedWithLocation={submittedWithLocation} />
-      <label htmlFor="request-radius">¿Hasta qué distancia querés buscar?<select id="request-radius" value={form.radius_km} onChange={e => setForm({ ...form, radius_km: Number(e.target.value) })} disabled={locked}>{requestRadii.map(value => <option key={value} value={value}>{value} km</option>)}</select><small>Sólo los comercios dentro del radio podrán ver este pedido en Radar.</small></label>
-      <div className="photo-placeholder"><Camera size={23} /><div><strong>Foto opcional</strong><span>Próximamente vas a poder adjuntar una imagen.</span></div><button type="button" disabled>Próximamente</button></div>
+      <h2>2. Dónde y hasta cuándo buscar</h2><RequestLocation disabled={locked} submittedWithLocation={submittedWithLocation} />
+      <label htmlFor="request-urgency">¿Cuándo lo necesitás?<select id="request-urgency" value={form.needed_when} onChange={e => setForm({ ...form, needed_when: e.target.value as DatabaseNeededWhen })} disabled={locked}>{Object.entries(requestUrgencies).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+      <label htmlFor="request-radius">¿Hasta qué distancia querés buscar?<select id="request-radius" value={form.radius_km} onChange={e => setForm({ ...form, radius_km: Number(e.target.value) })} disabled={locked}>{requestRadii.map(value => <option key={value} value={value}>{value} km</option>)}</select><small>Sólo los comercios dentro del radio podrán encontrar tu pedido.</small></label>
+      <p data-publish-help>Por ahora este pedido se publica sin fotografía.</p>
       <p className="info-note">El pedido se guarda en tu cuenta. Los comercios podrán responder con ofertas mientras siga abierto.</p>
-      <FormError message={error} /><button className="primary-button" disabled={!categories?.length || submitting || (!uncertain && locating)} type="submit"><Megaphone size={17} />{submitting ? "Publicando pedido..." : uncertain ? "Reintentar publicación" : "Publicar pedido"}</button>
+      <div id="product-request-feedback"><FormError message={error} /></div><div className={flow.status} data-tone={uncertain?"warning":error?"error":undefined} role="status">{submitting?"Publicando y esperando confirmación…":uncertain?"Resultado pendiente de confirmar. Conservamos los mismos datos y ubicación para el reintento.":error?"El pedido no tiene confirmación de publicación. Revisá el mensaje indicado.":"Se publicará al confirmar. Podés seguir su estado desde Mis pedidos."}</div><button className="primary-button" disabled={!categories?.length || submitting || (!uncertain && locating)} type="submit"><Megaphone size={17} aria-hidden="true" />{submitting ? "Publicando pedido..." : uncertain ? "Reintentar publicación" : "Publicar pedido"}</button>
     </form>
   </div>;
 }

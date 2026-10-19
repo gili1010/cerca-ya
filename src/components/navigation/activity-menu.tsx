@@ -1,51 +1,77 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import Link from "next/link";
+import { useEffect, useId, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { ClipboardList, ChevronDown, Heart, PackageCheck, Package, Store, Wrench, Radio, FileText, MessageSquare, CircleHelp } from "lucide-react";
-import { SectionHeader } from "@/components/ui/primitives";
+import { ClipboardList, ChevronDown, ChevronRight, Heart, PackageCheck, Package, Store, Wrench, Radio, MessageSquare, CircleHelp, LogIn, UserRound, X } from "lucide-react";
+import { useAuth } from "@/components/auth/auth-provider";
+import { useMyBusiness } from "@/components/businesses/business-provider";
+import { loginUrl } from "@/lib/auth/redirect";
 import { NavigationItem } from "./navigation-item";
 import styles from "./global-navigation.module.css";
 
-const groups = [
- { title: "Mis compras y solicitudes", items: [
-   { href: "/pedidos", label: "Mis pedidos", description: "Pedidos abiertos de productos y ofertas", icon: ClipboardList },
-   { href: "/reservas", label: "Mis reservas", description: "Seguí tus compras en comercios", icon: PackageCheck },
-   { href: "/mis-solicitudes-servicio", label: "Mis solicitudes de servicios", description: "Trabajos que necesitás y propuestas recibidas", icon: Wrench },
-   { href: "/guardados", label: "Guardados", description: "Volvé a tus productos favoritos", icon: Heart },
- ] },
- { title: "Lo que ofrezco", items: [
-   { href: "/mis-publicaciones", label: "Mis publicaciones", description: "Artículos nuevos y usados", icon: Package },
-   { href: "/mis-servicios", label: "Mis servicios", description: "Tus servicios publicados", icon: Wrench },
-   { href: "/comercio", label: "Mi comercio", description: "Productos, tienda y gestión comercial", icon: Store },
-   { href: "/mi-perfil-profesional", label: "Mi perfil profesional", description: "Presentación y localidades donde trabajás", icon: FileText },
- ] },
- { title: "Encontrá oportunidades", items: [
-   { href: "/comercio/radar", label: "Radar comercial", description: "Necesidades de productos para tu comercio", icon: Radio },
-   { href: "/radar-servicios", label: "Radar de servicios", description: "Trabajos compatibles con tu cobertura", icon: Radio },
-   { href: "/mis-propuestas-servicio", label: "Mis propuestas", description: "Presupuestos que enviaste como profesional", icon: MessageSquare },
- ] },
-] as const;
-
-export function ActivityMenu({ mobile = false, active = false, onRequests, onSaved, onHow }: { mobile?: boolean; active?: boolean; onRequests?: () => void; onSaved?: () => void; onHow?: () => void }) {
- const path = usePathname(), ref = useRef<HTMLDetailsElement>(null);
- function close() { if (ref.current) ref.current.open = false; }
+export function ActivityMenu({ mobile = false, active = false, entry = false, onRequests, onSaved, onHow }: { mobile?: boolean; active?: boolean; entry?: boolean; onRequests?: () => void; onSaved?: () => void; onHow?: () => void }) {
+ const path = usePathname(), ref = useRef<HTMLDetailsElement>(null), titleId = useId();
+ const { user, loading } = useAuth();
+ const { business, loading: businessLoading, error: businessError } = useMyBusiness();
+ const knownBusiness = !businessLoading && !businessError && business;
+ const knownNoBusiness = !businessLoading && !businessError && !business;
+ const groups = [
+  { title: "Mis compras y pedidos", collapsible: false, items: [
+   { href: "/reservas", label: "Mis reservas", description: "Estado e historial de tus pedidos a comercios", icon: PackageCheck },
+   { href: "/pedidos", label: "Mis pedidos de productos", description: "Lo que buscás y las ofertas que recibiste", icon: ClipboardList },
+   { href: "/guardados", label: "Guardados", description: "Productos que querés volver a ver", icon: Heart },
+  ] },
+  { title: "Trabajos que necesito", collapsible: false, items: [
+   { href: "/mis-solicitudes-servicio", label: "Mis solicitudes de servicios", description: "Tus trabajos solicitados y propuestas recibidas", icon: Wrench },
+  ] },
+  { title: "Lo que publico", collapsible: true, items: [
+   { href: "/mis-publicaciones", label: "Mis publicaciones", description: "Artículos particulares que publicaste para vender", icon: Package },
+   { href: "/mis-servicios", label: "Mis servicios", description: "Administrá los trabajos que ofrecés o empezá a ofrecer", icon: Wrench },
+   { href: knownNoBusiness ? "/comercio/crear" : "/comercio", label: knownNoBusiness ? "Crear mi tienda" : "Mi comercio", description: knownBusiness ? knownBusiness.name : "Tu tienda y gestión comercial", icon: Store },
+   ...(knownBusiness ? [
+    { href: "/comercio/productos", label: "Productos de mi comercio", description: "Tu catálogo comercial", icon: Package },
+    { href: "/comercio/reservas", label: "Reservas de mi comercio", description: "Pedidos que recibís como comerciante", icon: PackageCheck },
+   ] : []),
+  ] },
+  { title: "Oportunidades y respuestas", collapsible: true, items: [
+   { href: "/radar-servicios", label: "Radar de servicios", description: "Trabajos que buscan profesionales en tu cobertura", icon: Radio },
+   { href: "/mis-propuestas-servicio", label: "Mis propuestas enviadas", description: "Las respuestas que enviaste como profesional", icon: MessageSquare },
+   { href: "/comercio/radar", label: "Radar comercial", description: knownNoBusiness ? "Requiere un comercio: podés comenzar creando tu tienda" : "Pedidos de productos y acceso a tus ofertas disponibles", icon: Radio },
+  ] },
+ ];
+ const selected = (href: string) => path === href || (href !== "/comercio" && path.startsWith(`${href}/`));
+ function close(restore = false) { if (ref.current) { ref.current.open = false; if (restore) ref.current.querySelector("summary")?.focus(); } }
  useEffect(() => {
-   const outside = (event: PointerEvent) => { if (event.target instanceof Node && !ref.current?.contains(event.target)) close(); };
-   const escape = (event: KeyboardEvent) => { if (event.key === "Escape" && ref.current?.open) { close(); ref.current.querySelector("summary")?.focus(); } };
-   document.addEventListener("pointerdown",outside); document.addEventListener("keydown",escape);
-   return () => { document.removeEventListener("pointerdown",outside); document.removeEventListener("keydown",escape); };
+  const outside = (event: PointerEvent) => { if (event.target instanceof Node && !ref.current?.contains(event.target)) close(); };
+  const escape = (event: KeyboardEvent) => { if (event.key === "Escape" && ref.current?.open) { event.preventDefault(); close(true); } };
+  document.addEventListener("pointerdown", outside); document.addEventListener("keydown", escape);
+  return () => { document.removeEventListener("pointerdown", outside); document.removeEventListener("keydown", escape); };
  }, []);
- useEffect(() => { close(); }, [path]);
- return <details ref={ref} className={`${styles.menu} ${mobile ? styles.mobileMenu : ""}`}><summary className={`${mobile ? styles.bottomItem : styles.topItem} ${active ? styles.active : ""}`} aria-label="Actividad: abrir mis compras, publicaciones y oportunidades"><span className={styles.navIcon}><ClipboardList size={mobile ? 21 : 17} aria-hidden="true"/></span><span>Actividad</span>{!mobile && <ChevronDown size={13} aria-hidden="true"/>}</summary>
-   <div className={styles.menuPanel}><div className={styles.menuIntro}><strong>Tu actividad en CercaYa</strong><p>Comprá, ofrecé y encontrá oportunidades con la misma cuenta.</p></div>
-     {groups.map(group => <section key={group.title} className={styles.menuGroup}><SectionHeader level={3} title={group.title}/>{group.items.map(item => {
-       const callback = item.href === "/pedidos" ? onRequests : item.href === "/guardados" ? onSaved : undefined;
-       return callback ? <button type="button" key={item.href} className={styles.menuItem} onClick={() => { close(); callback(); }}><span className={styles.itemIcon}><item.icon size={19} aria-hidden="true"/></span><span><strong>{item.label}</strong><small>{item.description}</small></span></button> : <NavigationItem key={item.href} {...item} active={path === item.href || (path.startsWith(`${item.href}/`) && item.href !== "/comercio")} onNavigate={close}/>;
-     })}</section>)}
-     <section className={styles.menuGroup}><SectionHeader level={3} title="Necesito algo"/><NavigationItem href="/pedido/nuevo" label="Necesito un producto" description="Publicá un Pedido Abierto" icon={Package} onNavigate={close}/><NavigationItem href="/necesito-un-servicio" label="Necesito un servicio" description="Contá qué trabajo necesitás" icon={Wrench} onNavigate={close}/></section>
-     {onHow && <button className={styles.helpLink} type="button" onClick={() => { close(); onHow(); }}><CircleHelp size={17} aria-hidden="true"/>Cómo funciona CercaYa</button>}
-     <button className={styles.closeMenu} type="button" onClick={() => { close(); ref.current?.querySelector("summary")?.focus(); }}>Cerrar menú</button>
-   </div>
+ useEffect(() => { close(); }, [path, user?.id]);
+ return <details ref={ref} data-activity-menu className={`${styles.menu} ${mobile ? styles.mobileMenu : ""} ${entry ? styles.accountActivity : ""}`}
+  onToggle={event => { if (event.currentTarget.open) document.querySelectorAll<HTMLDetailsElement>("details[data-activity-menu]").forEach(menu => { if (menu !== event.currentTarget) menu.open = false; }); }}
+  onBlur={event => { if (event.relatedTarget instanceof Node && !event.currentTarget.contains(event.relatedTarget)) close(); }}>
+  <summary className={`${entry ? styles.activityEntry : mobile ? styles.bottomItem : styles.topItem} ${active ? styles.active : ""}`} aria-label={entry ? "Abrir Mi actividad" : "Actividad: abrir mis compras, publicaciones y oportunidades"}>
+   <span className={styles.navIcon}><ClipboardList size={mobile ? 21 : 18} aria-hidden="true"/></span><span>{entry ? "Ver mi actividad" : "Actividad"}</span>{!mobile && <ChevronDown size={14} aria-hidden="true"/>}
+  </summary>
+  <div className={styles.menuPanel} aria-labelledby={titleId}>
+   <div className={styles.menuIntro}><div><h2 id={titleId}>Mi actividad</h2><p>Encontrá tus publicaciones, pedidos y oportunidades</p></div><button type="button" className={styles.activityClose} aria-label="Cerrar Mi actividad" onClick={() => close(true)}><X size={20} aria-hidden="true"/></button></div>
+   {loading ? <p role="status" className={styles.menuStatus}>Comprobando tu sesión…</p> : !user ? <div className={styles.activityGuest}>
+    <LogIn size={28} aria-hidden="true"/><h3>Ingresá para ver tu actividad</h3><p>Consultá tus publicaciones, reservas y solicitudes desde tu cuenta.</p>
+    <Link className="primary-button" href={loginUrl("/cuenta")} onClick={() => close()}>Iniciar sesión</Link><Link className="outline-button" href="/registro?redirect=%2Fcuenta" onClick={() => close()}>Crear cuenta</Link><p>Al ingresar, abrí Mi actividad desde tu cuenta o la navegación.</p>
+   </div> : <>
+    {groups.map(group => {
+     const content = group.items.map(item => {
+      const callback = item.href === "/pedidos" ? onRequests : item.href === "/guardados" ? onSaved : undefined;
+      return callback ? <button type="button" key={item.href} className={styles.menuItem} onClick={() => { close(true); callback(); }}><span className={styles.itemIcon}><item.icon size={19} aria-hidden="true"/></span><span><strong>{item.label}</strong><small>{item.description}</small></span><ChevronRight className={styles.itemArrow} size={16} aria-hidden="true"/></button> : <NavigationItem key={item.href} {...item} active={selected(item.href)} onNavigate={() => close()}/>;
+     });
+     return group.collapsible ? <details key={group.title} className={styles.activityGroup} open={group.items.some(item => selected(item.href)) || undefined}><summary><h3>{group.title}</h3><ChevronDown size={16} aria-hidden="true"/></summary>{content}</details> : <section key={group.title} className={styles.menuGroup}><h3>{group.title}</h3>{content}</section>;
+    })}
+    <div className={styles.activityFooter}><NavigationItem href="/publicar" label="Publicar algo nuevo" description="Ofrecer un artículo, un servicio o pedir lo que necesitás" icon={Package} onNavigate={() => close()}/>{path!=="/cuenta"&&<NavigationItem href="/cuenta" label="Mi cuenta" description="Datos personales y configuración" icon={UserRound} onNavigate={() => close()}/>}</div>
+   </>}
+   {onHow && <button className={styles.helpLink} type="button" onClick={() => { close(); onHow(); }}><CircleHelp size={17} aria-hidden="true"/>Cómo funciona CercaYa</button>}
+   <button className={styles.closeMenu} type="button" onClick={() => close(true)}>Cerrar actividad</button>
+  </div>
  </details>;
 }

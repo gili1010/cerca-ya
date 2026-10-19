@@ -1,4 +1,8 @@
-import Link from "next/link";
-import {ServiceShell} from "@/components/services/service-shell";
-export default function NotFound(){return <ServiceShell><section className="panel"><h1>Prestador no disponible.</h1><p>Este perfil no está disponible públicamente.</p><Link className="primary-button" href="/">Volver a CercaYa</Link></section></ServiceShell>;}
+import { Suspense } from "react";
+import { DetailUnavailable } from "@/components/details/detail-unavailable";
+import { PersonalShell } from "@/components/personal-listings/personal-shell";
+import { BackLink } from "@/components/navigation/back-link";
 
+export default function NotFound() {
+  return <PersonalShell><Suspense fallback={<BackLink href="/">Volver a resultados</BackLink>}><DetailUnavailable /></Suspense></PersonalShell>;
+}

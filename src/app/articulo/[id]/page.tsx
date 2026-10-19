@@ -1,3 +1,5 @@
+import detailStyles from "@/components/details/public-details.module.css";
+import { BackLink } from "@/components/navigation/back-link";
 import { notFound } from "next/navigation";
 import { PersonalShell } from "@/components/personal-listings/personal-shell";
 import { PublicArticle } from "@/components/personal-listings/public-article";
@@ -15,7 +17,7 @@ export default async function Page({ params, searchParams }: { params: Promise<{
   let listing: PublicPersonalListing | null;
   try { listing = await getPublicPersonalListing(id); }
   catch {
-    return <PersonalShell><section className="panel"><h1>No pudimos cargar el artículo.</h1><p>Volvé a intentar en unos momentos.</p><a className="primary-button" href={`/articulo/${id}?returnTo=${encodeURIComponent(returnTo)}`}>Reintentar</a></section></PersonalShell>;
+    return <PersonalShell><section className={`${detailStyles.page} ${detailStyles.summary}`}><h1>No pudimos cargar el artículo.</h1><p>Volvé a intentar en unos momentos.</p><a className="primary-button" href={`/articulo/${id}?returnTo=${encodeURIComponent(returnTo)}`}>Reintentar</a><BackLink href={returnTo}>Volver a resultados</BackLink></section></PersonalShell>;
   }
   if (!listing) notFound();
   return <PersonalShell><PublicArticle key={listing.id} initial={listing} returnTo={returnTo} /></PersonalShell>;

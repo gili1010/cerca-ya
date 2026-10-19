@@ -1,4 +1,6 @@
 "use client";
+import {LoadingState} from "@/components/ui/primitives";
+import management from "@/components/management/management.module.css";
 import Link from "next/link";
 import {useEffect,useRef,useState} from "react";
 import {useAuth} from "@/components/auth/auth-provider";
@@ -16,6 +18,7 @@ import {useServicePhotoDraft} from "./use-service-photo-draft";
 import {ServicePhotos} from "./service-photos";
 import {ServiceAreasEditor} from "./service-areas-editor";
 import {ServicePhotoCleanup} from "./service-photo-cleanup";
+import flow from "@/components/publish/publish-flow.module.css";
 import styles from "@/components/personal-listings/personal-listings.module.css";
 
 const emptyForm={name:"",description:"",city:"",province:"",whatsapp:"",consent:false,active:true};
@@ -23,6 +26,8 @@ function profileForm(p:OwnedServiceProvider){return{name:p.display_name,descript
 export function ProfessionalProfile({continueToService=false,onContinue}:{continueToService?:boolean;onContinue?:()=>void}){
  const ws=useServiceWorkspace(),{user}=useAuth(),photo=useServicePhotoDraft(1);
  const [form,setForm]=useState(emptyForm),[areas,setAreas]=useState<ServiceAreaInput[]>([]),[busy,setBusy]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState(""),[frozen,setFrozen]=useState(false);
+ const errorFocus=useRef<HTMLDivElement>(null);
+ useEffect(()=>{if(error)errorFocus.current?.focus();},[error]);
  const pendingId=useRef<string|null>(null),hydrated=useRef(false),lock=useRef(false),live=useRef(true);
  useEffect(()=>{live.current=true;return()=>{live.current=false;};},[]);
  useEffect(()=>{
@@ -31,6 +36,9 @@ export function ProfessionalProfile({continueToService=false,onContinue}:{contin
   if(ws.provider){pendingId.current=ws.provider.id;setForm(profileForm(ws.provider));setAreas(ws.provider.areas.map(area=>({city:area.city,province_code:area.province_code})));photo.reset(ws.provider.avatar_path?[ws.provider.avatar_path]:[]);rememberServiceId("provider",user.id,null);}
   else{pendingId.current=pendingId.current??serviceSessionId("provider",user.id)??crypto.randomUUID();rememberServiceId("provider",user.id,pendingId.current);}
  },[ws.loading,ws.error,ws.provider,user,photo.reset]);
+ const profileDirty=JSON.stringify(form)!==JSON.stringify(ws.provider?profileForm(ws.provider):emptyForm);
+ const coverageDirty=JSON.stringify(areas)!==JSON.stringify(ws.provider?.areas.map(area=>({city:area.city,province_code:area.province_code}))??[]);
+ const photoDirty=photo.photos.some(item=>!item.path)||photo.photos.map(item=>item.path).join("|")!==(ws.provider?.avatar_path??"");
  const disabled=busy||photo.preparing||frozen||ws.suspended||!!ws.provider?.admin_blocked;
  function reload(){hydrated.current=false;setFrozen(false);setError("");setNotice("");ws.reload();}
  async function recoverPhoto(){
@@ -78,24 +86,26 @@ export function ProfessionalProfile({continueToService=false,onContinue}:{contin
    if(live.current){setError(serviceUiError(cause));setFrozen(true);}
   }finally{lock.current=false;if(live.current)setBusy(false);}
  }
- if(ws.loading)return <p role="status">Cargando tu perfil profesional…</p>;
+ if(ws.loading)return <LoadingState label="Cargando tu perfil profesional…"/>;
  if(ws.error)return <div className="panel"><FormError message={ws.error}/><button className="outline-button" onClick={reload}>Reintentar</button></div>;
- return <div className={styles.wizard}><div className={styles.heading}><span className="eyebrow">TU OFICIO EN CERCAYA</span><h1>Mi perfil profesional</h1><p>Presentate y contá dónde trabajás. No necesitás crear una tienda.</p></div>
+ return <div className={`${styles.wizard} ${flow.flow} ${management.page} ${management.profile}`}><div className={styles.heading}><span className="eyebrow">TU OFICIO EN CERCAYA</span><h1>Mi perfil profesional</h1><p>{continueToService?"Primero configurá tu perfil. Lo usarás para todos tus servicios, sin crear una tienda.":"Presentate y contá dónde trabajás. Un mismo perfil reúne todos tus servicios."}</p></div>
  {ws.suspended&&<p className="form-error">Tu cuenta está suspendida. Sólo podés consultar tus datos.</p>}{ws.provider?.admin_blocked&&<p className="form-error">Tu perfil está bloqueado. {ws.provider.admin_block_reason}</p>}
- <FormError message={error}/>{notice&&<p role="status" className={styles.notice}>{notice}</p>}{frozen&&<div className={styles.notice}>Revisá lo que quedó guardado antes de seguir. <button type="button" className="outline-button" disabled={busy} onClick={reload}>Recargar datos guardados (descarta cambios locales)</button></div>}
- <form className={`panel ${styles.formPanel}`} noValidate onSubmit={event=>{event.preventDefault();void save("profile");}}><fieldset disabled={disabled}><legend>Tu presentación</legend>
+ <div id="professional-profile-feedback" ref={errorFocus} tabIndex={-1}><FormError message={error}/></div>{notice&&<p role="status" className={styles.notice}>{notice}</p>}{frozen&&<div className={styles.notice}>Revisá lo que quedó guardado antes de seguir. <button type="button" className="outline-button" disabled={busy} onClick={reload}>Recargar datos guardados (descarta cambios locales)</button></div>}
+ <div className={flow.status} role="status">{busy?"Guardando y comprobando los cambios…":photo.preparing?"Preparando la foto…":frozen?"Resultado pendiente de revisión. Recuperá la versión guardada antes de seguir.":profileDirty||coverageDirty||photoDirty?"Tenés cambios sin guardar. Guardá cada sección modificada: perfil, cobertura y foto.":"Guardá cada sección por separado: perfil, cobertura y foto opcional."}</div>
+ <form className={`panel ${styles.formPanel}`} noValidate aria-busy={busy} aria-describedby={error?"professional-profile-feedback":undefined} onSubmit={event=>{event.preventDefault();void save("profile");}}><fieldset disabled={disabled}><legend>1. Mi presentación</legend><p data-publish-help>Tu nombre y presentación serán públicos. Esta localidad es tu referencia, no define dónde ofrecés tus trabajos.</p>
  <label className={styles.field}>Nombre público<input required maxLength={120} value={form.name} placeholder="Ej. Electricidad Juan" onChange={event=>setForm({...form,name:event.target.value})}/></label>
  <label className={styles.field}>Presentación<textarea maxLength={5000} value={form.description} onChange={event=>setForm({...form,description:event.target.value})}/></label>
  <ArticleLocality city={form.city} province={form.province} onCity={value=>setForm({...form,city:value})} onProvince={value=>setForm({...form,province:value,city:""})} disabled={disabled}/>
- <label className={styles.field}>WhatsApp (opcional para guardar el perfil)<input type="tel" value={form.whatsapp} maxLength={30} placeholder="Código de área y número" onChange={event=>setForm({...form,whatsapp:event.target.value,consent:false})}/></label>
- <label className={styles.check}><input type="checkbox" checked={form.consent} onChange={event=>setForm({...form,consent:event.target.checked})}/><span>Autorizo mostrar este WhatsApp para recibir consultas por mis servicios.</span></label>
+ <h2 className={management.subheading}>Cómo pueden contactarme</h2><label className={styles.field}>WhatsApp (opcional para guardar el perfil)<input id="professional-whatsapp" type="tel" inputMode="tel" aria-describedby="professional-whatsapp-help" value={form.whatsapp} maxLength={30} placeholder="Código de área y número" onChange={event=>setForm({...form,whatsapp:event.target.value,consent:false})}/></label>
+ <p id="professional-whatsapp-help" data-publish-help>Tu número será público sólo si autorizás el contacto. Podés guardar el perfil sin WhatsApp; para publicar servicios necesitás autorizar uno válido.</p>
+ <label className={styles.check}><input aria-describedby="professional-whatsapp-help" type="checkbox" checked={form.consent} onChange={event=>setForm({...form,consent:event.target.checked})}/><span>Autorizo mostrar este WhatsApp para recibir consultas por mis servicios.</span></label>
  <label className={styles.check}><input type="checkbox" checked={form.active} onChange={event=>setForm({...form,active:event.target.checked})}/><span>Perfil profesional activo</span></label>
  <p className={styles.hint}>Desactivar oculta tus servicios sin borrarlos. Los pausados o retirados conservan su estado al reactivar. Si tenés servicios publicados, pausá esos servicios o desactivá el perfil antes de quitar su contacto autorizado o toda la cobertura.</p>
  <button className="primary-button" disabled={disabled}>{busy?"Guardando…":ws.provider?"Guardar perfil":"Crear perfil profesional"}</button></fieldset></form>
- <section className={`panel ${styles.formPanel}`} style={{marginTop:"var(--space-5)"}}><h2>Localidades donde trabajo</h2><ServiceAreasEditor areas={areas} onChange={setAreas} disabled={disabled||!ws.provider}/><button type="button" className="primary-button" disabled={disabled||!ws.provider} onClick={()=>void save("areas")}>Guardar cobertura</button>{!ws.provider&&<p className={styles.hint}>Guardá primero el perfil; después podés completar tu cobertura.</p>}</section>
- <section className={`panel ${styles.formPanel}`} style={{marginTop:"var(--space-5)"}}><h2>Foto o logo</h2><ServicePhotos avatar photos={photo.photos} disabled={disabled||!ws.provider} preparing={photo.preparing} onAdd={files=>void photo.add(files)} onChange={photo.change}/><FormError message={photo.error}/>{ws.provider&&<button type="button" className="secondary-link" disabled={disabled} onClick={()=>void recoverPhoto()}>Recuperar foto temporal de un intento anterior</button>}<button type="button" className="outline-button" disabled={disabled||!ws.provider} onClick={()=>void save("photo")}>Guardar foto de perfil</button>{ws.provider&&<ServicePhotoCleanup id={ws.provider.id} kind="providers" disabled={disabled||photo.photos.some(item=>!item.path||item.path!==ws.provider?.avatar_path)}/>}</section>
+ <section id="professional-coverage" className={flow.section}><h2>2. Dónde trabajo</h2><ServiceAreasEditor areas={areas} onChange={setAreas} disabled={disabled||!ws.provider}/><button type="button" className="primary-button" disabled={disabled||!ws.provider} onClick={()=>void save("areas")}>Guardar cobertura</button>{!ws.provider&&<p className={styles.hint}>Guardá primero el perfil; después podés completar tu cobertura.</p>}</section>
+ <details className={`${flow.section} ${flow.optional}`}><summary>3. Foto o logo · opcional</summary><ServicePhotos avatar photos={photo.photos} disabled={disabled||!ws.provider} preparing={photo.preparing} onAdd={files=>void photo.add(files)} onChange={photo.change}/><FormError message={photo.error}/>{ws.provider&&<button type="button" className="secondary-link" disabled={disabled} onClick={()=>void recoverPhoto()}>Recuperar foto temporal de un intento anterior</button>}<button type="button" className="outline-button" disabled={disabled||!ws.provider} onClick={()=>void save("photo")}>Guardar foto de perfil</button>{ws.provider&&<ServicePhotoCleanup id={ws.provider.id} kind="providers" disabled={disabled||photo.photos.some(item=>!item.path||item.path!==ws.provider?.avatar_path)}/>}</details>
  <div className={styles.notice}>{ws.provider?providerPublishProblem(ws.provider)||"Tu perfil ya cumple los requisitos para publicar servicios.":"Podés crear el perfil sin WhatsApp ni cobertura; se necesitarán al publicar."}</div>
- <div className={styles.actions}>{onContinue?<button type="button" className="primary-button" disabled={!ws.provider||busy} onClick={onContinue}>Continuar con mi servicio</button>:<Link className="primary-button" href="/publicar/servicio">{continueToService?"Continuar con mi servicio":"Publicar un servicio"}</Link>}<Link className="outline-button" href="/mis-servicios">Mis servicios</Link></div>
+ <div className={`${styles.actions} ${flow.actions}`}>{onContinue?<button type="button" className="primary-button" disabled={!ws.provider||busy} onClick={onContinue}>Continuar con mi servicio</button>:<Link className="primary-button" href="/publicar/servicio">{continueToService?"Continuar con mi servicio":"Publicar un servicio"}</Link>}<Link className="outline-button" href="/mis-servicios">Mis servicios</Link></div>
  </div>;
 }
 

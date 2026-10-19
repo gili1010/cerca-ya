@@ -1,0 +1,40 @@
+.page { min-width: 0; max-width: 1180px; margin-inline: auto; }
+.page h1 { font-size: var(--text-title); line-height: 1.2; letter-spacing: -.035em; font-weight: 750; overflow-wrap: anywhere; }
+.page :is(p,small,dt,dd) { overflow-wrap: anywhere; }
+.page p { line-height: 1.65; }
+.page :global(.workflow-heading) { margin-block: var(--space-5); }
+.page :global(.radar-heading-icon) { display: none; }
+.page :global(.request-list-grid), .page :global(.offer-grid) { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: var(--space-5); }
+.page .card { min-width: 0; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); box-shadow: none; }
+.page .card h2 { font-size: 21px; line-height: 1.35; margin: 0; font-weight: 700; }
+.page .card :global(.request-description) { font-size: var(--text-base); line-height: 1.7; margin: 0; }
+.page .card > :global(.primary-button), .page .card > :global(.outline-button) { margin-top: auto; min-height: 48px; }
+.page .card :global(.card-topline) { align-items: start; flex-wrap: wrap; gap: var(--space-2); font-size: var(--text-sm); }
+.page .card :global(.radar-distance), .page .card :global(.request-card-meta), .page .card :global(.radar-offer-count) { margin: 0; font-size: var(--text-sm); }
+.page .card :global(.radar-suggestion) { padding: var(--space-4); border: 0; border-radius: var(--radius-md); background: var(--surface-soft); }
+.page .card :global(.radar-suggestion) strong { font-size: 21px; }
+.page :global(.radar-metrics) { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: var(--space-3); padding-block: var(--space-4); }
+.page :global(.radar-metrics) > div { min-width: 0; border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--space-4); background: var(--surface); }
+.page :global(.radar-metrics) dt { font-size: var(--text-sm); }
+.page :global(.radar-metrics) dd { font-size: 24px; font-weight: 700; color: var(--deep); }
+.page :global(.radar-toolbar) { gap: var(--space-4); margin-block: var(--space-5); }
+.page :global(.request-tabs) { gap: var(--space-2); flex-wrap: wrap; }
+.page :global(.filter-chip) { min-height: 44px; white-space: normal; }
+.page :global(.offer-detail) { display: grid; gap: var(--space-4); }
+.page :global(.offer-price) { font-size: clamp(1.8rem,3vw,2.3rem); color: var(--deep); }
+.page :global(.offer-card) { display: flex; flex-direction: column; gap: var(--space-3); }
+.page :global(.offer-link) { margin-top: auto; min-height: 44px; display: inline-flex; align-items: center; }
+.page :is(button,a,select,input,textarea):focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+.deadline { font-size: var(--text-sm); color: var(--muted); border-top: 1px solid var(--line); padding-top: var(--space-3); }
+.context { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--green); font-weight: 650; margin-bottom: var(--space-3); }
+@media (max-width:800px) { .page :global(.radar-metrics) { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width:640px) { .page :global(.request-list-grid), .page :global(.offer-grid) { grid-template-columns: minmax(0,1fr); } .page .card { padding: var(--space-4); } .page :global(.offers-heading) { flex-wrap: wrap; gap: var(--space-3); } .page :global(.offer-detail-actions) { display: grid; gap: var(--space-3); } .page :global(.radar-toolbar) label { width: 100%; } }
+
+.page :global(.request-card) { border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: none; min-width: 0; }
+.page :global(.request-card) h2 { font-size: 21px; line-height: 1.35; }
+.page :global(.info-note), .page :global(.request-card) small { font-size: var(--text-sm); line-height: 1.65; }
+.page :global(.request-overview) { margin-top: var(--space-5); }
+.page :global(.request-actions), .page :global(.offer-methods) { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.page :global(.request-actions) button { min-height: 48px; }
+.page :global(.request-tabs) { margin-block: var(--space-4); }
+@media (max-width:640px) { .page :global(.request-actions) button { width: 100%; } }

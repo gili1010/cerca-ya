@@ -1,5 +1,6 @@
 "use client";
 
+import {LoadingState} from "@/components/ui/primitives";
 import Link from "next/link";
 import { Fragment, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -100,7 +101,7 @@ export function useRadarDraft<T>(key: string, create: () => T, parse: (value: un
 }
 
 export function RadarFeedback({ loading, error, retry }: { loading: boolean; error: string; retry: () => void }) {
- return <>{loading && <p role="status">Cargando información…</p>}{error && <div className={styles.notice}><p role="alert">{error}</p><button type="button" className="outline-button" onClick={retry}>Volver a cargar</button></div>}</>;
+ return <>{loading && <LoadingState label="Cargando información…"/>}{error && <div className={styles.notice}><p role="alert">{error}</p><button type="button" className="outline-button" onClick={retry}>Volver a cargar</button></div>}</>;
 }
 export function RadarDraftProblem({ error,onDiscard,href }: { error: string; onDiscard: () => void; href: string }) {
  const [confirm,setConfirm]=useState(false);

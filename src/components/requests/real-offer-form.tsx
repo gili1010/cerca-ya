@@ -12,6 +12,9 @@ import { MerchantBusinessGate } from "../merchant-products/business-gate";
 import { FormError } from "./request-common";
 import { useLiveRadar } from "../radar/use-live-radar";
 import { LiveFeedback } from "./use-live-changes";
+import flow from "@/components/publish/publish-flow.module.css";
+import experience from "@/components/radar/radar-experience.module.css";
+import {money} from "@/lib/products";
 import { useRequestClock } from "./buyer-request-common";
 
 export function RealOfferForm({ requestId, productId }: { requestId: string; productId?: string }) {
@@ -68,8 +71,8 @@ function OfferFields({ business, request, product, refresh }: { business: Busine
       router.push(`/comercio/oferta-enviada/${data}`);
     } catch { setError("No pudimos enviar la oferta."); inFlight.current = false; setSubmitting(false); }
   }
-  return <div className="workflow-narrow"><BackLink href="/comercio/radar">Volver al Radar</BackLink><div className="workflow-heading"><span className="eyebrow">{business.name}</span><h1>Respondé con una oferta</h1><p>{request.title}</p>{product && <p>Precargamos tu producto. Revisá la compatibilidad, el precio y el tiempo de entrega antes de enviar.</p>}</div>
-    <form className="workflow-form panel" onSubmit={event => { event.preventDefault(); void submit(); }}>
+  return <div className={`workflow-narrow ${flow.flow} ${experience.page}`}><BackLink href="/comercio/radar">Volver al Radar</BackLink><div className="workflow-heading"><span className="eyebrow">{business.name}</span><span className={experience.context}>RESPUESTA DE TU COMERCIO</span><h1>Respondé con una oferta</h1><p>{request.title}</p>{product && <p>Precargamos tu producto. Revisá la compatibilidad, el precio y el tiempo de entrega antes de enviar.</p>}</div>
+    <form className="workflow-form panel" aria-busy={submitting} onSubmit={event => { event.preventDefault(); void submit(); }}>
       <label htmlFor="offered-product">Producto ofrecido<input id="offered-product" required minLength={3} maxLength={120} disabled={submitting} value={form.product_name} onChange={event => setForm({ ...form, product_name: event.target.value })} /></label>
       <label htmlFor="offered-price">Precio (ARS)<input id="offered-price" type="number" inputMode="decimal" required min="0.01" max="9999999999.99" step="0.01" disabled={submitting} value={form.price || ""} onChange={event => setForm({ ...form, price: Number(event.target.value) })} /></label>
       <label htmlFor="offer-description">Descripción<textarea id="offer-description" required minLength={3} maxLength={1000} disabled={submitting} value={form.description} onChange={event => setForm({ ...form, description: event.target.value })} placeholder="Estado, compatibilidad y detalles para el comprador." /></label>
@@ -78,6 +81,7 @@ function OfferFields({ business, request, product, refresh }: { business: Busine
       {form.delivery_available && <label htmlFor="delivery-price">Costo de envío (ARS)<input id="delivery-price" type="number" inputMode="decimal" required min="0" max="9999999999.99" step="0.01" disabled={submitting} value={form.delivery_price} onChange={event => setForm({ ...form, delivery_price: Number(event.target.value) })} /></label>}
       <label htmlFor="estimated-delivery">Tiempo estimado de {form.delivery_available ? "entrega" : "retiro"}<input id="estimated-delivery" required={form.delivery_available} maxLength={120} disabled={submitting} value={form.estimated_delivery} onChange={event => setForm({ ...form, estimated_delivery: event.target.value })} placeholder={form.delivery_available ? "Hoy, en 2 horas" : "Retiro inmediato"} /></label>
       <label className="checkbox-label"><input type="checkbox" disabled={submitting} checked={form.alternative} onChange={event => setForm({ ...form, alternative: event.target.checked })} />Es una alternativa al producto solicitado</label>
+      <details className={flow.preview}><summary>Revisá tu oferta antes de enviarla</summary><h2>{form.product_name}</h2><strong className="offer-price">{money(form.price)}</strong><p>{form.description}</p><p>{form.pickup_available?"Retiro disponible":"Sin retiro"} · {form.delivery_available?`Envío: ${money(form.delivery_price)}`:"Sin envío"}</p>{form.estimated_delivery&&<p>Tiempo estimado: {form.estimated_delivery}</p>}<p data-publish-help>Esta vista previa no confirma el envío ni crea una reserva.</p></details>
       <p className="info-note">La oferta quedará guardada y el comprador podrá consultarla al actualizar su pedido.</p><FormError message={error} /><button className="primary-button" type="submit" disabled={submitting || (!pickupAllowed && !deliveryAllowed)}>{submitting ? "Enviando oferta..." : "Enviar oferta"}</button>
     </form>
   </div>;

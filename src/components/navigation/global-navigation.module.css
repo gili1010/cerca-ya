@@ -25,7 +25,7 @@
 .menuGroup h3 { font-size: 12px; color: var(--secondary); letter-spacing: .02em; padding: var(--space-2); font-weight: 700; }
 .menuItem { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) var(--space-2); border-radius: var(--radius-md); text-align: left; width: 100%; min-height: 52px; color: var(--ink); }
 .menuItem[aria-current="page"] { background: var(--surface-soft); }
-.menuItem > span:last-child { display: grid; gap: 3px; min-width: 0; }
+.menuItem > span:nth-child(2) { display: grid; gap: 3px; min-width: 0; }
 .menuItem strong { font-size: 14px; line-height: 1.4; font-weight: 600; }
 .menuItem small { font-size: 12px; line-height: 1.5; color: var(--muted); }
 .itemIcon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0; background: var(--surface-soft); color: var(--green); }
@@ -57,3 +57,40 @@
 .zone strong,.topItem,.account,.menuIntro p,.menuItem small,.helpLink,.closeMenu { font-size: 14px; }
 @media(max-width:600px) { .bottomItem { font-size: 13px; } }
 
+
+/* UX/UI 6: a single activity hub, reused by navigation and Account. */
+.menuPanel { width: min(560px,calc(100vw - 32px)); }
+.menuIntro { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+.menuIntro > div { min-width: 0; }
+.menuIntro h2 { margin: 0; font-size: 20px; font-weight: 750; color: var(--deep); letter-spacing: -.025em; }
+.menuIntro p { font-size: 14px; }
+.activityClose { display: grid; place-items: center; flex: 0 0 44px; height: 44px; border: 1px solid var(--line); border-radius: var(--radius-md); color: var(--green); background: var(--surface); }
+.menuGroup h3 { font-size: 14px; margin: 0; }
+.menuItem { align-items: center; min-height: 60px; }
+.menuItem > span:nth-child(2) { flex: 1; }
+.menuItem strong, .menuItem small { overflow-wrap: anywhere; }
+.itemArrow { flex-shrink: 0; margin-left: auto; color: var(--muted); }
+.menuItem[aria-current=page] { border-left: 3px solid var(--green); }
+.activityGroup { margin-top: var(--space-4); border-top: 1px solid var(--line); padding-top: var(--space-2); }
+.activityGroup > summary { display: flex; gap: var(--space-3); align-items: center; justify-content: space-between; min-height: 48px; padding: var(--space-2); cursor: pointer; list-style: none; color: var(--secondary); }
+.activityGroup > summary::-webkit-details-marker { display: none; }
+.activityGroup h3 { margin: 0; font-size: 14px; font-weight: 700; }
+.activityGroup[open] > summary > svg { transform: rotate(180deg); }
+.activityFooter { margin-top: var(--space-4); padding-top: var(--space-3); border-top: 1px solid var(--line); }
+.activityGuest { display: grid; gap: var(--space-4); padding-block: var(--space-5); }
+.activityGuest > svg { color: var(--green); }
+.activityGuest h3 { margin: 0; font-size: 20px; line-height: 1.3; font-weight: 700; }
+.activityGuest p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.65; }
+.menuStatus { padding: var(--space-4); color: var(--muted); font-size: 14px; }
+.activityEntry { display: flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 48px; padding: var(--space-3) var(--space-4); background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--radius-md); color: var(--green); font-size: 14px; font-weight: 650; white-space: nowrap; cursor: pointer; }
+.activityEntry .navIcon { width: auto; height: auto; }
+.accountActivity { flex-shrink: 0; }
+.accountActivity .menuPanel { left: auto; right: 0; }
+.accountActivity :is(a,button,summary):focus-visible, .menuPanel :is(a,button,summary):focus-visible { outline: 3px solid var(--green); outline-offset: 2px; }
+@media (hover:hover) { .activityEntry:hover, .activityClose:hover, .activityGroup > summary:hover { background: var(--surface-soft); } }
+@media (max-width:600px) {
+ .mobileMenu .menuPanel, .accountActivity .menuPanel { position: fixed; inset: auto 12px calc(88px + env(safe-area-inset-bottom)); width: auto; max-height: min(68dvh,calc(100dvh - 112px - env(safe-area-inset-bottom))); }
+ .activityEntry { width: 100%; }
+ .menuPanel { padding: var(--space-3); }
+ .menuItem { gap: var(--space-2); }
+}
