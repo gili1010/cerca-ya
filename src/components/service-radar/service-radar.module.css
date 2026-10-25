@@ -71,5 +71,10 @@
 
 .experience .badge[data-status=UNAVAILABLE] { background: var(--paper); color: var(--muted); }
 .experience > .actions + .panel { margin-top: var(--space-5); }
+.requestActions { min-width: 0; }
+@media (max-width:600px) {
+ .requestActions.requestActions { flex-flow: column nowrap; align-items: stretch; }
+ .requestActions.requestActions > :is(a,button) { flex: 0 0 auto; width: 100%; min-width: 0; }
+}
 .modal .budget { padding-top: var(--space-3); border-top: 1px solid var(--line); }
 .modal h2 { font-size: 24px; line-height: 1.3; font-weight: 700; margin: 0; }

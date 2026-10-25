@@ -18,7 +18,7 @@ export function DetailGallery({ photos, title }: { photos: DetailPhoto[]; title:
   const image = photo?.src ? <ProductImage src={photo.src} alt={`${title}, foto ${index + 1}`} /> : <span className={styles.placeholder}><ImageOff size={32} aria-hidden="true" />{photos.length ? "Foto no disponible" : "Sin fotografías"}</span>;
   function close() { setExpanded(false); opener.current?.focus(); }
   return <section className={styles.gallery} aria-label={`Fotografías de ${title}`}>
-    <button ref={opener} type="button" className={styles.frame} disabled={!photo?.src} onClick={() => setExpanded(true)} aria-label={`Ampliar foto ${index + 1} de ${title}`}>
+    <button ref={opener} type="button" className={styles.frame} data-empty={photos.length === 0} disabled={!photo?.src} onClick={() => setExpanded(true)} aria-label={`Ampliar foto ${index + 1} de ${title}`}>
       {image}{photo?.src && <span className={styles.enlarge}><Maximize2 size={16} aria-hidden="true" />Ampliar</span>}
     </button>
     {photos.length > 1 && <div className={styles.thumbnails} aria-label="Elegir fotografía">{photos.map((item, position) => <button key={item.id} type="button" aria-label={`Ver foto ${position + 1}`} aria-pressed={position === index} onClick={() => setSelected(item.id)}>{item.src ? <ProductImage src={item.src} alt="" /> : <ImageOff size={20} aria-hidden="true" />}</button>)}</div>}
