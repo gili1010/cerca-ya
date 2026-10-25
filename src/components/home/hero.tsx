@@ -1,4 +1,4 @@
-import { useId, useState, type RefObject } from "react";
+import { type RefObject } from "react";
 import { ArrowRight, Search, X, Zap, MapPin, CheckCircle, MessageSquare } from "lucide-react";
 import { HomeLocality } from "./home-locality";
 import styles from "./home-discovery.module.css";
@@ -19,24 +19,17 @@ interface HeroProps {
 }
 
 export function Hero({ compact = false, query, inputRef, onQuery, onSearch, onUrgent, urgent, locality, province, hasCoordinates, onLocation, onLocality }: HeroProps) {
-  const [emptySearch, setEmptySearch] = useState(false);
-  const searchHintId = useId();
   return <section className={`${styles.hero} ${compact ? styles.compactHero : ""}`} aria-labelledby="hero-title">
     <div className={styles.heroContent}>
       {!compact && <span className="eyebrow">TU LOCALIDAD. MUCHAS POSIBILIDADES.</span>}
       <h1 id="hero-title">{compact ? "Encontrá lo que buscás." : <>Lo que necesitás,<br/><span>más cerca.</span></>}</h1>
       <p className={styles.lead}>{compact ? "Buscá y elegí el tipo de resultados que necesitás." : "Encontrá productos, artículos y servicios en tu zona."}</p>
-      <form className={styles.search} role="search" onSubmit={event => {
-        event.preventDefault();
-        if (!query.trim()) { setEmptySearch(true); inputRef.current?.focus(); return; }
-        setEmptySearch(false); onSearch();
-      }}>
+      <form className={styles.search} role="search" onSubmit={event => { event.preventDefault(); onSearch(); }}>
         <Search size={22} aria-hidden="true"/>
-        <input ref={inputRef} value={query} onChange={event => { setEmptySearch(false); onQuery(event.target.value); }} placeholder="¿Qué estás buscando?" aria-label="Buscar productos, artículos y servicios" aria-describedby={emptySearch ? searchHintId : undefined}/>
+        <input ref={inputRef} value={query} onChange={event => onQuery(event.target.value)} placeholder="¿Qué estás buscando?" aria-label="Buscar productos, artículos y servicios"/>
         {query && <button type="button" className={styles.clear} onClick={() => onQuery("")} aria-label="Borrar búsqueda"><X size={18} aria-hidden="true"/></button>}
         <button className={styles.submit} type="submit" aria-label="Buscar"><span>Buscar</span><ArrowRight size={20} aria-hidden="true"/></button>
       </form>
-      {emptySearch && <p id={searchHintId} role="status">Escribí qué estás buscando.</p>}
       {!compact && <><HomeLocality locality={locality} provinceCode={province} hasCoordinates={hasCoordinates} onLocation={onLocation} onLocality={onLocality}/>
       <div className={styles.today}><button type="button" aria-pressed={urgent} onClick={onUrgent}><Zap size={16} aria-hidden="true"/>Disponible hoy<ArrowRight size={15} aria-hidden="true"/></button><span>Explorá productos de comercios con los filtros de hoy y stock confirmado.</span></div></>}
     </div>
