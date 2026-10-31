@@ -91,7 +91,7 @@ export function ServiceSearch({ state, buyerLocality, buyerProvince, enabled, re
   const groups = categories?.filter(item => !item.parent_id) ?? [];
 
   return <section hidden={!enabled} id="servicios" className={`${styles.section} ${state.domain === "all" ? searchStyles.overviewSection : ""}`} aria-labelledby="service-results-title" aria-busy={loading}>
-    <div className={styles.heading}><div><h2 id="service-results-title">Profesionales y oficios</h2><p>Profesionales que trabajan en la localidad que elegís.</p></div><Link className="secondary-link" href="/necesito-un-servicio">Necesito un servicio</Link></div>
+    <div className={styles.heading}><div><h2 id="service-results-title">Profesionales y oficios</h2><p>Profesionales que trabajan en la localidad que elegís.</p></div><Link className={searchStyles.contextAction} href="/necesito-un-servicio">Necesito un servicio</Link></div>
     <FilterPanel expanded={editing} collapsible={state.domain === "all"} title={state.domain === "all" ? hasPlace ? `Servicios en ${locality} · Localidad y filtros` : "Servicios · Elegir localidad y filtros" : "Filtros de servicios"}>
       <label className={styles.field}>Grupo o especialidad
         <select value={state.serviceCategory} disabled={!categories} onChange={event => onChange({ serviceCategory: event.target.value, servicePage: 0 })}>

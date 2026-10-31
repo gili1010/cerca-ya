@@ -110,3 +110,9 @@
 .workspace.workspace :global(.catalog) .filters > :is(details,p) { grid-column: 1 / -1; }
 @media(max-width:800px) { .workspace.workspace :global(.catalog) .filters { grid-template-columns: 1fr; } }
 
+
+/* Shared secondary actions for product requests and service requests. */
+.contextAction.contextAction { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; max-width: 100%; padding: var(--space-2) var(--space-4); border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--surface); color: var(--green); font-size: var(--text-sm); font-weight: 650; line-height: 1.4; text-align: center; text-decoration: none; overflow-wrap: anywhere; transition: background-color .15s ease, border-color .15s ease; }
+.contextAction:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+@media (hover: hover) { .contextAction.contextAction:hover { background: var(--surface-soft); border-color: var(--green); text-decoration: none; } }
+@media (max-width: 600px) { .contextAction.contextAction { width: 100%; margin-block: var(--space-2) 0; white-space: normal; } }
