@@ -1,0 +1,13 @@
+.tools { --action-width: 170px; position: relative; min-width: 0; margin-block: var(--space-4); }
+.more { min-width: 0; }
+.more > summary, .reset { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 44px; width: var(--action-width); max-width: 100%; padding: var(--space-2) var(--space-3); border: 1px solid var(--line-strong); border-radius: var(--radius-md); color: var(--green); background: var(--surface); font-size: var(--text-sm); font-weight: 650; line-height: 1.4; text-align: center; cursor: pointer; transition: background-color .15s ease, border-color .15s ease; }
+.more > summary { list-style: none; }
+.more > summary::-webkit-details-marker { display: none; }
+.more > summary svg, .reset svg { flex-shrink: 0; }
+.more[open] > summary { background: var(--surface-soft); border-color: var(--green); }
+.reset { position: absolute; top: 0; left: calc(var(--action-width) + var(--space-3)); color: var(--secondary); }
+.panel :global(fieldset) > :global(.catalog-toolbar), .panel :global(fieldset) > [aria-label="Radio de búsqueda"] { grid-column: 1 / -1; }
+.panel { min-width: 0; margin-top: var(--space-3); padding-top: var(--space-1); border-top: 1px solid var(--line); }
+.more > summary:focus-visible, .reset:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+@media (hover: hover) { .more > summary:hover, .reset:hover { background: var(--surface-soft); border-color: var(--green); } }
+@media (max-width: 600px) { .tools { --action-width: calc((100% - var(--space-3)) / 2); } .more > summary, .reset { min-height: 56px; padding-inline: var(--space-2); } }

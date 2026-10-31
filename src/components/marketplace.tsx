@@ -158,12 +158,11 @@ export default function Marketplace() {
     if (tab === "search") { setFilters([]); inputRef.current?.focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: "smooth" }); }
     if (tab === "saved") { setQuery(""); setCategory(""); setFilters([]); goToCatalog(); }
   };
-  const urgent = filters.includes("today") && filters.includes("confirmed");
 
   return <>
     <Header activeNavigation={activeTab === "saved" ? "activity" : activeTab === "search" ? "search" : "home"} zone={zone} onZone={() => setModal("zone")} onAccount={() => setModal("account")} onExplore={goToCatalog} onRequests={() => router.push("/pedidos")} onHow={() => setModal("how")} />
     <main className={`shell ${homeStyles.page}`}>
-      <Hero compact={activeTab !== "home" && Boolean(query.trim())} query={query} inputRef={inputRef} locality={heroPlace.locality} province={heroPlace.province} onLocality={(city, province) => updateNavigation({ personalLocality: city, personalProvince: province, personalPage: 0 })} hasCoordinates={Boolean(coordinates)} onLocation={() => setModal("zone")} onQuery={value => { setQuery(value); setPage(0); if (activeTab !== "search") { setFilters([]); setActiveTab("search"); } }} onSearch={search} urgent={showCommercial && urgent} onUrgent={() => { updateNavigation({ domain: "businesses" }); setFilters(["today", "confirmed"]); setActiveTab("search"); setSort("recommended"); setPage(0); goToCatalog(); }} />
+      <Hero compact={activeTab !== "home" && Boolean(query.trim())} query={query} inputRef={inputRef} locality={heroPlace.locality} province={heroPlace.province} onLocality={(city, province) => updateNavigation({ personalLocality: city, personalProvince: province, personalPage: 0 })} onQuery={value => { setQuery(value); setPage(0); if (activeTab !== "search") { setFilters([]); setActiveTab("search"); } }} onSearch={search} />
       {activeTab === "home" && <DiscoveryEntrances onSelect={value => { setHomeTab("search"); updateNavigation({ domain: value, view: "search" }); goToCatalog(); }}/>}
       <div id="explorador" className={searchStyles.workspace}>
         <div className={searchStyles.intro}><h2>Explorá resultados</h2><p>Una búsqueda, tres tipos de opciones. Cada sección indica dónde busca y qué filtros aplica.</p></div>

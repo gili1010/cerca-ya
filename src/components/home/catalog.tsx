@@ -1,4 +1,4 @@
-import { ArrowDownUp, Heart, MapPin, Search, Store } from "lucide-react";
+import { ArrowDownUp, Heart, MapPin, RotateCcw, Search, SlidersHorizontal, Store } from "lucide-react";
 import Link from "next/link";
 import type { CategoryRow } from "@/types/database";
 import { ActiveFilters, FilterPanel, SearchPagination } from "../search/search-controls";
@@ -8,6 +8,7 @@ import { catalogRadii, type CatalogRadius } from "@/lib/hyperlocal";
 import type { PublicStoreSearchState } from "@/lib/use-public-store-search";
 import { ProductCard } from "./product-card";
 import cardStyles from "./product-card.module.css";
+import filterStyles from "./catalog-filters.module.css";
 import { QuickFilters } from "./quick-filters";
 import { ProductSkeletonGrid } from "../ui/product-skeleton-grid";
 import { StoreSearchResults } from "./store-search-results";
@@ -64,23 +65,30 @@ export function Catalog(props: CatalogProps) {
 
   return <section className="catalog" id="catalogo" aria-labelledby="catalog-title">
     <div className="catalog-heading"><div><span className="eyebrow catalog-eyebrow"><span className="live-dot" /> PRODUCTOS DE COMERCIOS</span><h2 id="catalog-title">{title}<span className="heading-dot">.</span></h2><p>Revisá la disponibilidad informada y las opciones de retiro o envío de cada comercio.</p></div><button className={`saved-toggle ${props.favoritesOnly ? "selected" : ""}`} onClick={props.onFavorites} aria-pressed={props.favoritesOnly}><Heart size={17} />Guardados{props.favorites.length > 0 && <span>{props.favorites.length}</span>}</button></div>
-    <FilterPanel title="Filtros de comercios">
+    <div className={filterStyles.tools}>
+      <details className={filterStyles.more}>
+        <summary><SlidersHorizontal size={16} aria-hidden="true"/>Más filtros</summary>
+        <div className={filterStyles.panel}>
+          <FilterPanel title="Filtros de comercios">
       <label className={fieldStyles.field}>Categoría comercial<select value={props.categorySlug} disabled={props.categoriesLoading || Boolean(props.categoryError)} onChange={event => props.onCategory(event.target.value)}><option value="">Todas las categorías</option>{props.categorySlug && !props.categories.some(item => item.slug === props.categorySlug) && <option value={props.categorySlug}>Categoría no disponible</option>}{props.categories.map(item => <option key={item.id} value={item.slug}>{item.name}</option>)}</select></label>
       {props.categoryError && <p role="alert">{props.categoryError} <button type="button" className="secondary-link" onClick={props.onCategoriesRetry}>Reintentar categorías</button></p>}
-    <div className="catalog-primary-filters"><QuickFilters mode="primary" active={props.filters} onToggle={props.onToggleFilter} hasLocation={props.hasLocation}/><span className="catalog-distance-summary">{props.hasLocation ? `Junto a tu ubicación · ${props.radiusKm} km` : props.locality ? `Por localidad: ${props.locality}` : "Sin ubicación comercial"}</span></div>
-    <details className="catalog-more-filters"><summary>Más filtros <span>Distancia, envío, retiro y orden</span></summary><div>
+
+            <div className="catalog-primary-filters"><QuickFilters mode="primary" active={props.filters} onToggle={props.onToggleFilter} hasLocation={props.hasLocation}/></div>
     <div className={radiusStyles.scope} role="group" aria-label="Radio de búsqueda"><span>Distancia</span><div className={radiusStyles.chips}>{catalogRadii.map(radius => <button type="button" key={radius} className={`filter-chip ${props.radiusKm === radius ? "selected" : ""}`} disabled={!props.hasLocation} aria-pressed={props.radiusKm === radius} onClick={() => props.onRadius(radius)}>{radius} km{props.radiusKm === radius ? " ✓" : ""}</button>)}</div><small>{props.hasLocation ? `El radio de ${props.radiusKm} km se aplica sólo a resultados con distancia calculable.` : props.locality ? `Explorás por localidad en ${props.locality}. Activá ubicación para filtrar por distancia.` : "Activá ubicación para buscar cerca."}</small></div>
 
     <div className="catalog-toolbar"><QuickFilters mode="secondary" active={props.filters} onToggle={props.onToggleFilter} hasLocation={props.hasLocation} /><label className="sort-select"><ArrowDownUp size={14} /><span className="sr-only">Ordenar productos</span><select value={props.sort} onChange={event => props.onSort(event.target.value as SortOrder)}><option value="recommended">Disponibilidad y relevancia</option><option value="distance" disabled={!props.hasLocation}>{props.hasLocation ? "Más cerca" : "Más cerca · activá tu ubicación"}</option><option value="price">Menor precio</option></select></label></div>
 
-</div></details>
-    {props.hasLocation && <p className="catalog-location-prompt"><MapPin size={16} aria-hidden="true"/><span>Ubicación comercial activa{props.locality ? ` en ${props.locality}` : ""}. Las distancias se calculan desde tu ubicación guardada.</span><button type="button" className="secondary-link" onClick={props.onLocation}>Revisar ubicación</button></p>}
-    </FilterPanel>
+          </FilterPanel>
     <ActiveFilters label="Filtros de comercios" items={[
       ...(props.categorySlug ? [{ key: "category", label: props.category || "Categoría seleccionada", onRemove: () => props.onCategory("") }] : []),
       ...props.filters.map(filter => ({ key: filter, label: ({today:"Hoy",nearby:"Cercanía",delivery:"Con envío",pickup:"Retiro",confirmed:"Disponibilidad confirmada"} as const)[filter], onRemove: () => props.onToggleFilter(filter) })),
       ...(props.sort !== "recommended" ? [{ key: "sort", label: props.sort === "price" ? "Menor precio" : "Más cerca", onRemove: () => props.onSort("recommended") }] : []),
-    ]} onClear={props.onReset}/>
+    ]}/>
+
+        </div>
+      </details>
+      <button type="button" className={filterStyles.reset} onClick={props.onReset}><RotateCcw size={15} aria-hidden="true"/>Limpiar filtros</button>
+    </div>
     {searching && props.hasLocation && <StoreSearchResults {...props.storeSearch} id="geographic-store-search-title" title={`Tiendas cercanas · Hasta ${props.radiusKm} km`} />}
     {searching && hasLocality && <StoreSearchResults {...props.localityStoreSearch} id="locality-store-search-title" title={props.hasLocation ? `También tiendas en ${props.locality}` : `Tiendas en ${props.locality}`} description={props.hasLocation ? "Comercios de tu localidad que todavía no tienen distancia verificada." : "Explorás por localidad y provincia, sin distancias calculadas."} localityMatch />}
     {searching && hasScope && <div className={styles.productHeading}><h3>Productos</h3><p>El radio se aplica a resultados con distancia calculable. Los demás filtros y el orden se aplican a los productos.</p></div>}
