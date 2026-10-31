@@ -1,12 +1,10 @@
 import Image from "next/image";
 import cardStyles from "./product-card.module.css";
 import Link from "next/link";
-import { Check, Clock3, Heart, MapPin, Store, Truck } from "lucide-react";
-import { confirmationTime, distance, money, photo, type Product } from "@/lib/products";
-import { ProductStock } from "../reservations/product-stock";
+import { Check, Clock3, Heart, Store, Truck } from "lucide-react";
+import { confirmationTime, money, photo, type Product } from "@/lib/products";
 import { ProductImage } from "../details/product-image";
 import { StockTime } from "../details/stock-time";
-import { formatDistance } from "@/lib/distance";
 import { isOnDemand, isProductAvailable } from "@/lib/product-availability";
 import localityStyles from "./catalog-locality.module.css";
 import { personalSearchReturnTo } from "@/lib/search-navigation";
@@ -24,7 +22,6 @@ interface ProductCardProps { product: Product; saved: boolean; onSave: (id: stri
 
 export function ProductCard({ product, saved, onSave, localityMatch = false, returnTo }: ProductCardProps) {
   const real = product.source === "supabase";
-  const available = isProductAvailable(product);
   const href = `/producto/${product.id}${returnTo ? `?returnTo=${encodeURIComponent(personalSearchReturnTo(returnTo))}` : ""}`;
   const storeSlug = product.database?.business.slug;
   const storeHref = real ? storeSlug ? `/tienda/${encodeURIComponent(storeSlug)}` : `${href}#comercio` : `/demo/comercios/${product.storeId}`;
@@ -38,9 +35,6 @@ export function ProductCard({ product, saved, onSave, localityMatch = false, ret
       <h3><Link href={href}>{product.name}</Link></h3>
       <strong className="product-price">{money(product.price)}</strong>
       <div className="product-store"><Store size={14} /><Link href={storeHref} aria-label={real ? `Ver tienda de ${product.store}` : undefined}>{product.store}{real && storeSlug ? " ›" : ""}</Link></div>
-      <div className="product-distance"><MapPin size={13} />{localityMatch ? <strong>{product.database?.business.city ? `En ${product.database.business.city}` : "Distancia no disponible"}</strong> : product.distanceKm === null ? product.database?.business.city ? <strong>{product.database.business.city}</strong> : <Link href={`${href}#comercio`}>Ver ubicación</Link> : <><strong>{real ? product.distanceKm < 0.1 ? "Muy cerca · distancia aprox." : `A ${formatDistance(product.distanceKm)} aprox.` : `A ${distance(product.distanceKm)} de vos`}</strong></>}</div>
-      {real ? <span className={`stock-pill ${!available ? "limited" : ""}`}><span />{isOnDemand(product) ? available ? "Disponible hoy" : "No disponible hoy" : product.stock > 0 ? "En stock" : "Sin stock"}</span> : <ProductStock productId={product.id} badge />}
-      <StockConfirmation product={product} />
       {real ? <div className="fulfillment public-fulfillment">{product.pickupToday && <span><Store size={15} />Retiro disponible</span>}{product.deliveryToday && <span className={localityMatch ? localityStyles.shipping : undefined}><Truck size={15} />{localityMatch ? "Este comercio realiza envíos · Consultá cobertura" : "Envío disponible"}</span>}{!product.pickupToday && !product.deliveryToday && <span>Consultá al comercio</span>}</div> : <div className="fulfillment">{product.deliveryToday ? <><Truck size={15} /><strong>Entrega hoy</strong></> : product.pickupToday ? <><Store size={15} /><strong>{product.pickupMinutes !== null && product.pickupMinutes <= 15 ? "Retiro inmediato" : "Retirá hoy"}</strong></> : <><Clock3 size={15} /><strong>Desde mañana</strong></>}{product.deliveryToday && product.pickupToday && <span>o retiro</span>}</div>}
 
       {returnTo && <Link className={`secondary-link ${cardStyles.detailAction}`} href={href}>Ver producto ›</Link>}

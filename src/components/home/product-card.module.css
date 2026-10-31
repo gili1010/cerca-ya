@@ -1,6 +1,6 @@
-.card :global(.product-body) { display: flex; flex-direction: column; flex: 1; min-width: 0; gap: var(--space-2); }
+.card.card :global(.product-body) { display: flex; flex-direction: column; flex: 1; min-width: 0; padding: var(--space-3); gap: var(--space-2); }
 .card :global(.product-store) { margin: 0; padding: 0; border: 0; font-size: var(--text-sm); line-height: 1.5; }
-.card :global(.product-store a) { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; display: inline-flex; align-items: center; min-height: 44px; }
+.card :global(.product-store a) { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; display: inline-flex; align-items: center; min-height: 36px; }
 .card :global(.product-distance) { margin: 0 0 var(--space-1); font-size: var(--text-sm); line-height: 1.5; }
 .card :global(.stock-pill) { position: static; align-self: flex-start; max-width: 100%; font-size: var(--text-sm); padding: var(--space-1) var(--space-2); background: var(--surface-soft); }
 .card :global(.stock-confirmation) { border: 0; background: transparent; padding: 0; margin-top: 0; gap: 2px; }
@@ -8,8 +8,8 @@
 .card :global(.stock-confirmation > span) { color: var(--ink); }
 .card :global(.stock-confirmation.unconfirmed > span) { color: var(--warning); }
 .card :global(.fulfillment) { font-size: var(--text-sm); padding-top: var(--space-1); line-height: 1.5; }
-.card :global(.public-card-category) { font-size: var(--text-sm); color: var(--muted); }
-.card :global(.product-body h3) { font-size: var(--text-base); line-height: 1.45; min-height: 2.9em; }
+.card :global(.public-card-category) { font-size: var(--text-xs); color: var(--muted); margin: 0; }
+.card.card :global(.product-body h3) { font-size: var(--text-sm); line-height: 1.4; min-height: 0; margin: 0; }
 .card :global(.product-price) { line-height: 1.25; margin-bottom: var(--space-1); }
 .card :global(.product-price) { white-space: normal; overflow-wrap: anywhere; }
 /* The commercial catalog sizes columns from its actual available width. */
@@ -18,4 +18,6 @@
 .card .imageFrame :global(.product-image-link) { display: block; }
 .card .imageFrame img { display: block; width: 100%; height: 100%; max-width: 100%; object-fit: cover; object-position: center; }
 .card:global(.product-card):hover .imageFrame img { transform: none; }
-.card .detailAction { margin-top: auto; padding-top: var(--space-3); }
+.card .detailAction { display: inline-flex; align-items: center; justify-content: center; align-self: stretch; min-height: 44px; margin-top: var(--space-1); padding: var(--space-2) var(--space-3); border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--surface-soft); color: var(--green); font-size: var(--text-sm); font-weight: 650; line-height: 1.4; text-align: center; text-decoration: none; transition: background-color .15s ease, border-color .15s ease; }
+.card .detailAction:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+@media (hover: hover) { .card .detailAction:hover { background: var(--surface); border-color: var(--green); text-decoration: none; } }
