@@ -116,3 +116,11 @@
 .contextAction:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
 @media (hover: hover) { .contextAction.contextAction:hover { background: var(--surface-soft); border-color: var(--green); text-decoration: none; } }
 @media (max-width: 600px) { .contextAction.contextAction { width: 100%; margin-block: var(--space-2) 0; white-space: normal; } }
+/* Compact public service cards; management and professional profiles stay unchanged. */
+.workspace.workspace :global(#servicios) article[data-compact] > div { padding: var(--space-3); gap: var(--space-2); }
+.workspace.workspace :global(#servicios) article[data-compact] h3 { font-size: var(--text-sm); line-height: 1.4; }
+.workspace.workspace :global(#servicios) article[data-compact] strong { font-size: 20px; line-height: 1.3; }
+.workspace.workspace :global(#servicios) article[data-compact] > div > span { font-size: var(--text-xs); padding: var(--space-1) var(--space-2); max-width: 100%; }
+.workspace.workspace :global(#servicios) article[data-compact] > div > a { font-size: var(--text-sm); line-height: 1.4; }
+.workspace.workspace :global(#servicios) article[data-compact] > a:first-child svg { width: 28px; height: 28px; }
+@media (max-width: 700px) { .workspace.workspace :global(#servicios) .resultGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); } }

@@ -115,7 +115,6 @@ export function Catalog(props: CatalogProps) {
     </section>}
 
     {globallyEmpty && <div className={`empty-state ${radiusStyles.emptyState}`}>{props.favoritesOnly ? <Heart size={30} /> : <Search size={30} />}<h3>{props.favoritesOnly ? "Tus favoritos tienen un lugar acá" : props.hasLocation ? `No encontramos ${noStoreResults ? "resultados" : "productos"} dentro de ${props.radiusKm} km.` : `No encontramos productos en ${props.locality}.`}</h3><p>{props.favoritesOnly ? "Guardá productos con el corazón o quitá filtros para ver tus guardados." : "¿No lo encontraste cerca? Preguntale a comercios cercanos."}</p><div className={radiusStyles.emptyActions}>{!props.favoritesOnly && props.hasLocation && props.radiusKm < 50 && <button type="button" className="outline-button" onClick={() => props.onRadius(50)}>Ampliar a 50 km</button>}{!props.favoritesOnly && <Link className="primary-button" href={requestHref}>📢 Crear Pedido Abierto</Link>}</div><button className={`secondary-link empty-reset ${radiusStyles.emptyReset}`} onClick={props.onReset}>Limpiar filtros de productos</button></div>}
-    <p className="demo-note">Disponibilidad informada por cada comercio. Consultá antes de acercarte. Distancias aproximadas en línea recta; los resultados por localidad no garantizan distancia ni cobertura de envío.</p>
   </section>;
 }
 

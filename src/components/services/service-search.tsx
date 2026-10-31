@@ -121,7 +121,7 @@ export function ServiceSearch({ state, buyerLocality, buyerProvince, enabled, re
     {current?.error && <div className={styles.notice}><p role="alert">{current.error}</p><button type="button" className="outline-button" onClick={() => { setResponse(null); setAttempt(value => value + 1); }}>Reintentar servicios</button></div>}
     {data && <>
       <p className={styles.metadata} role="status">{data.total} servicios en {locality}{state.query && ` para “${state.query}”`}</p>
-      <div className={`${styles.grid} ${searchStyles.resultGrid}`}>{data.items.map(item => <ServiceCard headingLevel={3} key={item.id} listing={item} urls={signed.urls}
+      <div className={`${styles.grid} ${searchStyles.resultGrid}`}>{data.items.map(item => <ServiceCard compact headingLevel={3} key={item.id} listing={item} urls={signed.urls}
         detailHref={servicePublicHref("servicio", item.id, context)} providerHref={servicePublicHref("prestador", item.provider_id, context)}/>)}</div>
       {signed.error && <p className={styles.metadata}>{signed.error} <button type="button" className="secondary-link" onClick={signed.refresh}>Reintentar fotos</button></p>}
       {stalePage ? <div className={styles.notice}><p>Esta página ya no tiene servicios disponibles.</p><button type="button" className="outline-button" onClick={() => onChange({ servicePage: 0 })}>Volver a la primera página</button></div> : !data.total && <div className={`${styles.notice} ${state.domain === "all" ? searchStyles.compactEmpty : ""}`}><h3>No encontramos profesionales que atiendan esta localidad con esos filtros.</h3><p>Probá otro oficio o especialidad, o cambiá la localidad.</p><Link className="primary-button" href="/necesito-un-servicio">Necesito un servicio</Link></div>}
