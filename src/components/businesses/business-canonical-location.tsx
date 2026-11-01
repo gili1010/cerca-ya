@@ -115,7 +115,7 @@ export function BusinessCanonicalLocation({ business, value, disabled, onChange,
       {searching && !selected && query.trim().length >= 2 && <p role="status">Buscando localidades…</p>}
       {open && !selected && !searching && !error && query.trim().length >= 2 && value.province_code && !suggestions.length && <p role="status">No encontramos esa localidad. Probá escribir el nombre nuevamente.</p>}
     </div>
-    <BusinessAddressInput value={value.address} context={context} disabled={locked} confirmed={configured} optional={configured && value.location_precision === "DEVICE"} onEdit={address => {
+    {business && <BusinessAddressInput value={value.address} context={context} disabled={locked} confirmed={configured} optional={configured && value.location_precision === "DEVICE"} onEdit={address => {
       if (isCoordinates(point) && value.location_precision === "DEVICE" && value.province_code) setDescriptionPoint({ ...point, city: value.city, provinceCode: value.province_code });
       cancelBootstrap(); setNotice("");
       onChange({ city: value.city, province: value.province, province_code: value.province_code, country_code: "AR", address, latitude: null, longitude: null, location_precision: "NONE" });
@@ -124,19 +124,19 @@ export function BusinessCanonicalLocation({ business, value, disabled, onChange,
       cancelBootstrap(); setQuery(address.locality); setSelected(true); setOpen(false); setError(""); onValidity(true);
       onChange({ address: address.address, city: address.locality, province: address.province, province_code: address.provinceCode, country_code: "AR", latitude: address.latitude, longitude: address.longitude, location_precision: "ADDRESS" });
       setNotice("Dirección seleccionada. Guardá para confirmar la ubicación del comercio.");
-    }} />
-    {descriptionPoint && selected && descriptionPoint.provinceCode === value.province_code && normalizePlace(descriptionPoint.city) === normalizePlace(value.city) && <div className={styles.descriptionConfirmation}>
+    }} />}
+    {business && descriptionPoint && selected && descriptionPoint.provinceCode === value.province_code && normalizePlace(descriptionPoint.city) === normalizePlace(value.city) && <div className={styles.descriptionConfirmation}>
       <p>Si sólo agregaste una descripción de la calle y el comercio sigue en el mismo lugar, podés conservar la ubicación GPS confirmada. Si cambió de lugar, usá una nueva ubicación o seleccioná otra dirección.</p>
       <button type="button" className="outline-button" disabled={locked} onClick={() => {
         onChange({ city: value.city, province: value.province, province_code: value.province_code, country_code: "AR", latitude: descriptionPoint.latitude, longitude: descriptionPoint.longitude, location_precision: "DEVICE" });
         setDescriptionPoint(null); setNotice("Confirmaste que la descripción corresponde al mismo comercio. Conservamos su ubicación GPS.");
       }}>Confirmo que es el mismo lugar: conservar ubicación GPS</button>
     </div>}
-    <p className="info-note" role="status">{configured ? <>✓ Ubicación configurada<br />{[value.address, [value.city, value.province].filter(Boolean).join(", ")].filter(Boolean).join(" · ")}</> : <>Falta confirmar la ubicación exacta del comercio.<br />Seleccioná una dirección sugerida o usá tu ubicación actual para aparecer en búsquedas por distancia.</>}</p>
+    {business && <p className="info-note" role="status">{configured ? <>✓ Ubicación configurada<br />{[value.address, [value.city, value.province].filter(Boolean).join(", ")].filter(Boolean).join(" · ")}</> : <>Falta confirmar la ubicación exacta del comercio.<br />Seleccioná una dirección sugerida o usá tu ubicación actual para aparecer en búsquedas por distancia.</>}</p>}
     {business && !selected && !value.province_code && <p className="info-note">Localidad actual: {business.city}. Podés conservar tus datos actuales o configurar la ubicación.</p>}
-    {notice && <p className="info-note" role="status">{notice}</p>}
-    <p className="info-note">La ubicación del comercio y sus distancias son públicas. Dejar la calle vacía no oculta su punto geográfico.</p>
-    <p className="info-note">Usá tu ubicación actual solamente si estás físicamente en el comercio. Seleccionar una localidad no establece la ubicación exacta de tu negocio.</p>
+    {notice && <p className="info-note" role="status">{business ? notice : configured ? "Ubicación configurada." : "Localidad seleccionada."}</p>}
+    {business && <p className="info-note">La ubicación del comercio y sus distancias son públicas. Dejar la calle vacía no oculta su punto geográfico.</p>}
+    {business && <p className="info-note">Usá tu ubicación actual solamente si estás físicamente en el comercio. Seleccionar una localidad no establece la ubicación exacta de tu negocio.</p>}
     <button type="button" className="outline-button" disabled={locked} onClick={() => void capture()}><MapPin size={17} aria-hidden="true" />{capturing ? "Obteniendo ubicación…" : "Usar mi ubicación actual"}</button>
     {error && <><p className="form-error" role="alert">{error}</p>{!selected && value.province_code && query.trim().length >= 2 && <button type="button" className="secondary-link" disabled={locked} onClick={() => setAttempt(value => value + 1)}>Reintentar búsqueda</button>}</>}
   </div>;
