@@ -1,3 +1,4 @@
+import { productLimitMessage } from "./limits";
 import type { ProductRow } from "@/types/database";
 
 export type ProductInput = Pick<ProductRow, "name" | "description" | "category_id" | "brand" | "model" | "sku" | "price" | "stock_quantity" | "inventory_mode" | "available_today" | "pickup_enabled" | "delivery_enabled" | "active">;
@@ -39,6 +40,7 @@ export function normalizeProduct(form: ProductFormValues): ProductInput {
 export function productErrorMessage(cause: unknown): string {
   const code = typeof cause === "object" && cause !== null && "code" in cause ? String(cause.code) : "";
   const message = typeof cause === "object" && cause !== null && "message" in cause ? String(cause.message) : "";
+  if (message.includes("product_active_limit_reached")) return productLimitMessage;
   if (message.includes("account_suspended")) return "Tu cuenta está suspendida.";
   if (message.includes("admin_resource_blocked")) return "Este producto fue desactivado por administración.";
   if (message.includes("product_inventory_mode_reserved")) return "No podés cambiar cómo ofrecés el producto mientras tenga reservas pendientes, confirmadas o listas.";

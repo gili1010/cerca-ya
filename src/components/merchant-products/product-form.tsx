@@ -1,4 +1,5 @@
 "use client";
+import { activeProductLimit, productLimitMessage } from "@/lib/merchant-products/limits";
 import management from "@/components/management/management.module.css";
 import { BackLink } from "@/components/navigation/back-link";
 
@@ -35,6 +36,7 @@ function ProductFormLoader({ business, productId }: { business: BusinessRow; pro
   if (error) return <section className="panel"><FormError message={error} /><button className="outline-button" onClick={() => { setError(""); setAttempt(value => value + 1); }}>Reintentar</button></section>;
   if (!data) return <p className="workflow-loading" role="status">Cargando formulario…</p>;
   if (productId && !data.product) return <section className="empty-state"><h1>Producto no disponible</h1><p>No encontramos ese producto en tu comercio.</p><BackLink href="/comercio/productos">Volver a Mis productos</BackLink></section>;
+  if (!productId && !data.product && data.activeCount >= activeProductLimit) return <section className="panel"><h1>Tu catálogo llegó al límite</h1><p>{data.activeCount} de {activeProductLimit} productos activos.</p><p>{productLimitMessage}</p><Link className="primary-button" href="/comercio/productos">Administrar mis productos</Link></section>;
   return <ProductFormFields business={business} product={data.product} initialImage={data.image} categories={data.categories} preferredCategoryIds={data.categoryIds} />;
 }
 

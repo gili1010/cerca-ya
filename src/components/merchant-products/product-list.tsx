@@ -15,6 +15,8 @@ import { MerchantBusinessGate } from "./business-gate";
 import { StockConfirmation } from "./stock-confirmation";
 import styles from "./product-list.module.css";
 
+import { activeProductLimit, productLimitMessage } from "@/lib/merchant-products/limits";
+
 const currency = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 2 });
 const stockLabels: Record<StockStatus, string> = { IN_STOCK: "En stock", OUT_OF_STOCK: "Sin stock", LOW_STOCK: "Stock bajo", UNCONFIRMED: "Sin confirmar" };
 type ProductAction = Database["public"]["Functions"]["manage_my_product"]["Args"]["p_action"];
@@ -51,14 +53,17 @@ function BusinessProducts({ business }: { business: BusinessRow }) {
       const { data: updated, error: failure } = await client.rpc("manage_my_product", { p_product_id: id, p_action: action });
       if (failure) throw failure;
       setData(current => current ? { ...current, products: current.products.map(product => product.id === id ? updated : product) } : current);
+      setAttempt(value => value + 1);
       setNotice(action === "confirm_stock" ? updated.inventory_mode === "ON_DEMAND" ? "Disponibilidad confirmada." : "Stock confirmado. La cantidad se mantuvo." : action === "activate" ? "Producto reactivado." : "Producto desactivado. Podés reactivarlo cuando quieras.");
-    } catch (cause) { setActionError(productErrorMessage(cause)); }
+    } catch (cause) { setActionError(productErrorMessage(cause)); setAttempt(value => value + 1); }
     finally { inFlight.current = false; setBusy(null); }
   }
 
   function changePage(next: number) { setData(null); setError(""); setNotice(""); setActionError(""); setPage(next); }
   return <>
-    <div className={`workflow-heading with-action ${styles.header}`}><div><span className="eyebrow">{business.name}</span><h1>Mis productos</h1><p>Administrá tu catálogo y mantené la disponibilidad al día.</p></div><Link className="primary-button" href="/comercio/productos/nuevo"><Plus size={18} aria-hidden="true" />Publicar producto</Link></div>
+    <div className={`workflow-heading with-action ${styles.header}`}><div><span className="eyebrow">{business.name}</span><h1>Mis productos</h1><p>Administrá tu catálogo y mantené la disponibilidad al día.</p></div>{data && data.activeCount >= activeProductLimit ? <button type="button" className="primary-button" disabled>Máximo de productos activos</button> : <Link className="primary-button" href="/comercio/productos/nuevo"><Plus size={18} aria-hidden="true" />Publicar producto</Link>}</div>
+    {data && <p className={styles.hint} role="status">{data.activeCount} de {activeProductLimit} productos activos</p>}
+    {data && data.activeCount >= activeProductLimit && <p className="info-note">{productLimitMessage}</p>}
     <p className={styles.hint}><Info size={16} aria-hidden="true" />Podés desactivar productos sin borrarlos y reactivarlos cuando quieras.</p>
     <FormError message={error} />{error && <button className="outline-button" onClick={() => { setError(""); setAttempt(value => value + 1); }}>Reintentar</button>}
     {!data && !error && <LoadingState label="Cargando tus productos…"/>}
@@ -89,7 +94,7 @@ function BusinessProducts({ business }: { business: BusinessRow }) {
           <StockConfirmation compact date={onDemand ? product.availability_confirmed_at : product.stock_confirmed_at} label={onDemand ? "Disponibilidad" : "Stock"} />
           <div className={styles.actions}>
             <div className={styles.primaryActions}><Link className="outline-button" href={`/comercio/productos/${product.id}/editar`} aria-disabled={Boolean(busy)} onClick={event => { if (busy) event.preventDefault(); }}><Pencil size={15} aria-hidden="true" />Editar producto</Link><button className="primary-button" disabled={Boolean(busy)} onClick={() => void manage(product.id, "confirm_stock")}><BadgeCheck size={16} aria-hidden="true" />{busy?.id === product.id && busy.action === "confirm_stock" ? "Confirmando..." : product.inventory_mode === "ON_DEMAND" ? "Confirmar disponibilidad" : "Confirmar stock"}</button></div>
-            <button className={styles.toggle} disabled={Boolean(busy) || Boolean(product.admin_blocked_at)} onClick={() => void manage(product.id, product.active ? "deactivate" : "activate")}>{busy?.id === product.id && busy.action !== "confirm_stock" ? "Guardando..." : product.admin_blocked_at ? "Desactivado por administración" : product.active ? "Desactivar producto" : "Reactivar producto"}</button>
+            <button className={styles.toggle} disabled={Boolean(busy) || Boolean(product.admin_blocked_at) || (!product.active && data.activeCount >= activeProductLimit)} onClick={() => void manage(product.id, product.active ? "deactivate" : "activate")}>{busy?.id === product.id && busy.action !== "confirm_stock" ? "Guardando..." : product.admin_blocked_at ? "Desactivado por administración" : product.active ? "Desactivar producto" : "Reactivar producto"}</button>
           </div>
         </article>;
       })}</div>
