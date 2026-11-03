@@ -47,7 +47,8 @@ export function ArticleEditor({ listingId }: { listingId?: string }) {
   const titleError = fieldFeedback(editor.error, ["Escribí un título"]);
   const categoryError = fieldFeedback(editor.error, ["Elegí una categoría"]);
   const priceError = fieldFeedback(editor.error, ["Ingresá un precio válido"]);
-  const contactError = fieldFeedback(editor.error, ["Ingresá un WhatsApp", "Para publicar, ingresá un WhatsApp"]);
+  const contactError = fieldFeedback(editor.error, ["Ingresá un WhatsApp"]);
+  const consentError = fieldFeedback(editor.error, ["Para publicar, marcá la casilla"]);
   const errorRef = useRef<HTMLDivElement>(null);
   useEffect(() => { if (editor.error) errorRef.current?.focus(); }, [editor.error]);
   if (editor.loading) return <p className="workflow-loading" role="status">Preparando tu publicación…</p>;
@@ -79,8 +80,9 @@ export function ArticleEditor({ listingId }: { listingId?: string }) {
       {step === 1 && <ArticlePhotos photos={editor.photos} disabled={locked} preparing={editor.preparing} onAdd={files => void editor.addPhotos(files)} onChange={editor.changePhotos} />}
       {step === 2 && <><label className={styles.field}>Nombre público <span className={styles.hint}>Opcional</span><input value={form.publicName} maxLength={120} autoComplete="off" placeholder="Cómo querés aparecer en tu anuncio" onChange={event => editor.change("publicName", event.target.value)} /></label>
         <label className={styles.field}>WhatsApp · Argentina (+54)<input value={form.whatsapp} aria-invalid={!!contactError} aria-describedby={contactError ? "article-contact-error" : undefined} type="tel" inputMode="tel" autoComplete="off" maxLength={40} placeholder="Ej. 3547 123456" onChange={event => { editor.change("whatsapp", event.target.value); editor.change("consent", false); }} /><small>Incluí código de área, sin 0 ni 15. Agregamos +54 cuando corresponda.</small><PublishFieldFeedback id="article-contact-error" message={contactError} /></label>
-        <p data-publish-help id="article-contact-help">Si lo autorizás, tu número será público para que puedan consultarte sobre este artículo.</p><label className={styles.check}><input aria-describedby="article-contact-help" type="checkbox" checked={form.consent} onChange={event => editor.change("consent", event.target.checked)} /><span>Autorizo a mostrar este número de WhatsApp en mi anuncio público.</span></label>
-        <p className={styles.notice}>Tu WhatsApp será visible para las personas que consulten este artículo.</p><p className={styles.hint}>Podés guardar un borrador sin contacto. Si no autorizás el número, no lo guardamos en el anuncio.</p>
+        <p data-publish-help id="article-contact-help">Si lo autorizás, tu número será público para que puedan consultarte sobre este artículo.</p><label className={styles.check}><input aria-invalid={!!consentError} aria-describedby={consentError ? "article-contact-help article-consent-error" : "article-contact-help"} type="checkbox" checked={form.consent} onChange={event => editor.change("consent", event.target.checked)} /><span>Autorizo a mostrar este número de WhatsApp en mi anuncio público.</span></label>
+        <PublishFieldFeedback id="article-consent-error" message={consentError} />
+        <p className={styles.notice}>{form.consent ? "Autorizaste que tu WhatsApp sea visible en este anuncio." : "Para publicar, marcá la casilla de autorización de WhatsApp."}</p><p className={styles.hint}>Podés guardar un borrador sin contacto. Si no autorizás el número, no lo guardamos en el anuncio.</p>
       </>}
       {step === 3 && <div className={flow.preview}><p data-publish-help>Vista previa privada. Revisá los datos antes de confirmar la publicación.</p><ArticlePreview editor={editor} /></div>}
       </fieldset>

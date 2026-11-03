@@ -31,8 +31,8 @@ export function validateArticleForm(form: PersonalArticleForm, categories: reado
   if (!provinceByCode(form.provinceCode)) return "Elegí la provincia donde se encuentra el artículo.";
   if (!form.city.trim() || form.city.trim().length > 120 || /[\u0000-\u001f\u007f]/.test(form.city)) return "Indicá una localidad de hasta 120 caracteres.";
   if (form.publicName.length > 120 || /[\u0000-\u001f\u007f]/.test(form.publicName)) return "El nombre público puede tener hasta 120 caracteres.";
-  if (form.consent && !normalizeArgentinaPhone(form.whatsapp)) return "Ingresá un WhatsApp argentino con código de área, sin 0 ni 15.";
-  if (contactRequired && (!form.consent || !normalizeArgentinaPhone(form.whatsapp))) return "Para publicar, ingresá un WhatsApp válido y autorizá que se muestre.";
+  if ((form.consent || contactRequired) && !normalizeArgentinaPhone(form.whatsapp)) return "Ingresá un WhatsApp argentino con código de área, sin 0 ni 15.";
+  if (contactRequired && !form.consent) return "Para publicar, marcá la casilla para autorizar que tu WhatsApp se muestre en el anuncio.";
   return null;
 }
 export function articleInput(form: PersonalArticleForm, listing: OwnedPersonalListing | null): PersonalListingInput {
